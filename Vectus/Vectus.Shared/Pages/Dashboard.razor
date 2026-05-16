@@ -1,0 +1,288 @@
+﻿@attribute [Route(PageRouteNames.Dashboard)]
+
+@using VectusLibrary.DataAccess
+
+<PageTitle>Dashboard - Vectus</PageTitle>
+
+@if (!_isUpdating && (_isLoading || _user is null))
+{
+	<LoadingScreen />
+}
+else if (_isUpdating)
+{
+	<!-- Update Progress Overlay -->
+	<div class="update-overlay">
+		<div class="update-container">
+			<div class="update-header">
+				<svg class="update-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+				</svg>
+				<h2 class="update-title">Updating @(Secrets.DatabaseName)</h2>
+				<p class="update-subtitle">Please wait while we update your app</p>
+			</div>
+
+			<div class="update-progress-section">
+				<div class="progress-info">
+					<span class="progress-label">Progress</span>
+					<span class="progress-percentage">@_updateProgress%</span>
+				</div>
+				<div class="progress-bar-container">
+					<div class="progress-bar-fill" style="width: @(_updateProgress)%"></div>
+				</div>
+				<div class="time-remaining">
+					@if (_timeRemaining > 0)
+					{
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="10" />
+							<polyline points="12 6 12 12 16 14" />
+						</svg>
+						<span>Estimated time: @_timeRemaining seconds</span>
+					}
+					else
+					{
+						<span>Calculating...</span>
+					}
+				</div>
+			</div>
+
+			<div class="update-status">
+				<div class="status-dot"></div>
+				<span>@_updateStatus</span>
+			</div>
+		</div>
+	</div>
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Dashboard">
+			<RightContent>
+				<IconButton Icon="IconType.Refresh" Title="Force Update" Disabled="@(_isLoading || _isUpdating)" OnClick="ForceUpdate" />
+			</RightContent>
+		</Header>
+
+		<!-- Main Content Container -->
+		<div class="page-container">
+
+			<div class="dashboard-grid">
+
+				<!-- ACCOUNTS -->
+				@if (_user.Accounts)
+				{
+					<FolderCard Title="Accounts" Description="Financial accounting, ledger reports and master data" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="12" y1="1" x2="12" y2="23" />
+								<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+							</svg>
+						</IconContent>
+					</FolderCard>
+				}
+
+
+				<!-- FLEET -->
+				@if (_user.Fleet || _user.Reports)
+				{
+					@if (_user.Fleet)
+					{
+						<FolderCard Title="Fleet Masters" Description="Manage vehicles, routes, drivers, OMC and document types" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<ellipse cx="12" cy="5" rx="9" ry="3" />
+									<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+									<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+								</svg>
+							</IconContent>
+						</FolderCard>
+					}
+
+					@if (_user.Fleet)
+					{
+						<FolderCard Title="Fleet Transactions" Description="Record Trips, Bills and Expenses" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FleetTransactionsDashboard)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M12 20h9" />
+									<path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+								</svg>
+							</IconContent>
+						</FolderCard>
+					}
+
+					@if (_user.Reports)
+					{
+						<FolderCard Title="Fleet Reports" Description="View trip, billing and expense reports across the fleet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FleetReportsDashboard)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M3 3v18h18" />
+									<path d="M18 17V9" />
+									<path d="M13 17V5" />
+									<path d="M8 17v-3" />
+								</svg>
+							</IconContent>
+						</FolderCard>
+					}
+				}
+
+				<!-- ADMINISTRATION -->
+				@if (_user.Admin)
+				{
+					<FolderCard Title="Site Administration" Description="Manage user accounts and system settings" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="3" />
+								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+							</svg>
+						</IconContent>
+					</FolderCard>
+				}
+
+			</div>
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<style>
+	/* Update Progress Overlay */
+	.update-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(99, 102, 241, 0.95) 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10000;
+		animation: fadeIn 0.3s ease;
+	}
+
+	.update-container {
+		background: #ffffff;
+		border-radius: 20px;
+		padding: 40px;
+		max-width: 500px;
+		width: 90%;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		animation: slideUp 0.4s ease;
+	}
+
+	.update-header {
+		text-align: center;
+		margin-bottom: 32px;
+	}
+
+	.update-icon {
+		color: #3b82f6;
+		margin-bottom: 16px;
+		animation: rotate 2s linear infinite;
+	}
+
+	.update-title {
+		font-size: 24px;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0 0 8px 0;
+		letter-spacing: -0.5px;
+	}
+
+	.update-subtitle {
+		font-size: 14px;
+		color: #64748b;
+		margin: 0;
+		font-weight: 400;
+	}
+
+	.update-progress-section {
+		margin-bottom: 24px;
+	}
+
+	.progress-info {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+
+	.progress-label {
+		font-size: 14px;
+		color: #475569;
+		font-weight: 500;
+	}
+
+	.progress-percentage {
+		font-size: 20px;
+		font-weight: 700;
+		color: #3b82f6;
+		letter-spacing: -0.5px;
+	}
+
+	.progress-bar-container {
+		height: 12px;
+		background: #e2e8f0;
+		border-radius: 12px;
+		overflow: hidden;
+		margin-bottom: 12px;
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+	}
+
+	.progress-bar-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+		border-radius: 12px;
+		transition: width 0.3s ease;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.progress-bar-fill::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		animation: shimmer 1.5s infinite;
+	}
+
+	.time-remaining {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: #64748b;
+		justify-content: center;
+	}
+
+	.time-remaining svg {
+		color: #94a3b8;
+	}
+
+	.update-status {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		justify-content: center;
+		padding: 16px;
+		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+		border-radius: 12px;
+		border: 1px solid #bae6fd;
+	}
+
+	.status-dot {
+		width: 8px;
+		height: 8px;
+		background: #3b82f6;
+		border-radius: 50%;
+		animation: pulse 1.5s ease-in-out infinite;
+	}
+
+	.update-status span {
+		font-size: 14px;
+		color: #0c4a6e;
+		font-weight: 500;
+	}
+</style>

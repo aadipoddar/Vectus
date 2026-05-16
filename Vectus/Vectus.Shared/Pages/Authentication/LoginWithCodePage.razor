@@ -1,0 +1,453 @@
+﻿@using VectusLibrary.DataAccess
+
+@attribute [Route(PageRouteNames.LoginWithCode)]
+
+<PageTitle>Login with Code - Vectus</PageTitle>
+
+<div class="login-container">
+	<div class="login-card">
+		<!-- Logo Section -->
+		<div class="logo-section">
+			<img src="images/logo_full.png" alt="Vectus Logo" class="login-logo" />
+		</div>
+
+		<!-- Login Form -->
+		<div class="form-section">
+			@if (!_isCodeSent)
+			{
+				<!-- Phone/Email Input -->
+				<div class="input-group">
+					<label class="input-label">Phone / Email</label>
+					<SfTextBox @ref="_phoneEmailTextBox" @bind-Value="_phoneEmail" Placeholder="Enter phone number or email"
+							   CssClass="custom-textbox" ShowClearButton="true">
+					</SfTextBox>
+				</div>
+
+				<!-- Send Code Button -->
+				<div class="button-group">
+					<button class="btn-login" @onclick="OnSendCodeClick" disabled="@_isVerifying">
+						@if (_isVerifying)
+						{
+							<span class="spinner"></span>
+							<span>Sending Code...</span>
+						}
+						else
+						{
+							<span>Send Verification Code</span>
+						}
+					</button>
+				</div>
+			}
+			else
+			{
+				<!-- OTP Input -->
+				<div class="input-group">
+					<label class="input-label">Verification Code</label>
+					<div class="otp-container">
+						<SfOtpInput @ref="_otpInput" @bind-Value="_otpCode" Length="6" CssClass="custom-otp"
+									Placeholder="@_codePlaceholder">
+						</SfOtpInput>
+					</div>
+					<p class="code-hint">@_codePlaceholder</p>
+				</div>
+
+				@if (_isEnabledUsersResetPassword)
+				{
+					<!-- New Password Input (Optional) -->
+					<div class="input-group">
+						<label class="input-label">New Password (Optional)</label>
+						<SfTextBox @ref="_newPasswordTextBox" @bind-Value="_newPassword" Type="InputType.Password"
+								   Placeholder="Enter new password (min 6 characters)" CssClass="custom-textbox"
+								   ShowClearButton="true">
+						</SfTextBox>
+					</div>
+				}
+
+				<!-- Login Button -->
+				<div class="button-group">
+					<button class="btn-login" @onclick="OnLoginWithCodeClick" disabled="@_isVerifying">
+						@if (_isVerifying)
+						{
+							<span class="spinner"></span>
+							<span>Verifying...</span>
+						}
+						else
+						{
+							<span>Verify & Login</span>
+						}
+					</button>
+				</div>
+
+				<!-- Resend Code Link -->
+				<div class="forgot-password-section">
+					<a class="forgot-password-link" @onclick="OnSendCodeClick">
+						Resend Code
+					</a>
+				</div>
+			}
+
+			<!-- Back to Login Link -->
+			<div class="forgot-password-section" style="margin-top: 8px;">
+				<a class="forgot-password-link"
+				   @onclick="() => NavigationManager.NavigateTo(PageRouteNames.Login, true)">
+					Back to Login
+				</a>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<div class="footer-section">
+			<p class="copyright">
+				&copy; @DateTime.Now.Year A Product By
+				<a href="@Secrets.AadiSoftWebsite" target="_blank" class="footer-link">AadiSoft</a>.
+				All rights reserved.
+			</p>
+		</div>
+	</div>
+</div>
+
+<ToastNotification @ref="_toastNotification" />
+
+<style>
+	/* Color Variables - Matching Dashboard Theme */
+	:root {
+		--primary-color: #3b82f6;
+		--primary-dark: #2563eb;
+		--primary-light: #60a5fa;
+		--secondary-color: #f8fafc;
+		--text-dark: #1e293b;
+		--text-light: #64748b;
+		--white: #ffffff;
+		--border-color: #e2e8f0;
+		--shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
+		--shadow-hover: 0 15px 50px rgba(59, 130, 246, 0.25);
+		--border-radius: 16px;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	}
+
+	/* Login Container */
+	.login-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 100vh;
+		padding: 20px;
+		background: linear-gradient(135deg, #f7f8fa 0%, #eef2f5 100%);
+		position: relative;
+	}
+
+	/* Login Card */
+	.login-card {
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+		backdrop-filter: blur(30px);
+		-webkit-backdrop-filter: blur(30px);
+		border: 1px solid rgba(255, 255, 255, 0.5);
+		border-radius: var(--border-radius);
+		box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15), 0 20px 80px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+		padding: 48px 40px;
+		width: 100%;
+		max-width: 450px;
+		position: relative;
+		z-index: 10;
+		animation: slideUp 0.4s ease;
+	}
+
+	@@keyframes slideUp {
+		from {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* Logo Section */
+	.logo-section {
+		text-align: center;
+		margin-bottom: 32px;
+	}
+
+	.login-logo {
+		width: 100%;
+		max-width: 340px;
+		height: auto;
+		object-fit: contain;
+		display: block;
+		margin: 0 auto;
+	}
+
+	/* Form Section */
+	.form-section {
+		margin-bottom: 24px;
+	}
+
+	.input-group {
+		margin-bottom: 24px;
+	}
+
+	.input-label {
+		display: block;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-dark);
+		margin-bottom: 8px;
+	}
+
+	/* Syncfusion TextBox Styling */
+	:deep(.custom-textbox) {
+		width: 100%;
+	}
+
+	:deep(.custom-textbox .e-input-group) {
+		border-radius: 12px;
+		border: 1px solid rgba(226, 232, 240, 0.6);
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.6) 100%);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+	}
+
+	:deep(.custom-textbox .e-input-group:focus-within) {
+		border-color: rgba(59, 130, 246, 0.5);
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
+		box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(59, 130, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+	}
+
+	:deep(.custom-textbox .e-input-group input) {
+		padding: 12px 16px;
+		font-size: 15px;
+		color: var(--text-dark);
+	}
+
+	:deep(.custom-textbox .e-input-group input::placeholder) {
+		color: var(--text-light);
+	}
+
+	/* OTP Input Styling */
+	.otp-container {
+		margin-bottom: 8px;
+	}
+
+	:deep(.custom-otp) {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	:deep(.custom-otp .e-input-group) {
+		flex: 1;
+		border-radius: 12px;
+		border: 1px solid rgba(226, 232, 240, 0.6);
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.6) 100%);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+	}
+
+	:deep(.custom-otp .e-input-group:focus-within) {
+		border-color: rgba(59, 130, 246, 0.5);
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
+		box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(59, 130, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+	}
+
+	:deep(.custom-otp .e-input-group input) {
+		padding: 12px;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--text-dark);
+		text-align: center;
+	}
+
+	.code-hint {
+		font-size: 12px;
+		color: var(--text-light);
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	/* Button Group */
+	.button-group {
+		margin-top: 32px;
+	}
+
+	.btn-login {
+		width: 100%;
+		padding: 14px 24px;
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.85) 100%);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		color: var(--white);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 12px;
+		font-size: 16px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3), 0 8px 32px rgba(59, 130, 246, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		position: relative;
+		overflow: hidden;
+	}
+
+		.btn-login::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 50%;
+			background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 100%);
+			border-radius: 12px 12px 0 0;
+			pointer-events: none;
+		}
+
+		.btn-login:hover:not(:disabled) {
+			background: linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(29, 78, 216, 0.9) 100%);
+			transform: translateY(-2px) scale(1.01);
+			box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4), 0 12px 40px rgba(59, 130, 246, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+		}
+
+		.btn-login:active:not(:disabled) {
+			transform: translateY(0) scale(0.99);
+			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+			transition: all 0.1s ease;
+		}
+
+		.btn-login:disabled {
+			opacity: 0.7;
+			cursor: not-allowed;
+			backdrop-filter: blur(10px);
+		}
+
+	/* Spinner */
+	.spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-left: 2px solid var(--white);
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+	/* Forgot Password Section */
+	.forgot-password-section {
+		text-align: center;
+		margin-top: 16px;
+	}
+
+	.forgot-password-link {
+		color: var(--primary-color);
+		font-size: 14px;
+		font-weight: 500;
+		text-decoration: none;
+		cursor: pointer;
+		transition: color 0.2s ease;
+	}
+
+		.forgot-password-link:hover {
+			color: var(--primary-dark);
+			text-decoration: underline;
+		}
+
+	/* Footer Section */
+	.footer-section {
+		text-align: center;
+		padding-top: 24px;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.copyright {
+		font-size: 13px;
+		color: var(--text-light);
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	.footer-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--primary-dark);
+			text-decoration: underline;
+		}
+
+		.footer-link:focus {
+			outline: 2px solid var(--primary-color);
+			outline-offset: 2px;
+			border-radius: 2px;
+		}
+
+	/* Responsive Design */
+	@@media (max-width: 480px) {
+		.login-card {
+			padding: 32px 24px;
+		}
+
+		.login-logo {
+			width: 100%;
+			max-width: 220px;
+		}
+
+		:deep(.custom-otp) {
+			gap: 4px;
+		}
+
+		:deep(.custom-otp .e-input-group input) {
+			padding: 10px;
+			font-size: 16px;
+		}
+	}
+
+	/* Accessibility */
+	@@media (prefers-reduced-motion: reduce) {
+
+		.spinner,
+		.login-card {
+			animation: none;
+		}
+
+		.btn-login:hover:not(:disabled) {
+			transform: none;
+		}
+	}
+
+	/* High contrast mode support */
+	@@media (prefers-contrast: high) {
+		.login-card {
+			border: 2px solid var(--text-dark);
+		}
+
+		:deep(.custom-textbox .e-input-group),
+		:deep(.custom-otp .e-input-group) {
+			border-width: 3px;
+		}
+	}
+</style>

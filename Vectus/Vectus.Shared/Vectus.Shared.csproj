@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Vectus.Shared.csproj.lscache" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.8" />
+	  <PackageReference Include="MudBlazor" Version="9.4.0" />
+	  <PackageReference Include="Syncfusion.Blazor.Buttons" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.Calendars" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.Grid" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.Inputs" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.Notifications" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.Popups" Version="33.2.6" />
+	  <PackageReference Include="Syncfusion.Blazor.Themes" Version="33.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VectusLibrary\VectusLibrary.csproj" />
+  </ItemGroup>
+
+</Project>

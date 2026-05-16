@@ -1,0 +1,12 @@
+<Solution>
+  <Project Path="DBVectus/DBVectus.sqlproj" Id="f988dda4-b890-4f0b-9987-b4470099c4ac">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Vectus/Vectus.Shared/Vectus.Shared.csproj" />
+  <Project Path="Vectus/Vectus.Web/Vectus.Web.csproj" />
+  <Project Path="Vectus/Vectus/Vectus.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="VectusLibrary/VectusLibrary.csproj" />
+</Solution>

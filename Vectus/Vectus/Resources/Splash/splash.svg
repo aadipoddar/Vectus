@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Vectus">
+  <title>Vectus</title>
+  <g>
+    <line x1="120" y1="200" x2="62" y2="76" stroke="#0B1220" stroke-width="18" stroke-linecap="round"/>
+    <line x1="120" y1="200" x2="194" y2="56" stroke="#0B1220" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="194" cy="56" r="11" fill="#C9A573"/>
+  </g>
+</svg>

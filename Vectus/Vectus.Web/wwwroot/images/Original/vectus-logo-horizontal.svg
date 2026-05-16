@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 130" width="500" height="130" role="img" aria-label="Vectus">
+  <title>Vectus</title>
+  <g>
+    <line x1="92" y1="103" x2="58" y2="39" stroke="#0B1220" stroke-width="6" stroke-linecap="round"/>
+    <line x1="92" y1="103" x2="130" y2="27" stroke="#0B1220" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="130" cy="27" r="3.6" fill="#C9A573"/>
+  </g>
+  <line x1="172" y1="40" x2="172" y2="90" stroke="#C9A573" stroke-width="0.8"/>
+  <text x="198" y="79" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="38" font-weight="500" letter-spacing="14" fill="#0B1220">VECTUS</text>
+</svg>

@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>DBVectus</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{f988dda4-b890-4f0b-9987-b4470099c4ac}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql170DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>DBVectus</RootNamespace>
+    <AssemblyName>DBVectus</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Accounts" />
+    <Folder Include="Accounts\FinancialAccounting" />
+    <Folder Include="Accounts\FinancialAccounting\Insert" />
+    <Folder Include="Accounts\FinancialAccounting\Load" />
+    <Folder Include="Accounts\FinancialAccounting\Table" />
+    <Folder Include="Accounts\Masters" />
+    <Folder Include="Accounts\Masters\Insert" />
+    <Folder Include="Accounts\Masters\Load" />
+    <Folder Include="Accounts\Masters\Table" />
+    <Folder Include="Operations" />
+    <Folder Include="Operations\AuditTrail" />
+    <Folder Include="Operations\Common" />
+    <Folder Include="Operations\Settings" />
+    <Folder Include="Operations\User" />
+    <Folder Include="PublishLocations" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
+    <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccountingLedger.sql" />
+    <Build Include="Accounts\FinancialAccounting\Load\FinancialAccounting_Ledger_Overview.sql" />
+    <Build Include="Accounts\FinancialAccounting\Load\FinancialAccounting_Overview.sql" />
+    <Build Include="Accounts\FinancialAccounting\Load\Load_FinancialAccounting_By_Voucher_Reference.sql" />
+    <Build Include="Accounts\FinancialAccounting\Load\Load_TrialBalance_By_Company_Date.sql" />
+    <Build Include="Accounts\FinancialAccounting\Table\FinancialAccounting.sql" />
+    <Build Include="Accounts\FinancialAccounting\Table\FinancialAccountingLedger.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_AccountType.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_Company.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_FinancialYear.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_Group.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_Ledger.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_StateUT.sql" />
+    <Build Include="Accounts\Masters\Insert\Insert_Voucher.sql" />
+    <Build Include="Accounts\Masters\Load\Load_FinancialYear_By_DateTime.sql" />
+    <Build Include="Accounts\Masters\Table\AccountType.sql" />
+    <Build Include="Accounts\Masters\Table\Company.sql" />
+    <Build Include="Accounts\Masters\Table\FinancialYear.sql" />
+    <Build Include="Accounts\Masters\Table\Group.sql" />
+    <Build Include="Accounts\Masters\Table\Ledger.sql" />
+    <Build Include="Accounts\Masters\Table\Nature.sql" />
+    <Build Include="Accounts\Masters\Table\StateUT.sql" />
+    <Build Include="Accounts\Masters\Table\Voucher.sql" />
+    <Build Include="Operations\AuditTrail\AuditTrail.sql" />
+    <Build Include="Operations\AuditTrail\Insert_AuditTrail.sql" />
+    <Build Include="Operations\Common\Load_CurrentDateTime.sql" />
+    <Build Include="Operations\Common\Load_LastTableData.sql" />
+    <Build Include="Operations\Common\Load_LastTableData_By_Company_FinancialYear.sql" />
+    <Build Include="Operations\Common\Load_LastTableData_By_FinancialYear.sql" />
+    <Build Include="Operations\Common\Load_TableData.sql" />
+    <Build Include="Operations\Common\Load_TableData_By_Code.sql" />
+    <Build Include="Operations\Common\Load_TableData_By_Date.sql" />
+    <Build Include="Operations\Common\Load_TableData_By_Id.sql" />
+    <Build Include="Operations\Common\Load_TableData_By_MasterId.sql" />
+    <Build Include="Operations\Common\Load_TableData_By_Status.sql" />
+    <Build Include="Operations\Common\Load_TableData_By_TransactionNo.sql" />
+    <Build Include="Operations\Settings\Load_Settings_By_Key.sql" />
+    <Build Include="Operations\Settings\Reset_Settings.sql" />
+    <Build Include="Operations\Settings\Settings.sql" />
+    <Build Include="Operations\Settings\Update_Settings.sql" />
+    <Build Include="Operations\User\Insert_User.sql" />
+    <Build Include="Operations\User\User.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PublishLocations\AzureVectus.publish.xml" />
+    <None Include="PublishLocations\LocalVectus.publish.xml" />
+  </ItemGroup>
+</Project>
