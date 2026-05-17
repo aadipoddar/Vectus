@@ -3,6 +3,10 @@ using VectusLibrary.Accounts.FinancialAccounting.Models;
 using VectusLibrary.Accounts.Masters.Exports;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Vehicle.Exports;
+using VectusLibrary.Fleet.Vehicle.Models;
+using VectusLibrary.Fleet.VehicleDocument.Exports;
+using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
@@ -46,20 +50,28 @@ public static class DecodeCode
 			//	if (excel) decodeTransactionNoModel.ExcelStream = await DriverExport.ExportMaster(drivers, ReportExportType.Excel);
 			//	break;
 
-			//case CodeType.VehicleType:
-			//	var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
-			//	decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, transactionNo);
-			//	decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleTypeModel).Id}";
-			//	if (pdf) decodeTransactionNoModel.PDFStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.PDF);
-			//	if (excel) decodeTransactionNoModel.ExcelStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.Excel);
-			//	break;
-			//case CodeType.VehicleDocumentType:
-			//	var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType);
-			//	decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, transactionNo);
-			//	decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleDocumentTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleDocumentTypeModel).Id}";
-			//	if (pdf) decodeTransactionNoModel.PDFStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.PDF);
-			//	if (excel) decodeTransactionNoModel.ExcelStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.Excel);
-			//	break;
+			case CodeType.VehicleDocumentType:
+				var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleDocumentTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleDocumentTypeModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.Excel);
+				break;
+
+			case CodeType.VehicleType:
+				var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleTypeModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.Excel);
+				break;
+			case CodeType.HDR:
+				var hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<HDRModel>(FleetNames.HDR, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.HDRMaster}/{(decodeTransactionNoModel.TransactionModel as HDRModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await HDRExport.ExportMaster(hdrs, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await HDRExport.ExportMaster(hdrs, ReportExportType.Excel);
+				break;
 
 			default:
 				break;

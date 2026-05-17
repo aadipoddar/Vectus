@@ -1,6 +1,8 @@
 ﻿using VectusLibrary.Accounts.FinancialAccounting.Models;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Vehicle.Models;
+using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 
@@ -24,19 +26,24 @@ public static class GenerateCodes
 					isDuplicate = ledger is not null;
 					break;
 
-					//case CodeType.Driver:
-					//	var driver = await CommonData.LoadTableDataByCode<DriverModel>(FleetNames.Driver, code, sqlDataAccessTransaction);
-					//	isDuplicate = driver is not null;
-					//	break;
+				//case CodeType.Driver:
+				//	var driver = await CommonData.LoadTableDataByCode<DriverModel>(FleetNames.Driver, code, sqlDataAccessTransaction);
+				//	isDuplicate = driver is not null;
+				//	break;
 
-					//case CodeType.VehicleType:
-					//	var vehicleType = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, code, sqlDataAccessTransaction);
-					//	isDuplicate = vehicleType is not null;
-					//	break;
-					//case CodeType.VehicleDocumentType:
-					//	var vehicleDocumentType = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, code, sqlDataAccessTransaction);
-					//	isDuplicate = vehicleDocumentType is not null;
-					//	break;
+				case CodeType.VehicleDocumentType:
+					var vehicleDocumentType = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, code, sqlDataAccessTransaction);
+					isDuplicate = vehicleDocumentType is not null;
+					break;
+
+				case CodeType.VehicleType:
+					var vehicleType = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, code, sqlDataAccessTransaction);
+					isDuplicate = vehicleType is not null;
+					break;
+				case CodeType.HDR:
+					var hdr = await CommonData.LoadTableDataByCode<HDRModel>(FleetNames.HDR, code, sqlDataAccessTransaction);
+					isDuplicate = hdr is not null;
+					break;
 			}
 
 			if (!isDuplicate)
@@ -129,74 +136,76 @@ public static class GenerateCodes
 	//}
 	//#endregion
 
-	//#region Vehicle
-	//public static async Task<string> GenerateVehicleTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	//{
-	//	var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType, sqlDataAccessTransaction);
-	//	var vehicleTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.VehicleTypeCodePrefix, sqlDataAccessTransaction)).Value;
+	#region Vehicle Document
+	public static async Task<string> GenerateVehicleDocumentTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, sqlDataAccessTransaction);
+		var vehicleDocumentTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DocumentTypeCodePrefix, sqlDataAccessTransaction)).Value;
 
-	//	var lastVehicleType = vehicleTypes.OrderByDescending(vt => vt.Id).FirstOrDefault();
-	//	if (lastVehicleType is not null)
-	//	{
-	//		var lastVehicleTypeCode = lastVehicleType.Code;
-	//		if (lastVehicleTypeCode.StartsWith(vehicleTypePrefix))
-	//		{
-	//			var lastNumberPart = lastVehicleTypeCode[vehicleTypePrefix.Length..];
-	//			if (int.TryParse(lastNumberPart, out int lastNumber))
-	//			{
-	//				int nextNumber = lastNumber + 1;
-	//				return await CheckDuplicateCode($"{vehicleTypePrefix}{nextNumber:D5}", 5, CodeType.VehicleType, sqlDataAccessTransaction);
-	//			}
-	//		}
-	//	}
+		var lastVehicleDocumentType = vehicleDocumentTypes.OrderByDescending(vdt => vdt.Id).FirstOrDefault();
+		if (lastVehicleDocumentType is not null)
+		{
+			var lastVehicleDocumentTypeCode = lastVehicleDocumentType.Code;
+			if (lastVehicleDocumentTypeCode.StartsWith(vehicleDocumentTypePrefix))
+			{
+				var lastNumberPart = lastVehicleDocumentTypeCode[vehicleDocumentTypePrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{vehicleDocumentTypePrefix}{nextNumber:D5}", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
+				}
+			}
+		}
 
-	//	return await CheckDuplicateCode($"{vehicleTypePrefix}00001", 5, CodeType.VehicleType, sqlDataAccessTransaction);
-	//}
+		return await CheckDuplicateCode($"{vehicleDocumentTypePrefix}00001", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
+	}
+	#endregion
 
-	//public static async Task<string> GenerateVehicleDocumentTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	//{
-	//	var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, sqlDataAccessTransaction);
-	//	var vehicleDocumentTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DocumentTypeCodePrefix, sqlDataAccessTransaction)).Value;
+	#region Vehicle
+	public static async Task<string> GenerateVehicleTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType, sqlDataAccessTransaction);
+		var vehicleTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.VehicleTypeCodePrefix, sqlDataAccessTransaction)).Value;
 
-	//	var lastVehicleDocumentType = vehicleDocumentTypes.OrderByDescending(vdt => vdt.Id).FirstOrDefault();
-	//	if (lastVehicleDocumentType is not null)
-	//	{
-	//		var lastVehicleDocumentTypeCode = lastVehicleDocumentType.Code;
-	//		if (lastVehicleDocumentTypeCode.StartsWith(vehicleDocumentTypePrefix))
-	//		{
-	//			var lastNumberPart = lastVehicleDocumentTypeCode[vehicleDocumentTypePrefix.Length..];
-	//			if (int.TryParse(lastNumberPart, out int lastNumber))
-	//			{
-	//				int nextNumber = lastNumber + 1;
-	//				return await CheckDuplicateCode($"{vehicleDocumentTypePrefix}{nextNumber:D5}", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
-	//			}
-	//		}
-	//	}
+		var lastVehicleType = vehicleTypes.OrderByDescending(vt => vt.Id).FirstOrDefault();
+		if (lastVehicleType is not null)
+		{
+			var lastVehicleTypeCode = lastVehicleType.Code;
+			if (lastVehicleTypeCode.StartsWith(vehicleTypePrefix))
+			{
+				var lastNumberPart = lastVehicleTypeCode[vehicleTypePrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{vehicleTypePrefix}{nextNumber:D5}", 5, CodeType.VehicleType, sqlDataAccessTransaction);
+				}
+			}
+		}
 
-	//	return await CheckDuplicateCode($"{vehicleDocumentTypePrefix}00001", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
-	//}
+		return await CheckDuplicateCode($"{vehicleTypePrefix}00001", 5, CodeType.VehicleType, sqlDataAccessTransaction);
+	}
 
-	//public static async Task<string> GenerateExpenseTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	//{
-	//	var expenseTypes = await CommonData.LoadTableData<ExpenseTypeModel>(FleetNames.ExpenseType, sqlDataAccessTransaction);
-	//	var expenseTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.ExpenseTypeCodePrefix, sqlDataAccessTransaction)).Value;
+	public static async Task<string> GenerateHDRCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR, sqlDataAccessTransaction);
+		var hdrPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.HDRCodePrefix, sqlDataAccessTransaction)).Value;
 
-	//	var lastExpenseType = expenseTypes.OrderByDescending(v => v.Id).FirstOrDefault();
-	//	if (lastExpenseType is not null)
-	//	{
-	//		var lastExpenseTypeCode = lastExpenseType.Code;
-	//		if (lastExpenseTypeCode.StartsWith(expenseTypePrefix))
-	//		{
-	//			var lastNumberPart = lastExpenseTypeCode[expenseTypePrefix.Length..];
-	//			if (int.TryParse(lastNumberPart, out int lastNumber))
-	//			{
-	//				int nextNumber = lastNumber + 1;
-	//				return await CheckDuplicateCode($"{expenseTypePrefix}{nextNumber:D5}", 5, CodeType.ExpenseType, sqlDataAccessTransaction);
-	//			}
-	//		}
-	//	}
+		var lastHDR = hdrs.OrderByDescending(h => h.Id).FirstOrDefault();
+		if (lastHDR is not null)
+		{
+			var lastHDRCode = lastHDR.Code;
+			if (lastHDRCode.StartsWith(hdrPrefix))
+			{
+				var lastNumberPart = lastHDRCode[hdrPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{hdrPrefix}{nextNumber:D5}", 5, CodeType.HDR, sqlDataAccessTransaction);
+				}
+			}
+		}
 
-	//	return await CheckDuplicateCode($"{expenseTypePrefix}00001", 5, CodeType.ExpenseType, sqlDataAccessTransaction);
-	//}
-	//#endregion
+		return await CheckDuplicateCode($"{hdrPrefix}00001", 5, CodeType.HDR, sqlDataAccessTransaction);
+	}
+	#endregion
 }

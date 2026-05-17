@@ -82,17 +82,19 @@ public static class FleetNames
 	#endregion
 
 	#region Vehicle Document
-	public static string VehicleDocumentType => "VehicleDocumentType";
 	public static string VehicleDocument => "VehicleDocument";
+	public static string VehicleDocumentType => "VehicleDocumentType";
 
-	public static string InsertDocumentType => "Insert_VehicleDocumentType";
 	public static string InsertDocument => "Insert_VehicleDocument";
+	public static string InsertDocumentType => "Insert_VehicleDocumentType";
 	#endregion
 
 	#region Vehicle
+	public static string HDR => "HDR";
 	public static string Vehicle => "Vehicle";
 	public static string VehicleType => "VehicleType";
 
+	public static string InsertHDR => "Insert_HDR";
 	public static string InsertVehicle => "Insert_Vehicle";
 	public static string InsertVehicleType => "Insert_VehicleType";
 	#endregion

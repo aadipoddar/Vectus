@@ -7,6 +7,7 @@ public enum CodeType
 
 	Driver,
 
+	HDR,
 	VehicleType,
 	VehicleDocumentType
 }

@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[VehicleType]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [Name] VARCHAR(250) NOT NULL UNIQUE,
+    [Code] VARCHAR(10) NOT NULL UNIQUE, 
+    [Remarks] VARCHAR(MAX) NULL,
+    [Status] BIT NOT NULL DEFAULT 1
+)

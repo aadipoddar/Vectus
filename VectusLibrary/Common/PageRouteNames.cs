@@ -42,9 +42,10 @@ public static class PageRouteNames
 
 	public const string DriverMaster = "/fleet/driver";
 
-	public const string VehicleDocumentTypeMaster = "/fleet/vehicle-document-type";
 	public const string VehicleDocument = "/fleet/vehicle-document";
+	public const string VehicleDocumentTypeMaster = "/fleet/vehicle-document-type";
 
+	public const string HDRMaster = "/fleet/hdr";
 	public const string VehicleMaster = "/fleet/vehicle";
 	public const string VehicleTypeMaster = "/fleet/vehicle-type";
 	#endregion
