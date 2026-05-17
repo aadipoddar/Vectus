@@ -228,8 +228,8 @@ internal static class TransactionMailing
         }}
     </style>
 </head>
-<body style=""margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f7f8fa;"">
-    <table role=""presentation"" style=""width: 100%; border-collapse: collapse; background-color: #f7f8fa;"">
+<body style=""margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: {MailTheme.PageBackground};"">
+    <table role=""presentation"" style=""width: 100%; border-collapse: collapse; background-color: {MailTheme.PageBackground};"">
         <tr>
             <td align=""center"" class=""outer-padding"" style=""padding: 40px 20px;"">
                 <table role=""presentation"" class=""email-container"" style=""width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);"">

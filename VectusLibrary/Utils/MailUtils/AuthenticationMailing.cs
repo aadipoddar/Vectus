@@ -57,8 +57,8 @@ public static class AuthenticationMailing
         }}
     </style>
 </head>
-<body style=""margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f7f8fa;"">
-    <table role=""presentation"" style=""width: 100%; border-collapse: collapse; background-color: #f7f8fa;"">
+<body style=""margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: {MailTheme.PageBackground};"">
+    <table role=""presentation"" style=""width: 100%; border-collapse: collapse; background-color: {MailTheme.PageBackground};"">
         <tr>
             <td align=""center"" class=""outer-padding"" style=""padding: 40px 20px;"">
                 <table role=""presentation"" class=""email-container"" style=""width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);"">
@@ -81,7 +81,7 @@ public static class AuthenticationMailing
                             <!-- Code Box -->
                             <table role=""presentation"" style=""width: 100%; border-collapse: collapse; margin: 30px 0;"">
                                 <tr>
-                                    <td align=""center"" style=""padding: 30px; background-color: #eef2f5; border-radius: 8px; border: 2px dashed #cbd5e1;"">
+                                    <td align=""center"" style=""padding: 30px; background-color: {MailTheme.SurfaceTint}; border-radius: 8px; border: 2px dashed {MailTheme.SurfaceBorder};"">
                                         <div style=""font-size: 36px; font-weight: 700; color: #2563eb; letter-spacing: 8px; font-family: 'Courier New', monospace;"">{code}</div>
                                     </td>
                                 </tr>
