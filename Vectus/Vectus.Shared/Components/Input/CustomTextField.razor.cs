@@ -20,6 +20,8 @@ public partial class CustomTextField
 	[Parameter] public bool Required { get; set; } = true;
 	[Parameter] public bool ReadOnly { get; set; } = false;
 
+	[Parameter] public InputType InputType { get; set; } = InputType.Text;
+
 	[Parameter] public int Lines { get; set; } = 1;
 	[Parameter] public int MaxLines { get; set; } = 5;
 	[Parameter] public int MaxLength { get; set; } = 524288;

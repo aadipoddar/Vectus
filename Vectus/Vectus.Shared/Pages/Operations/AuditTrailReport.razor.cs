@@ -1,25 +1,27 @@
+﻿using System.Text;
+
 using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Services;
 
-using VectusLibrary.Accounts.FinancialAccounting.Data;
-using VectusLibrary.Accounts.FinancialAccounting.Exports;
-using VectusLibrary.Accounts.FinancialAccounting.Models;
 using VectusLibrary.Accounts.Masters.Data;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Operations.Data;
+using VectusLibrary.Operations.Exports;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
-namespace Vectus.Shared.Pages.Accounts.Reports;
+namespace Vectus.Shared.Pages.Operations;
 
-public partial class TrialBalancePage : IAsyncDisposable
+public partial class AuditTrailReport : IAsyncDisposable
 {
 	private PeriodicTimer _autoRefreshTimer;
 	private CancellationTokenSource _autoRefreshCts;
+
+	private UserModel _user;
 
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
@@ -28,16 +30,14 @@ public partial class TrialBalancePage : IAsyncDisposable
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
 
-	private CompanyModel? _selectedCompany = null;
-	private GroupModel? _selectedGroup = null;
-	private AccountTypeModel? _selectedAccountType = null;
+	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
+	[
+		new() { Text = "Open Changes (Alt + O)", Id = "OpenChanges", IconCss = "e-icons e-eye", Target = ".e-content" }
+	];
 
-	private List<CompanyModel> _companies = [];
-	private List<GroupModel> _groups = [];
-	private List<AccountTypeModel> _accountTypes = [];
-	private List<TrialBalanceModel> _trialBalance = [];
+	private List<AuditTrailModel> _auditTrails = [];
 
-	private SfGrid<TrialBalanceModel> _sfGrid;
+	private SfGrid<AuditTrailModel> _sfGrid;
 	private ToastNotification _toastNotification;
 
 	#region Load Data
@@ -46,41 +46,23 @@ public partial class TrialBalancePage : IAsyncDisposable
 		if (!firstRender)
 			return;
 
-		try
-		{
-			await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
-			await InitializePage();
-		}
-		catch
-		{
-			NavigationManager.NavigateTo(NavigationManager.Uri, true);
-		}
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Admin]);
+		await InitializePage();
 	}
 
 	private async Task InitializePage()
 	{
-		await LoadData();
-		await LoadTrialBalance();
+		_fromDate = await CommonData.LoadCurrentDateTime();
+		_toDate = _fromDate;
+
+		await LoadAuditTrails();
 		await StartAutoRefresh();
+
 		_isLoading = false;
 		StateHasChanged();
 	}
 
-	private async Task LoadData()
-	{
-		_fromDate = await CommonData.LoadCurrentDateTime();
-		_toDate = _fromDate;
-
-		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(AccountNames.Company);
-		_groups = await CommonData.LoadTableDataByStatus<GroupModel>(AccountNames.Group);
-		_accountTypes = await CommonData.LoadTableDataByStatus<AccountTypeModel>(AccountNames.AccountType);
-
-		_companies = [.. _companies.OrderBy(s => s.Name)];
-		_groups = [.. _groups.OrderBy(s => s.Name)];
-		_accountTypes = [.. _accountTypes.OrderBy(s => s.Name)];
-	}
-
-	private async Task LoadTrialBalance()
+	private async Task LoadAuditTrails()
 	{
 		if (_isProcessing)
 			return;
@@ -89,24 +71,18 @@ public partial class TrialBalancePage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
+			await _toastNotification.ShowAsync("Loading", "Fetching audit trail records...", ToastType.Info);
 
-			_trialBalance = await FinancialAccountingData.LoadTrialBalanceByCompanyDate(
-				_selectedCompany?.Id ?? 0,
+			_auditTrails = await CommonData.LoadTableDataByDate<AuditTrailModel>(
+				OperationNames.AuditTrail,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
 
-			if (_selectedGroup?.Id > 0)
-				_trialBalance = [.. _trialBalance.Where(_ => _.GroupId == _selectedGroup.Id)];
-
-			if (_selectedAccountType?.Id > 0)
-				_trialBalance = [.. _trialBalance.Where(_ => _.AccountTypeId == _selectedAccountType.Id)];
-
-			_trialBalance = [.. _trialBalance.OrderBy(_ => _.LedgerName)];
+			_auditTrails = [.. _auditTrails.OrderByDescending(_ => _.TransactionDateTime)];
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"Failed to load transactions: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Failed to load audit trail: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -118,36 +94,18 @@ public partial class TrialBalancePage : IAsyncDisposable
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private async Task OnDateRangeChanged(MudBlazor.DateRange range)
 	{
 		_fromDate = range?.Start ?? _fromDate;
 		_toDate = range?.End ?? _toDate;
-		await LoadTrialBalance();
-	}
-
-	private async Task OnCompanyChanged(CompanyModel value)
-	{
-		_selectedCompany = value;
-		await LoadTrialBalance();
-	}
-
-	private async Task OnAccountTypeChanged(AccountTypeModel value)
-	{
-		_selectedAccountType = value;
-		await LoadTrialBalance();
-	}
-
-	private async Task OnGroupChanged(GroupModel value)
-	{
-		_selectedGroup = value;
-		await LoadTrialBalance();
+		await LoadAuditTrails();
 	}
 
 	private async Task HandleDatesChanged(DateRangeType dateRangeType)
 	{
 		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
-		await LoadTrialBalance();
+		await LoadAuditTrails();
 	}
 	#endregion
 
@@ -163,16 +121,13 @@ public partial class TrialBalancePage : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await TrialBalanceReportExport.ExportReport(
-					_trialBalance,
-					ReportExportType.Excel,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null,
-					_selectedGroup?.Id > 0 ? _selectedGroup : null,
-					_selectedAccountType?.Id > 0 ? _selectedAccountType : null
-				);
+			var (stream, fileName) = await AuditTrailExport.ExportReport(
+				_auditTrails,
+				ReportExportType.Excel,
+				DateOnly.FromDateTime(_fromDate),
+				DateOnly.FromDateTime(_toDate),
+				_showAllColumns
+			);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -199,16 +154,13 @@ public partial class TrialBalancePage : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await TrialBalanceReportExport.ExportReport(
-					_trialBalance,
-					ReportExportType.PDF,
-					DateOnly.FromDateTime(_fromDate),
-				 DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null,
-					_selectedGroup?.Id > 0 ? _selectedGroup : null,
-					_selectedAccountType?.Id > 0 ? _selectedAccountType : null
-				);
+			var (stream, fileName) = await AuditTrailExport.ExportReport(
+				_auditTrails,
+				ReportExportType.PDF,
+				DateOnly.FromDateTime(_fromDate),
+				DateOnly.FromDateTime(_toDate),
+				_showAllColumns
+			);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -225,16 +177,55 @@ public partial class TrialBalancePage : IAsyncDisposable
 	}
 	#endregion
 
+	#region Actions
+	private async Task OpenChanges()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var record = _sfGrid.SelectedRecords.First();
+
+		var sb = new StringBuilder();
+		sb.AppendLine("AUDIT TRAIL RECORD");
+		sb.AppendLine(new string('=', 60));
+		sb.AppendLine($"Module   : {record.TableName}");
+		sb.AppendLine($"Record   : {record.RecordNo}");
+		sb.AppendLine($"Action   : {record.Action}");
+		sb.AppendLine($"Date     : {record.TransactionDateTime:dd-MMM-yyyy HH:mm}");
+		sb.AppendLine($"User     : {record.CreatedByName}");
+		sb.AppendLine($"Platform : {record.CreatedFromPlatform}");
+
+		if (!string.IsNullOrWhiteSpace(record.RecordValue))
+		{
+			sb.AppendLine();
+			sb.AppendLine("CHANGES");
+			sb.AppendLine(new string('-', 60));
+			sb.AppendLine(record.RecordValue);
+		}
+		else
+		{
+			sb.AppendLine();
+			sb.AppendLine("CHANGES");
+			sb.AppendLine(new string('-', 60));
+			sb.AppendLine("(no changes recorded)");
+		}
+
+		var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+		var stream = new MemoryStream(bytes);
+		await SaveAndViewService.SaveAndView($"AuditTrail_{record.TableName}_{record.RecordNo}.txt", stream);
+	}
+	#endregion
+
 	#region Utilities
 	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
 	{
 		switch (args.Item.Id)
 		{
-			case "NewTransaction":
-				await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager);
+			case "OpenChanges":
+				await OpenChanges();
 				break;
 			case "Refresh":
-				await LoadTrialBalance();
+				await LoadAuditTrails();
 				break;
 			case "ToggleDetailsView":
 				await ToggleDetailsView();
@@ -244,18 +235,6 @@ public partial class TrialBalancePage : IAsyncDisposable
 				break;
 			case "ExportExcel":
 				await ExportExcel();
-				break;
-			case "TransactionHistory":
-				await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager);
-				break;
-			case "LedgerReport":
-				await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager);
-				break;
-			case "ProfitLoss":
-				await AuthenticationService.NavigateToRoute(PageRouteNames.ProfitAndLossReport, FormFactor, JSRuntime, NavigationManager);
-				break;
-			case "BalanceSheet":
-				await AuthenticationService.NavigateToRoute(PageRouteNames.BalanceSheetReport, FormFactor, JSRuntime, NavigationManager);
 				break;
 			case "PeriodToday":
 				await HandleDatesChanged(DateRangeType.Today);
@@ -290,6 +269,12 @@ public partial class TrialBalancePage : IAsyncDisposable
 		}
 	}
 
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<AuditTrailModel> args)
+	{
+		if (args.Item.Id == "OpenChanges")
+			await OpenChanges();
+	}
+
 	private async Task ToggleDetailsView()
 	{
 		_showAllColumns = !_showAllColumns;
@@ -300,7 +285,7 @@ public partial class TrialBalancePage : IAsyncDisposable
 	}
 
 	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+		NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard);
 
 	private async Task StartAutoRefresh()
 	{
@@ -317,7 +302,7 @@ public partial class TrialBalancePage : IAsyncDisposable
 		try
 		{
 			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
-				await LoadTrialBalance();
+				await LoadAuditTrails();
 		}
 		catch (OperationCanceledException)
 		{

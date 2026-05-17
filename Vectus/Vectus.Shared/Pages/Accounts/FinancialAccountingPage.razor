@@ -8,7 +8,8 @@
 
 <MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" />
 <MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
-<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfLedgerAutoComplete.FocusAsync()" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" />
+<MudBlazor.MudHotkey Key=JsKey.KeyG KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfLedgerAutoComplete.FocusAsync()" />
 <MudBlazor.MudHotkey Key=JsKey.Enter KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="AddItemToCart" />
 <MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => SaveTransaction()" />
 <MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => SaveTransaction(savePDF: true)" />
@@ -86,10 +87,10 @@ else
 						<div class="form-grid">
 							<!-- Company -->
 							<div class="form-field">
-								<CustomAutoComplete T="CompanyModel"
+								<CustomAutoComplete @ref="_sfFirstFocus" T="CompanyModel"
 													Value="_selectedCompany"
 													DataSource="@_companies"
-													Placeholder="Select Company"
+													Placeholder="Select Company (Ctrl + F)"
 													Label="Company" Required="true"
 													ValueChanged="OnCompanyChanged"
 													FieldValue="@nameof(CompanyModel.Name)"
@@ -228,7 +229,7 @@ else
 								<CustomAutoComplete @ref="_sfLedgerAutoComplete" T="LedgerModel"
 													Value="_selectedLedger"
 													DataSource="@_ledgers"
-													Placeholder="Select Ledger (Ctrl + F)"
+													Placeholder="Select Ledger (Ctrl + G)"
 													Label="Ledger" Required="true"
 													ValueChanged="OnItemChanged" OpenOnFocus="false"
 													FieldValue="@nameof(LedgerModel.Name)"

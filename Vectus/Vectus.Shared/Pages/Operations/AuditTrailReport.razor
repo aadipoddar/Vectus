@@ -1,0 +1,186 @@
+﻿@using VectusLibrary.Operations.Models
+
+@attribute [Route(PageRouteNames.AuditTrailReport)]
+
+<PageTitle>Audit Trail - Vectus</PageTitle>
+
+<MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadAuditTrails" />
+<MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadAuditTrails" />
+<MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" />
+<MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
+<MudBlazor.MudHotkey Key=JsKey.KeyO KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="OpenChanges" />
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Audit Trail">
+			<LeftContent>
+				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
+					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" OnOpen='async () => await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0)' />
+					<MenuItems>
+						<MenuItem Text="File" IconCss="e-icons e-folder">
+							<MenuItems>
+								<MenuItem Text="Refresh Data (Ctrl + R / F5)" IconCss="e-icons e-refresh" Id="Refresh" Disabled="@_isProcessing" />
+								<MenuItem Text="@(_showAllColumns ? "Hide Details (Ctrl + Q)" : "Show Details (Ctrl + Q)")" IconCss="e-icons e-table" Id="ToggleDetailsView" Disabled="@_isProcessing" />
+								<MenuItem Separator="true" />
+								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
+								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Record" IconCss="e-icons e-description">
+							<MenuItems>
+								<MenuItem Text="Open Changes (Alt + O)" IconCss="e-icons e-eye" Id="OpenChanges" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Periods" IconCss="e-icons e-clock">
+							<MenuItems>
+								<MenuItem Text="Today" Id="PeriodToday" Disabled="@_isProcessing" />
+								<MenuItem Text="Previous Day" Id="PeriodPreviousDay" Disabled="@_isProcessing" />
+								<MenuItem Text="Next Day" Id="PeriodNextDay" Disabled="@_isProcessing" />
+								<MenuItem Text="Current Month" Id="PeriodCurrentMonth" Disabled="@_isProcessing" />
+								<MenuItem Text="Previous Month" Id="PeriodPreviousMonth" Disabled="@_isProcessing" />
+								<MenuItem Text="Next Month" Id="PeriodNextMonth" Disabled="@_isProcessing" />
+								<MenuItem Text="Current FY" Id="PeriodCurrentFinancialYear" Disabled="@_isProcessing" />
+								<MenuItem Text="Previous FY" Id="PeriodPreviousFinancialYear" Disabled="@_isProcessing" />
+								<MenuItem Text="Next FY" Id="PeriodNextFinancialYear" Disabled="@_isProcessing" />
+								<MenuItem Text="All Time" Id="PeriodAllTime" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+					</MenuItems>
+				</SfMenu>
+			</LeftContent>
+			<RightContent>
+				<IconButton Icon="IconType.Back" Title="Back (Ctrl + B)" OnClick="NavigateBack" />
+			</RightContent>
+		</Header>
+
+		<div class="page-container">
+
+			<!-- Filters Section -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+						</svg>
+						<h2 class="section-title">Filters</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="filters-container">
+						<div class="filters-grid">
+							<div class="form-field">
+								<CustomDateRangePicker Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
+													   ValueChanged="OnDateRangeChanged"
+													   Label="Date Range"
+													   Required="false" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Report Grid Section -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<line x1="8" y1="6" x2="21" y2="6" />
+							<line x1="8" y1="12" x2="21" y2="12" />
+							<line x1="8" y1="18" x2="21" y2="18" />
+							<line x1="3" y1="6" x2="3.01" y2="6" />
+							<line x1="3" y1="12" x2="3.01" y2="12" />
+							<line x1="3" y1="18" x2="3.01" y2="18" />
+						</svg>
+						<h2 class="section-title">Audit Trail Records</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfGrid" TValue="AuditTrailModel" DataSource="_auditTrails"
+							AllowTextWrap="true" AllowPaging="true" AllowSorting="true" AllowResizing="true"
+							AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true" GridLines="GridLine.Horizontal"
+							AllowGrouping="true" CssClass="professional-grid" ContextMenuItems="@_gridContextMenuItems"
+							Toolbar="@(new List<string>() { "Search" })">
+
+						<GridEvents TValue="AuditTrailModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridGroupSettings ShowDropArea="true" ShowGroupedColumn="true" ShowUngroupButton="true" />
+						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "10", "20", "50", "100", "All" })" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+
+						<GridAggregates>
+							<GridAggregate>
+								<GridAggregateColumns>
+									<GridAggregateColumn Field="@nameof(AuditTrailModel.Id)" Type="AggregateType.Count">
+										<FooterTemplate>
+											@{
+												var aggregate = (context as AggregateTemplateContext);
+											}
+											<div class="aggregate-label">
+												<strong>Total Records: @aggregate.Count</strong>
+											</div>
+										</FooterTemplate>
+										<GroupFooterTemplate>
+											@{
+												var aggregate = (context as AggregateTemplateContext);
+											}
+											<div class="aggregate-label">
+												<strong>Total Records: @aggregate.Count</strong>
+											</div>
+										</GroupFooterTemplate>
+										<GroupCaptionTemplate>
+											@{
+												var aggregate = (context as AggregateTemplateContext);
+											}
+											<div class="aggregate-label">
+												<strong>Total Records: @aggregate.Count</strong>
+											</div>
+										</GroupCaptionTemplate>
+									</GridAggregateColumn>
+								</GridAggregateColumns>
+							</GridAggregate>
+						</GridAggregates>
+
+						<GridColumns>
+							<GridColumn Field="@nameof(AuditTrailModel.TransactionDateTime)" HeaderText="Date" Width="100" Format="dd/MM/yy HH:mm" Type="ColumnType.DateTime" />
+							<GridColumn Field="@nameof(AuditTrailModel.Action)" HeaderText="Action" Width="100" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as AuditTrailModel);
+										var css = item.Action switch
+										{
+											"Insert" => "grid-credit",
+											"Delete" => "grid-debit",
+											"Recover" => "grid-total",
+											_ => string.Empty
+										};
+										<span class="@css">@item.Action</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(AuditTrailModel.TableName)" HeaderText="Module" Width="130" />
+							<GridColumn Field="@nameof(AuditTrailModel.RecordNo)" HeaderText="Record No" Width="130" />
+							<GridColumn Field="@nameof(AuditTrailModel.RecordValue)" HeaderText="Changes" Width="400" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(AuditTrailModel.CreatedByName)" HeaderText="User" Width="100" />
+							<GridColumn Field="@nameof(AuditTrailModel.CreatedFromPlatform)" HeaderText="Platform" Width="100" Visible="_showAllColumns" />
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<ToastNotification @ref="_toastNotification" />

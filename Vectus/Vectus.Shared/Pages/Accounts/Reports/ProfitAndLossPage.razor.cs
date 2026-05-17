@@ -45,8 +45,15 @@ public partial class ProfitAndLossPage : IAsyncDisposable
 		if (!firstRender)
 			return;
 
-		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
-		await InitializePage();
+		try
+		{
+			await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
+			await InitializePage();
+		}
+		catch
+		{
+			NavigationManager.NavigateTo(NavigationManager.Uri, true);
+		}
 	}
 
 	private async Task InitializePage()

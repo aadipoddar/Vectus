@@ -55,8 +55,15 @@ public partial class FinancialYearPage
 		if (!firstRender)
 			return;
 
-		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts]);
-		await LoadData();
+		try
+		{
+			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts]);
+			await LoadData();
+		}
+		catch
+		{
+			ResetPage();
+		}
 	}
 
 	private async Task LoadData()

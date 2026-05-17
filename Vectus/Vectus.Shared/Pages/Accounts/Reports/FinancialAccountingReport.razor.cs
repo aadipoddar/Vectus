@@ -63,8 +63,15 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 		if (!firstRender)
 			return;
 
-		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
-		await InitializePage();
+		try
+		{
+			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
+			await InitializePage();
+		}
+		catch
+		{
+			NavigationManager.NavigateTo(NavigationManager.Uri, true);
+		}
 	}
 
 	private async Task InitializePage()
