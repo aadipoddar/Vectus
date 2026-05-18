@@ -39,6 +39,7 @@ public partial class VehicleDocumentPage
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
+		new() { Text = "Download Document (Ctrl + D)", Id = "DownloadSelectedDocument", IconCss = "e-icons e-download", Target = ".e-content" },
 		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
@@ -363,6 +364,35 @@ public partial class VehicleDocumentPage
 		}
 	}
 
+	private async Task DownloadSelectedDocument()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		var documentUrl = selectedRecords[0].DocumentUrl;
+		if (string.IsNullOrWhiteSpace(documentUrl))
+		{
+			await _toastNotification.ShowAsync("No Document", "No document is available for the selected transaction.", ToastType.Warning);
+			return;
+		}
+
+		try
+		{
+			await _toastNotification.ShowAsync("Processing", "Downloading the document...", ToastType.Info);
+
+			var (stream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(documentUrl);
+			var fileName = documentUrl.Split('/').Last();
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Downloaded", "The document has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Downloading", ex.Message, ToastType.Error);
+		}
+	}
+
 	private async Task MarkDocumentForRemoval()
 	{
 		if (string.IsNullOrWhiteSpace(_vehicleDocument.DocumentUrl))
@@ -404,6 +434,7 @@ public partial class VehicleDocumentPage
 		switch (args.Item.Id)
 		{
 			case "EditSelectedItem": await EditSelectedItem(); break;
+			case "DownloadSelectedDocument": await DownloadSelectedDocument(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
 		}
 	}

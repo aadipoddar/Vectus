@@ -32,6 +32,7 @@ public partial class DriverPage
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
+		new() { Text = "Download License (Ctrl + D)", Id = "DownloadSelectedLicense", IconCss = "e-icons e-download", Target = ".e-content" },
 		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
@@ -298,6 +299,35 @@ public partial class DriverPage
 		}
 	}
 
+	private async Task DownloadSelectedLicense()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		var licenseUrl = selectedRecords[0].LicenseUrl;
+		if (string.IsNullOrWhiteSpace(licenseUrl))
+		{
+			await _toastNotification.ShowAsync("No License", "No license document is available for the selected driver.", ToastType.Warning);
+			return;
+		}
+
+		try
+		{
+			await _toastNotification.ShowAsync("Processing", "Downloading the license...", ToastType.Info);
+
+			var (stream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(licenseUrl);
+			var fileName = licenseUrl.Split('/').Last();
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Downloaded", "The license has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Downloading", ex.Message, ToastType.Error);
+		}
+	}
+
 	private async Task MarkLicenseForRemoval()
 	{
 		if (string.IsNullOrWhiteSpace(_driver.LicenseUrl))
@@ -339,6 +369,7 @@ public partial class DriverPage
 		switch (args.Item.Id)
 		{
 			case "EditSelectedItem": await EditSelectedItem(); break;
+			case "DownloadSelectedLicense": await DownloadSelectedLicense(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
 		}
 	}
