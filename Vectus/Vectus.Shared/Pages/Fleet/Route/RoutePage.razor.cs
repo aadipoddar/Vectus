@@ -4,6 +4,7 @@ using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
+using VectusLibrary.APIService;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Route.Data;
@@ -78,6 +79,47 @@ public partial class RoutePage
 
 		if (_sfFirstFocus is not null)
 			await _sfFirstFocus.FocusAsync();
+	}
+	#endregion
+
+	#region API
+	private async Task GetRouteDetails()
+	{
+		if (_isProcessing || _isLoading)
+			return;
+
+		if (_selectedFromLocation is null || _selectedToLocation is null)
+		{
+			await _toastNotification.ShowAsync("Select Locations", "Please select both From and To locations first.", ToastType.Warning);
+			return;
+		}
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Fetching", "Getting route details from the map...", ToastType.Info);
+
+			var estimate = await OpenRouteApiService.GetRouteEstimate(
+				_selectedFromLocation.Latitude, _selectedFromLocation.Longitude,
+				_selectedToLocation.Latitude, _selectedToLocation.Longitude);
+
+			_route.EstimatedDistance = estimate.DistanceKm;
+			_route.EstimatedHours = estimate.Hours;
+			_route.EstimatedFuelConsumption = estimate.FuelLitres;
+			_route.EstimatedCost = estimate.Cost;
+
+			await _toastNotification.ShowAsync("Fetched", "Route details have been fetched successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Fetching", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
 	}
 	#endregion
 
