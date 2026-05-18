@@ -15,6 +15,8 @@ public static class LocationExport
 			location.Id,
 			location.Name,
 			location.Code,
+			location.Latitude,
+			location.Longitude,
 			location.Remarks,
 			Status = location.Status ? "Active" : "Deleted"
 		});
@@ -24,6 +26,8 @@ public static class LocationExport
 			[nameof(LocationModel.Id)] = new() { DisplayName = "ID", Alignment = CellAlignment.Center, IncludeInTotal = false },
 			[nameof(LocationModel.Name)] = new() { DisplayName = "Name", Alignment = CellAlignment.Left, IsRequired = true },
 			[nameof(LocationModel.Code)] = new() { DisplayName = "Code", Alignment = CellAlignment.Left, IsRequired = true },
+			[nameof(LocationModel.Latitude)] = new() { DisplayName = "Latitude", Alignment = CellAlignment.Right, Format = "0.0000000000", IncludeInTotal = false },
+			[nameof(LocationModel.Longitude)] = new() { DisplayName = "Longitude", Alignment = CellAlignment.Right, Format = "0.0000000000", IncludeInTotal = false },
 			[nameof(LocationModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
 			[nameof(LocationModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
@@ -33,6 +37,8 @@ public static class LocationExport
 			nameof(LocationModel.Id),
 			nameof(LocationModel.Name),
 			nameof(LocationModel.Code),
+			nameof(LocationModel.Latitude),
+			nameof(LocationModel.Longitude),
 			nameof(LocationModel.Remarks),
 			nameof(LocationModel.Status)
 		];

@@ -81,6 +81,22 @@ else
 						</div>
 
 						<div class="form-field">
+							<CustomNumericField T="decimal"
+												@bind-Value="_location.Latitude"
+												Label="Latitude"
+												Placeholder="e.g. 22.5726"
+												Format="N10" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="decimal"
+												@bind-Value="_location.Longitude"
+												Label="Longitude"
+												Placeholder="e.g. 88.3639"
+												Format="N10" />
+						</div>
+
+						<div class="form-field">
 							<CustomTextField @bind-Value="_location.Remarks"
 											 Label="Remarks"
 											 Placeholder="Enter remarks (optional)"
@@ -114,6 +130,8 @@ else
 							<GridColumn Field="@nameof(LocationModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(LocationModel.Name)" HeaderText="Location Name" Width="300" />
 							<GridColumn Field="@nameof(LocationModel.Code)" HeaderText="Code" Width="150" />
+							<GridColumn Field="@nameof(LocationModel.Latitude)" HeaderText="Latitude" Width="160" Format="N10" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(LocationModel.Longitude)" HeaderText="Longitude" Width="160" Format="N10" TextAlign="TextAlign.Right" />
 							<GridColumn Field="@nameof(LocationModel.Remarks)" HeaderText="Remarks" Width="400" />
 							<GridColumn Field="@nameof(LocationModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
