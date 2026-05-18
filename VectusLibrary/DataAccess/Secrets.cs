@@ -19,6 +19,7 @@ public static partial class Secrets
 	public static string SyncfusionLicense = GetSecret(nameof(SyncfusionLicense));
 
 	public static string OpenRouteServiceApiKey = GetSecret(nameof(OpenRouteServiceApiKey));
+	public static string GoogleMapsApiKey = GetSecret(nameof(GoogleMapsApiKey));
 
 	public static string Email => "softaadi@gmail.com";
 	public static string EmailPassword = GetSecret(nameof(EmailPassword));

@@ -100,14 +100,24 @@ public partial class RoutePage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Fetching", "Getting route details from the map...", ToastType.Info);
 
-			var estimate = await OpenRouteApiService.GetRouteEstimate(
-				_selectedFromLocation.Latitude, _selectedFromLocation.Longitude,
-				_selectedToLocation.Latitude, _selectedToLocation.Longitude);
+			RouteModel estimate;
+			try
+			{
+				estimate = await GoogleMapsApiService.GetRouteEstimate(
+					_selectedFromLocation.Latitude, _selectedFromLocation.Longitude,
+					_selectedToLocation.Latitude, _selectedToLocation.Longitude);
+			}
+			catch
+			{
+				estimate = await OpenRouteApiService.GetRouteEstimate(
+					_selectedFromLocation.Latitude, _selectedFromLocation.Longitude,
+					_selectedToLocation.Latitude, _selectedToLocation.Longitude);
+			}
 
-			_route.EstimatedDistance = estimate.DistanceKm;
-			_route.EstimatedHours = estimate.Hours;
-			_route.EstimatedFuelConsumption = estimate.FuelLitres;
-			_route.EstimatedCost = estimate.Cost;
+			_route.EstimatedDistance = estimate.EstimatedDistance;
+			_route.EstimatedHours = estimate.EstimatedHours;
+			_route.EstimatedFuelConsumption = estimate.EstimatedFuelConsumption;
+			_route.EstimatedCost = estimate.EstimatedCost;
 
 			await _toastNotification.ShowAsync("Fetched", "Route details have been fetched successfully.", ToastType.Success);
 		}

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 
 using VectusLibrary.DataAccess;
@@ -7,7 +8,7 @@ using VectusLibrary.Operations.Models;
 
 namespace VectusLibrary.APIService;
 
-public static class OpenRouteApiService
+public static class GoogleMapsApiService
 {
 	private static readonly HttpClient _httpClient = new();
 
@@ -18,24 +19,30 @@ public static class OpenRouteApiService
 		var truckKmPerLitre = double.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.TruckMileageKmPerLitre)).Value);
 		var dieselPricePerLitre = decimal.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.DieselPricePerLitre)).Value);
 
-		var url = "https://api.openrouteservice.org/v2/directions/driving-hgv" +
-			$"?api_key={Secrets.OpenRouteServiceApiKey}" +
-			$"&start={fromLongitude},{fromLatitude}" +
-			$"&end={toLongitude},{toLatitude}";
+		var requestBody = new
+		{
+			origin = new { location = new { latLng = new { latitude = fromLatitude, longitude = fromLongitude } } },
+			destination = new { location = new { latLng = new { latitude = toLatitude, longitude = toLongitude } } },
+			travelMode = "DRIVE",
+			routingPreference = "TRAFFIC_AWARE"
+		};
 
-		using var response = await _httpClient.GetAsync(url);
+		using var request = new HttpRequestMessage(HttpMethod.Post, "https://routes.googleapis.com/directions/v2:computeRoutes");
+		request.Headers.Add("X-Goog-Api-Key", Secrets.GoogleMapsApiKey);
+		request.Headers.Add("X-Goog-FieldMask", "routes.distanceMeters,routes.duration");
+		request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+
+		using var response = await _httpClient.SendAsync(request);
 		response.EnsureSuccessStatusCode();
 
 		await using var stream = await response.Content.ReadAsStreamAsync();
 		using var json = await JsonDocument.ParseAsync(stream);
 
-		var summary = json.RootElement
-			.GetProperty("features")[0]
-			.GetProperty("properties")
-			.GetProperty("summary");
+		var route = json.RootElement.GetProperty("routes")[0];
 
-		var distanceKm = summary.GetProperty("distance").GetDouble() / 1000.0;
-		var hours = summary.GetProperty("duration").GetDouble() / 3600.0;
+		var distanceKm = route.GetProperty("distanceMeters").GetInt32() / 1000.0;
+		var hours = double.Parse(route.GetProperty("duration").GetString().TrimEnd('s')) / 3600.0;
+
 		var fuelLitres = distanceKm / truckKmPerLitre;
 		var cost = (decimal)fuelLitres * dieselPricePerLitre;
 
@@ -48,4 +55,3 @@ public static class OpenRouteApiService
 		};
 	}
 }
-
