@@ -90,13 +90,7 @@ public static class DriverData
 			throw new Exception($"Driver code '{item.Code}' already exists. Please choose a different code.");
 	}
 
-	public static async Task<int> SaveTransaction(
-		DriverModel driver,
-		int userId,
-		string platform,
-		Stream pendingLicenseStream = null,
-		string pendingLicenseFileName = null,
-		string licenseUrlToDelete = null)
+	public static async Task<int> SaveTransaction(DriverModel driver, int userId, string platform)
 	{
 		await ValidateTransaction(driver);
 
@@ -105,13 +99,7 @@ public static class DriverData
 			? await CommonData.LoadTableDataById<DriverModel>(FleetNames.Driver, driver.Id)
 			: null;
 
-		if (pendingLicenseStream is not null && !string.IsNullOrWhiteSpace(pendingLicenseFileName))
-		{
-			var fileName = $"{Guid.NewGuid()}_{pendingLicenseFileName}";
-			driver.LicenseUrl = await BlobStorageAccess.UploadFileToBlobStorage(pendingLicenseStream, fileName, BlobStorageContainers.driverlicense);
-		}
-
-		driver.Id = await SqlDataAccessTransaction.Run(async transaction =>
+		return await SqlDataAccessTransaction.Run(async transaction =>
 		{
 			var id = await InsertDriver(driver, transaction);
 			var diff = AuditTrailData.GetDifference(previous, driver);
@@ -126,13 +114,5 @@ public static class DriverData
 			}, transaction);
 			return id;
 		});
-
-		if (!string.IsNullOrWhiteSpace(licenseUrlToDelete))
-		{
-			var oldFileName = licenseUrlToDelete.Split('/').Last();
-			await BlobStorageAccess.DeleteFileFromBlobStorage(oldFileName, BlobStorageContainers.driverlicense);
-		}
-
-		return driver.Id;
 	}
 }

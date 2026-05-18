@@ -24,9 +24,6 @@ public partial class DriverPage
 	private bool _isUploadDialogVisible = false;
 
 	private DriverModel _driver = new();
-	private Stream _pendingLicenseStream;
-	private string _pendingLicenseFileName;
-	private string _licenseUrlToDelete = string.Empty;
 
 	private List<DriverModel> _drivers = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
@@ -37,6 +34,7 @@ public partial class DriverPage
 	];
 
 	private SfGrid<DriverModel> _sfGrid;
+	private SfUploader _sfLicenseUploader;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
 	private CustomTextField _sfFirstFocus;
@@ -97,13 +95,7 @@ public partial class DriverPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			await DriverData.SaveTransaction(
-				_driver,
-				_user.Id,
-				FormFactor.GetFormFactor() + FormFactor.GetPlatform(),
-				_pendingLicenseStream,
-				_pendingLicenseFileName,
-				_licenseUrlToDelete);
+			await DriverData.SaveTransaction(_driver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
 			ResetPage();
@@ -255,27 +247,51 @@ public partial class DriverPage
 
 	private async Task OnUploaderFileChange(UploadChangeEventArgs args)
 	{
-		if (args.Files is null || args.Files.Count == 0 || args.Files[0].File is null)
-			return;
+		try
+		{
+			if (args.Files is null || args.Files.Count != 1)
+				return;
 
-		var file = args.Files[0].File;
-		var ms = new MemoryStream();
-		await file.OpenReadStream(maxAllowedSize: 52428800).CopyToAsync(ms);
-		ms.Position = 0;
+			if (!string.IsNullOrEmpty(_driver.LicenseUrl))
+				await RemoveExistingLicense();
 
-		_pendingLicenseStream?.Dispose();
-		_pendingLicenseStream = ms;
-		_pendingLicenseFileName = file.Name;
+			await using var file = args.Files[0].File.OpenReadStream(maxAllowedSize: 52428800);
+			var fileName = $"{Guid.NewGuid()}_{args.Files[0].File.Name}";
+			_driver.LicenseUrl = await BlobStorageAccess.UploadFileToBlobStorage(file, fileName, BlobStorageContainers.driverlicense);
 
-		await _toastNotification.ShowAsync("License Selected", $"'{_pendingLicenseFileName}' will be uploaded when you save the transaction.", ToastType.Info);
+			await _toastNotification.ShowAsync("Uploaded", "The license has been uploaded successfully.", ToastType.Success);
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Uploading", ex.Message, ToastType.Error);
+		}
 	}
 
-	private Task OnRemoveFile(RemovingEventArgs args)
+	private async Task OnRemoveFile(RemovingEventArgs args) =>
+		await RemoveExistingLicense();
+
+	private async Task RemoveExistingLicense()
 	{
-		_pendingLicenseStream?.Dispose();
-		_pendingLicenseStream = null;
-		_pendingLicenseFileName = null;
-		return Task.CompletedTask;
+		try
+		{
+			if (string.IsNullOrEmpty(_driver.LicenseUrl))
+				return;
+
+			var fileName = _driver.LicenseUrl.Split('/').Last();
+			await BlobStorageAccess.DeleteFileFromBlobStorage(fileName, BlobStorageContainers.driverlicense);
+			_driver.LicenseUrl = null;
+
+			if (_sfLicenseUploader is not null)
+				await _sfLicenseUploader.ClearAllAsync();
+
+			await _toastNotification.ShowAsync("Removed", "The license has been removed successfully.", ToastType.Success);
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Removing", ex.Message, ToastType.Error);
+		}
 	}
 
 	private async Task DownloadExistingLicense()
@@ -285,13 +301,9 @@ public partial class DriverPage
 			if (string.IsNullOrWhiteSpace(_driver.LicenseUrl))
 				return;
 
-			await _toastNotification.ShowAsync("Processing", "Downloading the license...", ToastType.Info);
-
 			var (stream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(_driver.LicenseUrl);
 			var fileName = _driver.LicenseUrl.Split('/').Last();
 			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Downloaded", "The license has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
@@ -328,24 +340,6 @@ public partial class DriverPage
 		}
 	}
 
-	private async Task MarkLicenseForRemoval()
-	{
-		if (string.IsNullOrWhiteSpace(_driver.LicenseUrl))
-		{
-			_pendingLicenseStream?.Dispose();
-			_pendingLicenseStream = null;
-			_pendingLicenseFileName = null;
-			return;
-		}
-
-		_licenseUrlToDelete = _driver.LicenseUrl;
-		_driver.LicenseUrl = null;
-		_pendingLicenseStream?.Dispose();
-		_pendingLicenseStream = null;
-		_pendingLicenseFileName = null;
-
-		await _toastNotification.ShowAsync("License Removed", "License will be removed when you save the transaction.", ToastType.Info);
-	}
 	#endregion
 
 	#region Utilities
@@ -384,10 +378,6 @@ public partial class DriverPage
 		if (_driver is null)
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
 
-		_pendingLicenseStream?.Dispose();
-		_pendingLicenseStream = null;
-		_pendingLicenseFileName = null;
-		_licenseUrlToDelete = string.Empty;
 		_isUploadDialogVisible = false;
 
 		StateHasChanged();

@@ -202,13 +202,11 @@ else
 	</div>
 }
 
-<DocumentUploadDialog Title="Upload Original Document"
-					  InfoMessage="Document will be uploaded only when you save the transaction."
-					  ExistingDocumentUrl="@_vehicleDocument.DocumentUrl"
-					  PendingDocumentFileName="@_pendingDocumentFileName"
-					  ShowInterpretButton="false" @bind-IsVisible="_isUploadDialogVisible"
+<DocumentUploadDialog ExistingDocumentUrl="@_vehicleDocument.DocumentUrl"
+					  @bind-IsVisible="_isUploadDialogVisible"
+					  UploaderReference="_sfDocumentUploader"
 					  OnFileChange="OnUploaderFileChange" OnFileRemove="OnRemoveFile"
-					  OnDownloadClick="DownloadExistingDocument" OnRemoveClick="MarkDocumentForRemoval"
+					  OnDownloadClick="DownloadExistingDocument" OnRemoveClick="RemoveExistingDocument"
 					  OnClose="CloseUploadDialog" />
 
 <DeleteConfirmationDialog @ref="_deleteConfirmationDialog" IdentifierValue="@_deleteTransactionNo"

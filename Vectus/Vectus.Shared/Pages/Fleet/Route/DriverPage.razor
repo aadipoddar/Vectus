@@ -145,12 +145,11 @@ else
 }
 
 <DocumentUploadDialog Title="Upload Driver License"
-					  InfoMessage="License will be uploaded only when you save the transaction."
 					  ExistingDocumentUrl="@_driver.LicenseUrl"
-					  PendingDocumentFileName="@_pendingLicenseFileName"
-					  ShowInterpretButton="false" @bind-IsVisible="_isUploadDialogVisible"
+					  @bind-IsVisible="_isUploadDialogVisible"
+					  UploaderReference="_sfLicenseUploader"
 					  OnFileChange="OnUploaderFileChange" OnFileRemove="OnRemoveFile"
-					  OnDownloadClick="DownloadExistingLicense" OnRemoveClick="MarkLicenseForRemoval"
+					  OnDownloadClick="DownloadExistingLicense" OnRemoveClick="RemoveExistingLicense"
 					  OnClose="CloseUploadDialog" />
 
 <DeleteConfirmationDialog @ref="_deleteConfirmationDialog" IdentifierValue="@_deleteTransactionName"

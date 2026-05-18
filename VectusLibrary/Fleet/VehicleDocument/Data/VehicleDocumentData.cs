@@ -74,23 +74,13 @@ public static class VehicleDocumentData
 			throw new Exception($"Vehicle Document transaction number '{item.TransactionNo}' already exists. Please choose a different transaction number.");
 	}
 
-	public static async Task<int> SaveTransaction(
-		VehicleDocumentModel vehicleDocument,
-		Stream pendingDocumentStream = null,
-		string pendingDocumentFileName = null,
-		string documentUrlToDelete = null)
+	public static async Task<int> SaveTransaction(VehicleDocumentModel vehicleDocument)
 	{
 		await ValidateTransaction(vehicleDocument);
 		var isUpdate = vehicleDocument.Id > 0;
 		var previous = isUpdate
 			? await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, vehicleDocument.Id)
 			: null;
-
-		if (pendingDocumentStream is not null && !string.IsNullOrWhiteSpace(pendingDocumentFileName))
-		{
-			var fileName = $"{Guid.NewGuid()}_{pendingDocumentFileName}";
-			vehicleDocument.DocumentUrl = await BlobStorageAccess.UploadFileToBlobStorage(pendingDocumentStream, fileName, BlobStorageContainers.vehicledocument);
-		}
 
 		vehicleDocument.Id = await SqlDataAccessTransaction.Run(async transaction =>
 		{
@@ -108,12 +98,6 @@ public static class VehicleDocumentData
 			}, transaction);
 			return id;
 		});
-
-		if (!string.IsNullOrWhiteSpace(documentUrlToDelete))
-		{
-			var oldFileName = documentUrlToDelete.Split('/').Last();
-			await BlobStorageAccess.DeleteFileFromBlobStorage(oldFileName, BlobStorageContainers.vehicledocument);
-		}
 
 		return vehicleDocument.Id;
 	}
