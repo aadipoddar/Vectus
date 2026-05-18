@@ -126,8 +126,8 @@
     <Build Include="Operations\Settings\Update_Settings.sql" />
     <Build Include="Operations\User\Insert_User.sql" />
     <Build Include="Operations\User\User.sql" />
-    <Build Include="Fleet\Vehicle\Table\HDR.sql" />
-    <Build Include="Fleet\Vehicle\Insert\Insert_HDR.sql" />
+    <Build Include="Fleet\Vehicle\Table\SDR.sql" />
+    <Build Include="Fleet\Vehicle\Insert\Insert_SDR.sql" />
     <Build Include="Fleet\Vehicle\Table\VehicleType.sql" />
     <Build Include="Fleet\Vehicle\Insert\Insert_VehicleType.sql" />
     <Build Include="Fleet\Vehicle\Table\Vehicle.sql" />

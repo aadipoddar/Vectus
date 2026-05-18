@@ -114,13 +114,13 @@ else
 						</div>
 
 						<div class="form-field">
-							<CustomAutoComplete T="HDRModel"
-												@bind-Value="_selectedHDR"
-												DataSource="@_hdrs"
-												Placeholder="Select HDR"
-												FieldValue="@nameof(HDRModel.Name)"
-												Label="HDR" Required="false"
-												AddNewRoute="@PageRouteNames.HDRMaster" />
+							<CustomAutoComplete T="SDRModel"
+												@bind-Value="_selectedSDR"
+												DataSource="@_sdrs"
+												Placeholder="Select SDR"
+												FieldValue="@nameof(SDRModel.Name)"
+												Label="SDR" Required="false"
+												AddNewRoute="@PageRouteNames.SDRMaster" />
 						</div>
 
 						<div class="form-field">
@@ -189,12 +189,12 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(VehicleModel.HDRId)" HeaderText="HDR" Width="220">
+							<GridColumn Field="@nameof(VehicleModel.SDRId)" HeaderText="SDR" Width="220">
 								<Template>
 									@{
 										var item = (context as VehicleModel);
-										var hdr = _hdrs.FirstOrDefault(o => o.Id == item.HDRId);
-										<span>@(hdr is not null ? hdr.Name : "N/A")</span>
+										var sdr = _sdrs.FirstOrDefault(o => o.Id == item.SDRId);
+										<span>@(sdr is not null ? sdr.Name : "N/A")</span>
 									}
 								</Template>
 							</GridColumn>

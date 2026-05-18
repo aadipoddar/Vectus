@@ -4,47 +4,47 @@ using VectusLibrary.Utils.ExportUtils;
 
 namespace VectusLibrary.Fleet.Vehicle.Exports;
 
-public static class HDRExport
+public static class SDRExport
 {
 	public static async Task<(MemoryStream stream, string fileName)> ExportMaster(
-		IEnumerable<HDRModel> hdrData,
+		IEnumerable<SDRModel> sdrData,
 		ReportExportType exportType)
 	{
-		var enrichedData = hdrData.Select(hdr => new
+		var enrichedData = sdrData.Select(sdr => new
 		{
-			hdr.Id,
-			hdr.Name,
-			hdr.Code,
-			hdr.Remarks,
-			Status = hdr.Status ? "Active" : "Deleted"
+			sdr.Id,
+			sdr.Name,
+			sdr.Code,
+			sdr.Remarks,
+			Status = sdr.Status ? "Active" : "Deleted"
 		});
 
 		var columnSettings = new Dictionary<string, ReportColumnSetting>
 		{
-			[nameof(HDRModel.Id)] = new() { DisplayName = "ID", Alignment = CellAlignment.Center, IncludeInTotal = false },
-			[nameof(HDRModel.Name)] = new() { DisplayName = "Name", Alignment = CellAlignment.Left, IsRequired = true },
-			[nameof(HDRModel.Code)] = new() { DisplayName = "Code", Alignment = CellAlignment.Left, IsRequired = true },
-			[nameof(HDRModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
-			[nameof(HDRModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
+			[nameof(SDRModel.Id)] = new() { DisplayName = "ID", Alignment = CellAlignment.Center, IncludeInTotal = false },
+			[nameof(SDRModel.Name)] = new() { DisplayName = "Name", Alignment = CellAlignment.Left, IsRequired = true },
+			[nameof(SDRModel.Code)] = new() { DisplayName = "Code", Alignment = CellAlignment.Left, IsRequired = true },
+			[nameof(SDRModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
+			[nameof(SDRModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
 
 		List<string> columnOrder =
 		[
-			nameof(HDRModel.Id),
-			nameof(HDRModel.Name),
-			nameof(HDRModel.Code),
-			nameof(HDRModel.Remarks),
-			nameof(HDRModel.Status)
+			nameof(SDRModel.Id),
+			nameof(SDRModel.Name),
+			nameof(SDRModel.Code),
+			nameof(SDRModel.Remarks),
+			nameof(SDRModel.Status)
 		];
 
 		var currentDateTime = await CommonData.LoadCurrentDateTime();
-		var fileName = $"HDR_Master_{currentDateTime:yyyyMMdd_HHmmss}";
+		var fileName = $"SDR_Master_{currentDateTime:yyyyMMdd_HHmmss}";
 
 		if (exportType == ReportExportType.PDF)
 		{
 			var stream = await PDFReportExportUtil.ExportToPdf(
 				enrichedData,
-				"HDR MASTER",
+				"SDR MASTER",
 				null,
 				null,
 				columnSettings,
@@ -59,8 +59,8 @@ public static class HDRExport
 		{
 			var stream = await ExcelReportExportUtil.ExportToExcel(
 				enrichedData,
-				"HDR",
-				"HDR Data",
+				"SDR",
+				"SDR Data",
 				null,
 				null,
 				columnSettings,

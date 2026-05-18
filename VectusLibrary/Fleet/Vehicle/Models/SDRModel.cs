@@ -1,6 +1,6 @@
 ﻿namespace VectusLibrary.Fleet.Vehicle.Models;
 
-public class HDRModel
+public class SDRModel
 {
 	public int Id { get; set; }
 	public string Name { get; set; }

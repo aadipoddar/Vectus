@@ -11,7 +11,7 @@ public class VehicleModel
 	public decimal OpeningKM { get; set; }
 	public int VehicleTypeId { get; set; }
 	public int CompanyId { get; set; }
-	public int? HDRId { get; set; }
+	public int? SDRId { get; set; }
 	public string? Remarks { get; set; }
 	public bool Status { get; set; }
 }

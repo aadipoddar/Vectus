@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Insert_HDR]
+﻿CREATE PROCEDURE [dbo].[Insert_SDR]
 	@Id INT OUTPUT,
 	@Name VARCHAR(250),
 	@Code VARCHAR(10),
@@ -8,7 +8,7 @@ AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[HDR]
+		INSERT INTO [dbo].[SDR]
 		(
 			[Name],
 			[Code],
@@ -28,7 +28,7 @@ BEGIN
 
 	ELSE
 	BEGIN
-		UPDATE [dbo].[HDR]
+		UPDATE [dbo].[SDR]
 		SET
 			[Name] = @Name,
 			[Code] = @Code,

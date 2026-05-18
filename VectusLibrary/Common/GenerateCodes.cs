@@ -48,9 +48,9 @@ public static class GenerateCodes
 					var vehicleType = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, code, sqlDataAccessTransaction);
 					isDuplicate = vehicleType is not null;
 					break;
-				case CodeType.HDR:
-					var hdr = await CommonData.LoadTableDataByCode<HDRModel>(FleetNames.HDR, code, sqlDataAccessTransaction);
-					isDuplicate = hdr is not null;
+				case CodeType.SDR:
+					var sdr = await CommonData.LoadTableDataByCode<SDRModel>(FleetNames.SDR, code, sqlDataAccessTransaction);
+					isDuplicate = sdr is not null;
 					break;
 			}
 
@@ -239,27 +239,27 @@ public static class GenerateCodes
 		return await CheckDuplicateCode($"{vehicleTypePrefix}00001", 5, CodeType.VehicleType, sqlDataAccessTransaction);
 	}
 
-	public static async Task<string> GenerateHDRCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	public static async Task<string> GenerateSDRCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
 	{
-		var hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR, sqlDataAccessTransaction);
-		var hdrPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.HDRCodePrefix, sqlDataAccessTransaction)).Value;
+		var sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR, sqlDataAccessTransaction);
+		var sdrPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.SDRCodePrefix, sqlDataAccessTransaction)).Value;
 
-		var lastHDR = hdrs.OrderByDescending(h => h.Id).FirstOrDefault();
-		if (lastHDR is not null)
+		var lastSDR = sdrs.OrderByDescending(h => h.Id).FirstOrDefault();
+		if (lastSDR is not null)
 		{
-			var lastHDRCode = lastHDR.Code;
-			if (lastHDRCode.StartsWith(hdrPrefix))
+			var lastSDRCode = lastSDR.Code;
+			if (lastSDRCode.StartsWith(sdrPrefix))
 			{
-				var lastNumberPart = lastHDRCode[hdrPrefix.Length..];
+				var lastNumberPart = lastSDRCode[sdrPrefix.Length..];
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{hdrPrefix}{nextNumber:D5}", 5, CodeType.HDR, sqlDataAccessTransaction);
+					return await CheckDuplicateCode($"{sdrPrefix}{nextNumber:D5}", 5, CodeType.SDR, sqlDataAccessTransaction);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{hdrPrefix}00001", 5, CodeType.HDR, sqlDataAccessTransaction);
+		return await CheckDuplicateCode($"{sdrPrefix}00001", 5, CodeType.SDR, sqlDataAccessTransaction);
 	}
 	#endregion
 }

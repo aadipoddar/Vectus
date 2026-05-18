@@ -14,7 +14,7 @@ public static class VehicleExport
 	{
 		var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
 		var companies = await CommonData.LoadTableData<CompanyModel>(AccountNames.Company);
-		var hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR);
+		var sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
 
 		var enrichedData = vehicleData.Select(vehicle => new
 		{
@@ -27,7 +27,7 @@ public static class VehicleExport
 			vehicle.OpeningKM,
 			VehicleType = vehicleTypes.FirstOrDefault(vt => vt.Id == vehicle.VehicleTypeId)?.Name ?? "N/A",
 			Company = companies.FirstOrDefault(c => c.Id == vehicle.CompanyId)?.Name ?? "N/A",
-			HDR = hdrs.FirstOrDefault(o => o.Id == vehicle.HDRId)?.Name ?? "N/A",
+			SDR = sdrs.FirstOrDefault(o => o.Id == vehicle.SDRId)?.Name ?? "N/A",
 			vehicle.Remarks,
 			Status = vehicle.Status ? "Active" : "Deleted"
 		});
@@ -43,7 +43,7 @@ public static class VehicleExport
 			[nameof(VehicleModel.OpeningKM)] = new() { DisplayName = "Opening KM", Alignment = CellAlignment.Right, Format = "#,##0.00" },
 			["VehicleType"] = new() { DisplayName = "Vehicle Type", Alignment = CellAlignment.Left },
 			["Company"] = new() { DisplayName = "Company", Alignment = CellAlignment.Left },
-			["HDR"] = new() { DisplayName = "HDR", Alignment = CellAlignment.Left },
+			["SDR"] = new() { DisplayName = "SDR", Alignment = CellAlignment.Left },
 			[nameof(VehicleModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
 			[nameof(VehicleModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
@@ -59,7 +59,7 @@ public static class VehicleExport
 			nameof(VehicleModel.OpeningKM),
 			"VehicleType",
 			"Company",
-			"HDR",
+			"SDR",
 			nameof(VehicleModel.Remarks),
 			nameof(VehicleModel.Status)
 		];

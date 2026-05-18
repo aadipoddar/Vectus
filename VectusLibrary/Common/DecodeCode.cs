@@ -81,12 +81,12 @@ public static class DecodeCode
 				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.PDF);
 				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.Excel);
 				break;
-			case CodeType.HDR:
-				var hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR);
-				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<HDRModel>(FleetNames.HDR, transactionNo);
-				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.HDRMaster}/{(decodeTransactionNoModel.TransactionModel as HDRModel).Id}";
-				if (pdf) decodeTransactionNoModel.PDFStream = await HDRExport.ExportMaster(hdrs, ReportExportType.PDF);
-				if (excel) decodeTransactionNoModel.ExcelStream = await HDRExport.ExportMaster(hdrs, ReportExportType.Excel);
+			case CodeType.SDR:
+				var sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<SDRModel>(FleetNames.SDR, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.SDRMaster}/{(decodeTransactionNoModel.TransactionModel as SDRModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await SDRExport.ExportMaster(sdrs, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await SDRExport.ExportMaster(sdrs, ReportExportType.Excel);
 				break;
 
 			default:

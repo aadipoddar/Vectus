@@ -14,23 +14,23 @@ using VectusLibrary.Utils.ExportUtils;
 
 namespace Vectus.Shared.Pages.Fleet.Vehicle;
 
-public partial class HDRPage
+public partial class SDRPage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showDeleted = false;
 
-	private HDRModel _hdr = new();
+	private SDRModel _sdr = new();
 
-	private List<HDRModel> _hdrs = [];
+	private List<SDRModel> _sdrs = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
 		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private SfGrid<HDRModel> _sfGrid;
+	private SfGrid<SDRModel> _sfGrid;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
 	private CustomTextField _sfFirstFocus;
@@ -59,10 +59,10 @@ public partial class HDRPage
 
 	private async Task LoadData()
 	{
-		_hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR);
+		_sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
 
 		if (!_showDeleted)
-			_hdrs = [.. _hdrs.Where(hdr => hdr.Status)];
+			_sdrs = [.. _sdrs.Where(sdr => sdr.Status)];
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -91,7 +91,7 @@ public partial class HDRPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			await HDRData.SaveTransaction(_hdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await SDRData.SaveTransaction(_sdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
 			ResetPage();
@@ -118,10 +118,10 @@ public partial class HDRPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var hdr = await CommonData.LoadTableDataById<HDRModel>(FleetNames.HDR, _deleteTransactionId)
+			var sdr = await CommonData.LoadTableDataById<SDRModel>(FleetNames.SDR, _deleteTransactionId)
 				?? throw new Exception("Transaction not found.");
 
-			await HDRData.DeleteTransaction(hdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await SDRData.DeleteTransaction(sdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Deleted", "Transaction has been deleted successfully.", ToastType.Success);
 			ResetPage();
@@ -148,10 +148,10 @@ public partial class HDRPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var hdr = await CommonData.LoadTableDataById<HDRModel>(FleetNames.HDR, _recoverTransactionId)
+			var sdr = await CommonData.LoadTableDataById<SDRModel>(FleetNames.SDR, _recoverTransactionId)
 				?? throw new Exception("Transaction not found.");
 
-			await HDRData.RecoverTransaction(hdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await SDRData.RecoverTransaction(sdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Recovered", "Transaction has been recovered successfully.", ToastType.Success);
 			ResetPage();
@@ -181,7 +181,7 @@ public partial class HDRPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await HDRExport.ExportMaster(_hdrs, ReportExportType.Excel);
+			var (stream, fileName) = await SDRExport.ExportMaster(_sdrs, ReportExportType.Excel);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -208,7 +208,7 @@ public partial class HDRPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await HDRExport.ExportMaster(_hdrs, ReportExportType.PDF);
+			var (stream, fileName) = await SDRExport.ExportMaster(_sdrs, ReportExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -240,7 +240,7 @@ public partial class HDRPage
 		}
 	}
 
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<HDRModel> args)
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<SDRModel> args)
 	{
 		switch (args.Item.Id)
 		{
@@ -255,8 +255,8 @@ public partial class HDRPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		_hdr = await CommonData.LoadTableDataById<HDRModel>(FleetNames.HDR, selectedRecords[0].Id);
-		if (_hdr is null)
+		_sdr = await CommonData.LoadTableDataById<SDRModel>(FleetNames.SDR, selectedRecords[0].Id);
+		if (_sdr is null)
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
 
 		StateHasChanged();
@@ -311,7 +311,7 @@ public partial class HDRPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.HDRMaster, true);
+		NavigationManager.NavigateTo(PageRouteNames.SDRMaster, true);
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);

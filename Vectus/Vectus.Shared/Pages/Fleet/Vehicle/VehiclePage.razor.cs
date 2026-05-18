@@ -25,12 +25,12 @@ public partial class VehiclePage
 	private VehicleModel _vehicle = new() { PurchaseDate = DateTime.Today };
 	private VehicleTypeModel _selectedVehicleType;
 	private CompanyModel _selectedCompany;
-	private HDRModel? _selectedHDR;
+	private SDRModel? _selectedSDR;
 
 	private List<VehicleModel> _vehicles = [];
 	private List<VehicleTypeModel> _vehicleTypes = [];
 	private List<CompanyModel> _companies = [];
-	private List<HDRModel> _hdrs = [];
+	private List<SDRModel> _sdrs = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
@@ -69,15 +69,15 @@ public partial class VehiclePage
 		_vehicles = await CommonData.LoadTableData<VehicleModel>(FleetNames.Vehicle);
 		_vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
 		_companies = await CommonData.LoadTableData<CompanyModel>(AccountNames.Company);
-		_hdrs = await CommonData.LoadTableData<HDRModel>(FleetNames.HDR);
+		_sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
 
 		_vehicleTypes = [.. _vehicleTypes.OrderBy(vt => vt.Name)];
 		_companies = [.. _companies.OrderBy(c => c.Name)];
-		_hdrs = [.. _hdrs.OrderBy(o => o.Name)];
+		_sdrs = [.. _sdrs.OrderBy(o => o.Name)];
 
 		_selectedVehicleType = _vehicleTypes.FirstOrDefault(vt => vt.Id == _vehicle.VehicleTypeId);
 		_selectedCompany = _companies.FirstOrDefault(c => c.Id == _vehicle.CompanyId);
-		_selectedHDR = null;
+		_selectedSDR = null;
 
 		if (!_showDeleted)
 			_vehicles = [.. _vehicles.Where(v => v.Status)];
@@ -111,7 +111,7 @@ public partial class VehiclePage
 
 			_vehicle.VehicleTypeId = _selectedVehicleType?.Id ?? 0;
 			_vehicle.CompanyId = _selectedCompany?.Id ?? 0;
-			_vehicle.HDRId = _selectedHDR?.Id;
+			_vehicle.SDRId = _selectedSDR?.Id;
 
 			await VehicleData.SaveTransaction(_vehicle, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
@@ -284,10 +284,10 @@ public partial class VehiclePage
 		_selectedVehicleType = _vehicleTypes.FirstOrDefault(vt => vt.Id == _vehicle.VehicleTypeId);
 		_selectedCompany = _companies.FirstOrDefault(c => c.Id == _vehicle.CompanyId);
 
-		if (_vehicle.HDRId.HasValue)
-			_selectedHDR = _hdrs.FirstOrDefault(o => o.Id == _vehicle.HDRId);
+		if (_vehicle.SDRId.HasValue)
+			_selectedSDR = _sdrs.FirstOrDefault(o => o.Id == _vehicle.SDRId);
 		else
-			_selectedHDR = null;
+			_selectedSDR = null;
 
 		StateHasChanged();
 

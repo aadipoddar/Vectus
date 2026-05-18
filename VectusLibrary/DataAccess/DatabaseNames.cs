@@ -94,11 +94,11 @@ public static class FleetNames
 	#endregion
 
 	#region Vehicle
-	public static string HDR => "HDR";
+	public static string SDR => "SDR";
 	public static string Vehicle => "Vehicle";
 	public static string VehicleType => "VehicleType";
 
-	public static string InsertHDR => "Insert_HDR";
+	public static string InsertSDR => "Insert_SDR";
 	public static string InsertVehicle => "Insert_Vehicle";
 	public static string InsertVehicleType => "Insert_VehicleType";
 	#endregion

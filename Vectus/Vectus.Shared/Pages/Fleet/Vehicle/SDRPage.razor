@@ -1,8 +1,8 @@
 ﻿@using VectusLibrary.Fleet.Vehicle.Models
 
-@attribute [Route(PageRouteNames.HDRMaster)]
+@attribute [Route(PageRouteNames.SDRMaster)]
 
-<PageTitle>HDR Management - Vectus</PageTitle>
+<PageTitle>SDR Management - Vectus</PageTitle>
 
 <MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" />
 <MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
@@ -21,7 +21,7 @@
 else
 {
 	<div class="page-shell">
-		<Header Title="HDR Management">
+		<Header Title="SDR Management">
 			<LeftContent>
 				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
 					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
@@ -60,20 +60,20 @@ else
 							 stroke-linejoin="round">
 							<path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5" />
 						</svg>
-						<h2 class="section-title">HDR Details</h2>
+						<h2 class="section-title">SDR Details</h2>
 					</div>
 				</div>
 				<div class="section-body">
 					<div class="form-grid">
 						<div class="form-field">
 							<CustomTextField @ref="_sfFirstFocus"
-											 @bind-Value="_hdr.Name"
+											 @bind-Value="_sdr.Name"
 											 Label="Name"
-											 Placeholder="Enter HDR name (Ctrl + F)" />
+											 Placeholder="Enter SDR name (Ctrl + F)" />
 						</div>
 
 						<div class="form-field">
-							<CustomTextField @bind-Value="_hdr.Code"
+							<CustomTextField @bind-Value="_sdr.Code"
 											 Label="Code"
 											 Placeholder="Auto-generated"
 											 ReadOnly="true"
@@ -81,7 +81,7 @@ else
 						</div>
 
 						<div class="form-field">
-							<CustomTextField @bind-Value="_hdr.Remarks"
+							<CustomTextField @bind-Value="_sdr.Remarks"
 											 Label="Remarks"
 											 Placeholder="Enter remarks (optional)"
 											 Required="false"
@@ -100,25 +100,25 @@ else
 							<path d="M9 11l3 3L22 4" />
 							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
 						</svg>
-						<h2 class="section-title">HDR List</h2>
+						<h2 class="section-title">SDR List</h2>
 					</div>
 				</div>
 				<div class="section-body grid-body">
-					<SfGrid @ref="_sfGrid" DataSource="@_hdrs" AllowPaging="true" AllowSorting="true"
+					<SfGrid @ref="_sfGrid" DataSource="@_sdrs" AllowPaging="true" AllowSorting="true"
 							AllowFiltering="true" AllowResizing="true" CssClass="professional-grid"
 							Toolbar="@(new List<string>() { "Search" })" ContextMenuItems="@_gridContextMenuItems">
 						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
-						<GridEvents TValue="HDRModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridEvents TValue="SDRModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(HDRModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(HDRModel.Name)" HeaderText="HDR Name" Width="300" />
-							<GridColumn Field="@nameof(HDRModel.Code)" HeaderText="Code" Width="150" />
-							<GridColumn Field="@nameof(HDRModel.Remarks)" HeaderText="Remarks" Width="400" />
-							<GridColumn Field="@nameof(HDRModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+							<GridColumn Field="@nameof(SDRModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(SDRModel.Name)" HeaderText="SDR Name" Width="300" />
+							<GridColumn Field="@nameof(SDRModel.Code)" HeaderText="Code" Width="150" />
+							<GridColumn Field="@nameof(SDRModel.Remarks)" HeaderText="Remarks" Width="400" />
+							<GridColumn Field="@nameof(SDRModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
 									@{
-										var item = (context as HDRModel);
+										var item = (context as SDRModel);
 										<span class="@(item.Status ? string.Empty : "grid-debit")">@(item.Status ? "Active" : "Deleted")</span>
 									}
 								</Template>

@@ -9,7 +9,7 @@ public enum CodeType
 	Route,
 	Driver,
 
-	HDR,
+	SDR,
 	VehicleType,
 	VehicleDocumentType
 }

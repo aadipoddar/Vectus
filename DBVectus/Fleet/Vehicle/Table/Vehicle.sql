@@ -9,10 +9,10 @@
     [OpeningKM] MONEY NOT NULL, 
     [VehicleTypeId] INT NOT NULL, 
     [CompanyId] INT NOT NULL,
-    [HDRId] INT NULL,
+    [SDRId] INT NULL,
     [Remarks] VARCHAR(MAX) NULL, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Vehicle_ToVehicleType] FOREIGN KEY ([VehicleTypeId]) REFERENCES [VehicleType]([Id]), 
     CONSTRAINT [FK_Vehicle_ToCompany] FOREIGN KEY ([CompanyId]) REFERENCES [Company]([Id]),
-    CONSTRAINT [FK_Vehicle_ToHDR] FOREIGN KEY ([HDRId]) REFERENCES [HDR]([Id])
+    CONSTRAINT [FK_Vehicle_ToSDR] FOREIGN KEY ([SDRId]) REFERENCES [SDR]([Id])
 )
