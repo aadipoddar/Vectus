@@ -63,10 +63,7 @@ public partial class FinancialAccountingPage
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts]);
 			await InitializePage();
 		}
-		catch
-		{
-			await ResetPage();
-		}
+		catch { await ResetPage(); }
 	}
 
 	private async Task InitializePage()

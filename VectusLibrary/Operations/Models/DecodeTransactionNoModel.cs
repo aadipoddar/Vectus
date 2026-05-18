@@ -5,6 +5,8 @@ public enum CodeType
 	FinancialAccounting,
 	Ledger,
 
+	Location,
+	Route,
 	Driver,
 
 	HDR,

@@ -78,6 +78,9 @@
     <Folder Include="Fleet\VehicleDocument" />
     <Folder Include="Fleet\VehicleDocument\Insert" />
     <Folder Include="Fleet\VehicleDocument\Table" />
+    <Folder Include="Fleet\Route" />
+    <Folder Include="Fleet\Route\Insert" />
+    <Folder Include="Fleet\Route\Table" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -133,6 +136,12 @@
     <Build Include="Fleet\VehicleDocument\Insert\Insert_VehicleDocumentType.sql" />
     <Build Include="Fleet\VehicleDocument\Table\VehicleDocument.sql" />
     <Build Include="Fleet\VehicleDocument\Table\VehicleDocumentType.sql" />
+    <Build Include="Fleet\Route\Insert\Insert_Driver.sql" />
+    <Build Include="Fleet\Route\Insert\Insert_Location.sql" />
+    <Build Include="Fleet\Route\Insert\Insert_Route.sql" />
+    <Build Include="Fleet\Route\Table\Driver.sql" />
+    <Build Include="Fleet\Route\Table\Location.sql" />
+    <Build Include="Fleet\Route\Table\Route.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

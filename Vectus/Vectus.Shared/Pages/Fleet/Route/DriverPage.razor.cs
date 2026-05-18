@@ -1,45 +1,44 @@
-using Syncfusion.Blazor.Grids;
+﻿using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Inputs;
 
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
-using VectusLibrary.Accounts.Masters.Data;
-using VectusLibrary.Accounts.Masters.Exports;
-using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Route.Data;
+using VectusLibrary.Fleet.Route.Exports;
+using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
-namespace Vectus.Shared.Pages.Accounts.Masters;
+namespace Vectus.Shared.Pages.Fleet.Route;
 
-public partial class FinancialYearPage
+public partial class DriverPage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showDeleted = false;
+	private bool _isUploadDialogVisible = false;
 
-	private FinancialYearModel _financialYear = new();
+	private DriverModel _driver = new();
+	private Stream _pendingLicenseStream;
+	private string _pendingLicenseFileName;
+	private string _licenseUrlToDelete = string.Empty;
 
-	private List<FinancialYearModel> _financialYears = [];
+	private List<DriverModel> _drivers = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
 		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private SfGrid<FinancialYearModel> _sfGrid;
+	private SfGrid<DriverModel> _sfGrid;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private CustomDatePicker _sfFirstFocus;
-
-	private DateTime StartDateTime => _financialYear.StartDate == default ? default : _financialYear.StartDate.ToDateTime(TimeOnly.MinValue);
-	private DateTime EndDateTime => _financialYear.EndDate == default ? default : _financialYear.EndDate.ToDateTime(TimeOnly.MinValue);
-
-	private void OnStartDateChanged(DateTime value) => _financialYear.StartDate = DateOnly.FromDateTime(value);
-	private void OnEndDateChanged(DateTime value) => _financialYear.EndDate = DateOnly.FromDateTime(value);
+	private CustomTextField _sfFirstFocus;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionName = string.Empty;
@@ -57,7 +56,7 @@ public partial class FinancialYearPage
 
 		try
 		{
-			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts]);
+			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Fleet]);
 			await LoadData();
 		}
 		catch { NavigateBack(); }
@@ -65,10 +64,10 @@ public partial class FinancialYearPage
 
 	private async Task LoadData()
 	{
-		_financialYears = await CommonData.LoadTableData<FinancialYearModel>(AccountNames.FinancialYear);
+		_drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver);
 
 		if (!_showDeleted)
-			_financialYears = [.. _financialYears.Where(fy => fy.Status)];
+			_drivers = [.. _drivers.Where(vd => vd.Status)];
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -97,7 +96,13 @@ public partial class FinancialYearPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			await FinancialYearData.SaveTransaction(_financialYear, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await DriverData.SaveTransaction(
+				_driver,
+				_user.Id,
+				FormFactor.GetFormFactor() + FormFactor.GetPlatform(),
+				_pendingLicenseStream,
+				_pendingLicenseFileName,
+				_licenseUrlToDelete);
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
 			ResetPage();
@@ -114,43 +119,6 @@ public partial class FinancialYearPage
 	#endregion
 
 	#region Actions
-	private void AutoGenerateNextYear()
-	{
-		if (_financialYears.Count == 0)
-		{
-			_financialYear.StartDate = new DateOnly(DateTime.Now.Year, 4, 1);
-			_financialYear.EndDate = new DateOnly(DateTime.Now.Year + 1, 3, 31);
-			_financialYear.YearNo = 1;
-		}
-		else
-		{
-			var latestYear = _financialYears
-				.Where(fy => fy.Status)
-				.OrderByDescending(fy => fy.EndDate)
-				.FirstOrDefault();
-
-			if (latestYear != null)
-			{
-				_financialYear.StartDate = latestYear.EndDate.AddDays(1);
-				_financialYear.EndDate = latestYear.EndDate.AddYears(1);
-				_financialYear.YearNo = latestYear.YearNo + 1;
-			}
-			else
-			{
-				_financialYear.StartDate = new DateOnly(DateTime.Now.Year, 4, 1);
-				_financialYear.EndDate = new DateOnly(DateTime.Now.Year + 1, 3, 31);
-				_financialYear.YearNo = 1;
-			}
-		}
-
-		_financialYear.Id = 0;
-		_financialYear.Remarks = $"Auto-generated based on {(_financialYears.Count == 0 ? "current date" : "latest financial year")}";
-		_financialYear.Locked = false;
-		_financialYear.Status = true;
-
-		StateHasChanged();
-	}
-
 	private async Task ConfirmDelete()
 	{
 		try
@@ -161,10 +129,10 @@ public partial class FinancialYearPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, _deleteTransactionId)
+			var driver = await CommonData.LoadTableDataById<DriverModel>(FleetNames.Driver, _deleteTransactionId)
 				?? throw new Exception("Transaction not found.");
 
-			await FinancialYearData.DeleteTransaction(financialYear, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await DriverData.DeleteTransaction(driver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Deleted", "Transaction has been deleted successfully.", ToastType.Success);
 			ResetPage();
@@ -191,10 +159,10 @@ public partial class FinancialYearPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, _recoverTransactionId)
+			var driver = await CommonData.LoadTableDataById<DriverModel>(FleetNames.Driver, _recoverTransactionId)
 				?? throw new Exception("Transaction not found.");
 
-			await FinancialYearData.RecoverTransaction(financialYear, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await DriverData.RecoverTransaction(driver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Recovered", "Transaction has been recovered successfully.", ToastType.Success);
 			ResetPage();
@@ -224,7 +192,7 @@ public partial class FinancialYearPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await FinancialYearExport.ExportMaster(_financialYears, ReportExportType.Excel);
+			var (stream, fileName) = await DriverExport.ExportMaster(_drivers, ReportExportType.Excel);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -251,7 +219,7 @@ public partial class FinancialYearPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await FinancialYearExport.ExportMaster(_financialYears, ReportExportType.PDF);
+			var (stream, fileName) = await DriverExport.ExportMaster(_drivers, ReportExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -268,6 +236,88 @@ public partial class FinancialYearPage
 	}
 	#endregion
 
+	#region Uploading License
+	private void UploadLicense()
+	{
+		if (_isProcessing)
+			return;
+
+		_isUploadDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private void CloseUploadDialog()
+	{
+		_isUploadDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private async Task OnUploaderFileChange(UploadChangeEventArgs args)
+	{
+		if (args.Files is null || args.Files.Count == 0 || args.Files[0].File is null)
+			return;
+
+		var file = args.Files[0].File;
+		var ms = new MemoryStream();
+		await file.OpenReadStream(maxAllowedSize: 52428800).CopyToAsync(ms);
+		ms.Position = 0;
+
+		_pendingLicenseStream?.Dispose();
+		_pendingLicenseStream = ms;
+		_pendingLicenseFileName = file.Name;
+
+		await _toastNotification.ShowAsync("License Selected", $"'{_pendingLicenseFileName}' will be uploaded when you save the transaction.", ToastType.Info);
+	}
+
+	private Task OnRemoveFile(RemovingEventArgs args)
+	{
+		_pendingLicenseStream?.Dispose();
+		_pendingLicenseStream = null;
+		_pendingLicenseFileName = null;
+		return Task.CompletedTask;
+	}
+
+	private async Task DownloadExistingLicense()
+	{
+		try
+		{
+			if (string.IsNullOrWhiteSpace(_driver.LicenseUrl))
+				return;
+
+			await _toastNotification.ShowAsync("Processing", "Downloading the license...", ToastType.Info);
+
+			var (stream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(_driver.LicenseUrl);
+			var fileName = _driver.LicenseUrl.Split('/').Last();
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Downloaded", "The license has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Downloading", ex.Message, ToastType.Error);
+		}
+	}
+
+	private async Task MarkLicenseForRemoval()
+	{
+		if (string.IsNullOrWhiteSpace(_driver.LicenseUrl))
+		{
+			_pendingLicenseStream?.Dispose();
+			_pendingLicenseStream = null;
+			_pendingLicenseFileName = null;
+			return;
+		}
+
+		_licenseUrlToDelete = _driver.LicenseUrl;
+		_driver.LicenseUrl = null;
+		_pendingLicenseStream?.Dispose();
+		_pendingLicenseStream = null;
+		_pendingLicenseFileName = null;
+
+		await _toastNotification.ShowAsync("License Removed", "License will be removed when you save the transaction.", ToastType.Info);
+	}
+	#endregion
+
 	#region Utilities
 	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
 	{
@@ -275,6 +325,7 @@ public partial class FinancialYearPage
 		{
 			case "NewTransaction": ResetPage(); break;
 			case "SaveTransaction": await SaveTransaction(); break;
+			case "UploadLicense": UploadLicense(); break;
 			case "ToggleDeleted": await ToggleDeleted(); break;
 			case "ExportExcel": await ExportExcel(); break;
 			case "ExportPdf": await ExportPdf(); break;
@@ -283,7 +334,7 @@ public partial class FinancialYearPage
 		}
 	}
 
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<FinancialYearModel> args)
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<DriverModel> args)
 	{
 		switch (args.Item.Id)
 		{
@@ -298,9 +349,15 @@ public partial class FinancialYearPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		_financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, selectedRecords[0].Id);
-		if (_financialYear is null)
+		_driver = await CommonData.LoadTableDataById<DriverModel>(FleetNames.Driver, selectedRecords[0].Id);
+		if (_driver is null)
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+
+		_pendingLicenseStream?.Dispose();
+		_pendingLicenseStream = null;
+		_pendingLicenseFileName = null;
+		_licenseUrlToDelete = string.Empty;
+		_isUploadDialogVisible = false;
 
 		StateHasChanged();
 
@@ -312,11 +369,10 @@ public partial class FinancialYearPage
 		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
 		if (selectedRecords.Count > 0)
 		{
-			var fy = selectedRecords[0];
-			if (fy.Status)
-				await ShowDeleteConfirmation(fy.Id, $"{fy.StartDate:dd-MMM-yyyy} to {fy.EndDate:dd-MMM-yyyy}");
+			if (selectedRecords[0].Status)
+				await ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
 			else
-				await ShowRecoverConfirmation(fy.Id, $"{fy.StartDate:dd-MMM-yyyy} to {fy.EndDate:dd-MMM-yyyy}");
+				await ShowRecoverConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
 		}
 	}
 
@@ -355,9 +411,9 @@ public partial class FinancialYearPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.FinancialYearMaster, true);
+		NavigationManager.NavigateTo(PageRouteNames.DriverMaster, true);
 
 	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);
 	#endregion
 }

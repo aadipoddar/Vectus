@@ -77,8 +77,12 @@ public static class FleetNames
 {
 	#region Route
 	public static string Driver => "Driver";
+	public static string Location => "Location";
+	public static string Route => "Route";
 
 	public static string InsertDriver => "Insert_Driver";
+	public static string InsertLocation => "Insert_Location";
+	public static string InsertRoute => "Insert_Route";
 	#endregion
 
 	#region Vehicle Document

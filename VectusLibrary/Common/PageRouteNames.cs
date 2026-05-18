@@ -40,6 +40,8 @@ public static class PageRouteNames
 	public const string FleetTransactionsDashboard = "/fleet-transactions";
 	public const string FleetMastersDashboard = "/fleet-masters";
 
+	public const string LocationMaster = "/fleet/location";
+	public const string RouteMaster = "/fleet/route";
 	public const string DriverMaster = "/fleet/driver";
 
 	public const string VehicleDocument = "/fleet/vehicle-document";

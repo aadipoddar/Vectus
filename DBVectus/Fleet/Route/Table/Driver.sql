@@ -1,0 +1,10 @@
+﻿CREATE TABLE [dbo].[Driver]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [Name] VARCHAR(MAX) NOT NULL,
+    [Mobile] VARCHAR(10) NOT NULL UNIQUE,
+    [Code] VARCHAR(10) NOT NULL UNIQUE, 
+    [Remarks] VARCHAR(MAX) NULL,
+    [LicenseUrl] VARCHAR(MAX) NULL,
+    [Status] BIT NOT NULL DEFAULT 1
+)

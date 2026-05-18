@@ -1,6 +1,7 @@
 ﻿using VectusLibrary.Accounts.FinancialAccounting.Models;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Data;
@@ -26,16 +27,23 @@ public static class GenerateCodes
 					isDuplicate = ledger is not null;
 					break;
 
-				//case CodeType.Driver:
-				//	var driver = await CommonData.LoadTableDataByCode<DriverModel>(FleetNames.Driver, code, sqlDataAccessTransaction);
-				//	isDuplicate = driver is not null;
-				//	break;
+				case CodeType.Driver:
+					var driver = await CommonData.LoadTableDataByCode<DriverModel>(FleetNames.Driver, code, sqlDataAccessTransaction);
+					isDuplicate = driver is not null;
+					break;
+				case CodeType.Location:
+					var location = await CommonData.LoadTableDataByCode<LocationModel>(FleetNames.Location, code, sqlDataAccessTransaction);
+					isDuplicate = location is not null;
+					break;
+				case CodeType.Route:
+					var route = await CommonData.LoadTableDataByCode<RouteModel>(FleetNames.Route, code, sqlDataAccessTransaction);
+					isDuplicate = route is not null;
+					break;
 
 				case CodeType.VehicleDocumentType:
 					var vehicleDocumentType = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, code, sqlDataAccessTransaction);
 					isDuplicate = vehicleDocumentType is not null;
 					break;
-
 				case CodeType.VehicleType:
 					var vehicleType = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, code, sqlDataAccessTransaction);
 					isDuplicate = vehicleType is not null;
@@ -111,30 +119,76 @@ public static class GenerateCodes
 	}
 	#endregion
 
-	//#region Route
-	//public static async Task<string> GenerateDriverCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	//{
-	//	var drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver, sqlDataAccessTransaction);
-	//	var driverPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DriverCodePrefix, sqlDataAccessTransaction)).Value;
+	#region Route
+	public static async Task<string> GenerateLocationCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var locations = await CommonData.LoadTableData<LocationModel>(FleetNames.Location, sqlDataAccessTransaction);
+		var locationPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.LocationCodePrefix, sqlDataAccessTransaction)).Value;
 
-	//	var lastDriver = drivers.OrderByDescending(vd => vd.Id).FirstOrDefault();
-	//	if (lastDriver is not null)
-	//	{
-	//		var lastDriverCode = lastDriver.Code;
-	//		if (lastDriverCode.StartsWith(driverPrefix))
-	//		{
-	//			var lastNumberPart = lastDriverCode[driverPrefix.Length..];
-	//			if (int.TryParse(lastNumberPart, out int lastNumber))
-	//			{
-	//				int nextNumber = lastNumber + 1;
-	//				return await CheckDuplicateCode($"{driverPrefix}{nextNumber:D5}", 5, CodeType.Driver, sqlDataAccessTransaction);
-	//			}
-	//		}
-	//	}
+		var lastLocation = locations.OrderByDescending(l => l.Id).FirstOrDefault();
+		if (lastLocation is not null)
+		{
+			var lastLocationCode = lastLocation.Code;
+			if (lastLocationCode.StartsWith(locationPrefix))
+			{
+				var lastNumberPart = lastLocationCode[locationPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{locationPrefix}{nextNumber:D5}", 5, CodeType.Location, sqlDataAccessTransaction);
+				}
+			}
+		}
 
-	//	return await CheckDuplicateCode($"{driverPrefix}00001", 5, CodeType.Driver, sqlDataAccessTransaction);
-	//}
-	//#endregion
+		return await CheckDuplicateCode($"{locationPrefix}00001", 5, CodeType.Location, sqlDataAccessTransaction);
+	}
+
+	public static async Task<string> GenerateRouteCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var routes = await CommonData.LoadTableData<RouteModel>(FleetNames.Route, sqlDataAccessTransaction);
+		var routePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.RouteCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastRoute = routes.OrderByDescending(r => r.Id).FirstOrDefault();
+		if (lastRoute is not null)
+		{
+			var lastRouteCode = lastRoute.Code;
+			if (lastRouteCode.StartsWith(routePrefix))
+			{
+				var lastNumberPart = lastRouteCode[routePrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{routePrefix}{nextNumber:D5}", 5, CodeType.Route, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{routePrefix}00001", 5, CodeType.Route, sqlDataAccessTransaction);
+	}
+
+	public static async Task<string> GenerateDriverCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver, sqlDataAccessTransaction);
+		var driverPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DriverCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastDriver = drivers.OrderByDescending(vd => vd.Id).FirstOrDefault();
+		if (lastDriver is not null)
+		{
+			var lastDriverCode = lastDriver.Code;
+			if (lastDriverCode.StartsWith(driverPrefix))
+			{
+				var lastNumberPart = lastDriverCode[driverPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{driverPrefix}{nextNumber:D5}", 5, CodeType.Driver, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{driverPrefix}00001", 5, CodeType.Driver, sqlDataAccessTransaction);
+	}
+	#endregion
 
 	#region Vehicle Document
 	public static async Task<string> GenerateVehicleDocumentTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)

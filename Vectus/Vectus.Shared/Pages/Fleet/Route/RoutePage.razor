@@ -1,0 +1,211 @@
+﻿@attribute [Route(PageRouteNames.RouteMaster)]
+
+@using VectusLibrary.Fleet.Route.Models
+
+<PageTitle>Route Management - Vectus</PageTitle>
+
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" />
+<MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" />
+<MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" />
+<MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" />
+<MudBlazor.MudHotkey Key=JsKey.Insert OnHotkeyPressed="EditSelectedItem" />
+<MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedItem" />
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Route Management">
+			<LeftContent>
+				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
+					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
+					<MenuItems>
+						<MenuItem Text="File" IconCss="e-icons e-folder">
+							<MenuItems>
+								<MenuItem Text="New (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="@(_showDeleted ? "Hide Deleted (Ctrl + Delete)" : "Show Deleted (Ctrl + Delete)")" IconCss="e-icons e-trash" Id="ToggleDeleted" Disabled="@_isProcessing" />
+								<MenuItem Separator="true" />
+								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
+								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Transaction" IconCss="e-icons e-chart">
+							<MenuItems>
+								<MenuItem Text="Edit (Insert)" IconCss="e-icons e-edit" Id="EditSelectedItem" Disabled="@_isProcessing" />
+								<MenuItem Text="Delete / Recover (Del)" IconCss="e-icons e-trash" Id="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+					</MenuItems>
+				</SfMenu>
+			</LeftContent>
+			<RightContent>
+				<IconButton Icon="IconType.Back" Title="Back (Ctrl + B)" OnClick="NavigateBack" />
+			</RightContent>
+		</Header>
+
+		<div class="page-container">
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5" />
+						</svg>
+						<h2 class="section-title">Route Details</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
+						<div class="form-field">
+							<CustomAutoComplete @ref="_sfFirstFocus" T="LocationModel"
+												@bind-Value="_selectedFromLocation"
+												DataSource="@_locations"
+												Placeholder="Select From Location (Ctrl + F)"
+												Label="From Location"
+												FieldValue="@nameof(LocationModel.Name)"
+												AddNewRoute="@PageRouteNames.LocationMaster" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="LocationModel"
+												@bind-Value="_selectedToLocation"
+												DataSource="@_locations"
+												Placeholder="Select To Location"
+												Label="To Location"
+												FieldValue="@nameof(LocationModel.Name)"
+												AddNewRoute="@PageRouteNames.LocationMaster" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_route.Code"
+											 Label="Code"
+											 Placeholder="Auto-generated"
+											 ReadOnly="true"
+											 TabIndex="-1" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="int"
+												@bind-Value="_route.EstimatedHours"
+												Label="Estimated Hours"
+												Placeholder="Enter estimated hours"
+												Format="N0"
+												Min="0" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="int"
+												@bind-Value="_route.EstimatedDistance"
+												Label="Estimated Distance"
+												Placeholder="Enter estimated distance"
+												Format="N0"
+												Min="0" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="int"
+												@bind-Value="_route.EstimatedFuelConsumption"
+												Label="Estimated Fuel Consumption"
+												Placeholder="Enter estimated fuel consumption"
+												Format="N0"
+												Min="0" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="decimal"
+												@bind-Value="_route.EstimatedCost"
+												Label="Estimated Cost"
+												Placeholder="Enter estimated cost"
+												Min="0" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_route.Remarks"
+											 Label="Remarks"
+											 Placeholder="Enter remarks (optional)"
+											 Required="false"
+											 Lines="2" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M9 11l3 3L22 4" />
+							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+						</svg>
+						<h2 class="section-title">Routes List</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfGrid" DataSource="@_routes" AllowPaging="true" AllowSorting="true"
+							AllowFiltering="true" AllowResizing="true" CssClass="professional-grid"
+							Toolbar="@(new List<string>() { "Search" })" ContextMenuItems="@_gridContextMenuItems">
+						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
+						<GridEvents TValue="RouteModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(RouteModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(RouteModel.FromLocationId)" HeaderText="From Location" Width="250">
+								<Template>
+									@{
+										var item = (context as RouteModel);
+										var fromLocation = _locations.FirstOrDefault(rl => rl.Id == item.FromLocationId);
+										<span>@(fromLocation is not null ? fromLocation.Name : "N/A")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(RouteModel.ToLocationId)" HeaderText="To Location" Width="250">
+								<Template>
+									@{
+										var item = (context as RouteModel);
+										var toLocation = _locations.FirstOrDefault(rl => rl.Id == item.ToLocationId);
+										<span>@(toLocation is not null ? toLocation.Name : "N/A")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(RouteModel.Code)" HeaderText="Code" Width="150" />
+							<GridColumn Field="@nameof(RouteModel.EstimatedHours)" HeaderText="Estimated Hours" Width="160" Format="N0" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(RouteModel.EstimatedDistance)" HeaderText="Estimated Distance" Width="170" Format="N0" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(RouteModel.EstimatedFuelConsumption)" HeaderText="Estimated Fuel" Width="160" Format="N0" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(RouteModel.EstimatedCost)" HeaderText="Estimated Cost" Width="160" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(RouteModel.Remarks)" HeaderText="Remarks" Width="300" />
+							<GridColumn Field="@nameof(RouteModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+								<Template>
+									@{
+										var item = (context as RouteModel);
+										<span class="@(item.Status ? string.Empty : "grid-debit")">@(item.Status ? "Active" : "Deleted")</span>
+									}
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<DeleteConfirmationDialog @ref="_deleteConfirmationDialog" IdentifierValue="@_deleteTransactionName"
+						  OnConfirm="ConfirmDelete" OnCancel="CancelDelete" />
+
+<RecoverConfirmationDialog @ref="_recoverConfirmationDialog" IdentifierValue="@_recoverTransactionName"
+						   OnConfirm="ConfirmRecover" OnCancel="CancelRecover" />
+
+<ToastNotification @ref="_toastNotification" />
