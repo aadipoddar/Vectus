@@ -1,9 +1,12 @@
-﻿using Syncfusion.Blazor.Grids;
+﻿using Microsoft.JSInterop;
+
+using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
+using VectusLibrary.APIService;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Route.Data;
@@ -22,12 +25,14 @@ public partial class LocationPage
 	private bool _showDeleted = false;
 
 	private LocationModel _location = new();
+	private PlaceModel _selectedPlace;
 
 	private List<LocationModel> _locations = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
-		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
+		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" },
+		new() { Text = "Open in Maps (Ctrl + M)", Id = "OpenInMaps", IconCss = "e-icons e-location", Target = ".e-content" }
 	];
 
 	private SfGrid<LocationModel> _sfGrid;
@@ -72,6 +77,32 @@ public partial class LocationPage
 
 		if (_sfFirstFocus is not null)
 			await _sfFirstFocus.FocusAsync();
+	}
+	#endregion
+
+	#region API
+	private async Task<IEnumerable<PlaceModel>> SearchPlacesAsync(string searchText) =>
+		await GoogleMapsApiService.SearchPlaces(searchText);
+
+	private async Task OnPlaceSelected(PlaceModel place)
+	{
+		_selectedPlace = place;
+		if (place is null)
+			return;
+
+		try
+		{
+			var details = await GoogleMapsApiService.GetPlaceDetails(place.PlaceId);
+
+			_location.Latitude = details.Latitude;
+			_location.Longitude = details.Longitude;
+
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Searching", ex.Message, ToastType.Error);
+		}
 	}
 	#endregion
 
@@ -237,6 +268,7 @@ public partial class LocationPage
 			case "ExportPdf": await ExportPdf(); break;
 			case "EditSelectedItem": await EditSelectedItem(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
+			case "OpenInMaps": await OpenInMaps(); break;
 		}
 	}
 
@@ -246,7 +278,18 @@ public partial class LocationPage
 		{
 			case "EditSelectedItem": await EditSelectedItem(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
+			case "OpenInMaps": await OpenInMaps(); break;
 		}
+	}
+
+	private async Task OpenInMaps()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		var location = selectedRecords[0];
+		await JSRuntime.InvokeVoidAsync("open", $"https://www.google.com/maps?q={location.Latitude},{location.Longitude}", "_blank");
 	}
 
 	private async Task EditSelectedItem()

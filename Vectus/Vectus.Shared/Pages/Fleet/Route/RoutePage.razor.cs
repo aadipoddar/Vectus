@@ -1,3 +1,5 @@
+using Microsoft.JSInterop;
+
 using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
@@ -31,7 +33,8 @@ public partial class RoutePage
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
-		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
+		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" },
+		new() { Text = "Open in Maps (Ctrl + M)", Id = "OpenInMaps", IconCss = "e-icons e-location", Target = ".e-content" }
 	];
 
 	private SfGrid<RouteModel> _sfGrid;
@@ -298,6 +301,7 @@ public partial class RoutePage
 			case "ExportPdf": await ExportPdf(); break;
 			case "EditSelectedItem": await EditSelectedItem(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
+			case "OpenInMaps": await OpenInMaps(); break;
 		}
 	}
 
@@ -307,7 +311,25 @@ public partial class RoutePage
 		{
 			case "EditSelectedItem": await EditSelectedItem(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
+			case "OpenInMaps": await OpenInMaps(); break;
 		}
+	}
+
+	private async Task OpenInMaps()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		var route = selectedRecords[0];
+		var from = _locations.FirstOrDefault(l => l.Id == route.FromLocationId);
+		var to = _locations.FirstOrDefault(l => l.Id == route.ToLocationId);
+		if (from is null || to is null)
+			return;
+
+		await JSRuntime.InvokeVoidAsync("open",
+			$"https://www.google.com/maps/dir/?api=1&origin={from.Latitude},{from.Longitude}&destination={to.Latitude},{to.Longitude}",
+			"_blank");
 	}
 
 	private async Task EditSelectedItem()

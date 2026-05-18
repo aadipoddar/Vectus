@@ -22,6 +22,7 @@ public partial class CustomAutoComplete<T>
 	[Parameter] public EventCallback<T> ValueChanged { get; set; }
 
 	[Parameter] public IEnumerable<T> DataSource { get; set; }
+	[Parameter] public Func<string, Task<IEnumerable<T>>> SearchFunction { get; set; }
 	[Parameter] public string Placeholder { get; set; } = "Select...";
 	[Parameter] public string FieldValue { get; set; }
 	[Parameter] public bool Disabled { get; set; } = false;
@@ -55,20 +56,30 @@ public partial class CustomAutoComplete<T>
 		return _fieldProperty?.GetValue(item)?.ToString() ?? string.Empty;
 	}
 
-	private Task<IEnumerable<T>> SearchAsync(string searchText, CancellationToken token)
+	private async Task<IEnumerable<T>> SearchAsync(string searchText, CancellationToken token)
 	{
+		// Remote search (e.g. map place lookup) takes precedence when provided.
+		if (SearchFunction is not null)
+		{
+			if (string.IsNullOrWhiteSpace(searchText) || searchText.Length < 3)
+				return [];
+
+			try { return await SearchFunction(searchText); }
+			catch { return []; }
+		}
+
 		if (DataSource is null)
-			return Task.FromResult<IEnumerable<T>>([]);
+			return [];
 
 		if (string.IsNullOrWhiteSpace(searchText))
-			return Task.FromResult(DataSource);
+			return DataSource;
 
-		return Task.FromResult(DataSource.Where(item =>
+		return DataSource.Where(item =>
 		{
 			var display = DisplayText(item);
 			return !string.IsNullOrEmpty(display) &&
 				   display.Contains(searchText, StringComparison.OrdinalIgnoreCase);
-		}));
+		});
 	}
 
 	private async Task OnValueChangedInternal(T value)

@@ -54,4 +54,68 @@ public static class GoogleMapsApiService
 			EstimatedCost = Math.Round(cost, 2)
 		};
 	}
+
+	/// <summary>
+	/// Searches places by text using the Google Geocoding API and returns
+	/// live "as you type" predictions (Google Maps style) for a search box.
+	/// </summary>
+	public static async Task<IEnumerable<PlaceModel>> SearchPlaces(string input)
+	{
+		var requestBody = new { input };
+
+		using var request = new HttpRequestMessage(HttpMethod.Post, "https://places.googleapis.com/v1/places:autocomplete");
+		request.Headers.Add("X-Goog-Api-Key", Secrets.GoogleMapsApiKey);
+		request.Headers.Add("X-Goog-FieldMask", "suggestions.placePrediction.text,suggestions.placePrediction.placeId");
+		request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+
+		using var response = await _httpClient.SendAsync(request);
+		response.EnsureSuccessStatusCode();
+
+		await using var stream = await response.Content.ReadAsStreamAsync();
+		using var json = await JsonDocument.ParseAsync(stream);
+
+		var places = new List<PlaceModel>();
+		if (json.RootElement.TryGetProperty("suggestions", out var suggestions))
+			foreach (var suggestion in suggestions.EnumerateArray())
+				if (suggestion.TryGetProperty("placePrediction", out var prediction))
+					places.Add(new()
+					{
+						Description = prediction.GetProperty("text").GetProperty("text").GetString(),
+						PlaceId = prediction.GetProperty("placeId").GetString()
+					});
+
+		return places;
+	}
+
+	/// <summary>
+	/// Resolves a place prediction (by place id) to its coordinates using the
+	/// Google Place Details (New) API. Only the "location" field is requested,
+	/// which keeps the call in the cheapest Place Details Essentials SKU.
+	/// </summary>
+	public static async Task<LocationModel> GetPlaceDetails(string placeId)
+	{
+		using var request = new HttpRequestMessage(HttpMethod.Get, $"https://places.googleapis.com/v1/places/{placeId}");
+		request.Headers.Add("X-Goog-Api-Key", Secrets.GoogleMapsApiKey);
+		request.Headers.Add("X-Goog-FieldMask", "location");
+
+		using var response = await _httpClient.SendAsync(request);
+		response.EnsureSuccessStatusCode();
+
+		await using var stream = await response.Content.ReadAsStreamAsync();
+		using var json = await JsonDocument.ParseAsync(stream);
+
+		var location = json.RootElement.GetProperty("location");
+
+		return new()
+		{
+			Latitude = location.GetProperty("latitude").GetDecimal(),
+			Longitude = location.GetProperty("longitude").GetDecimal()
+		};
+	}
+}
+
+public class PlaceModel
+{
+	public string Description { get; set; }
+	public string PlaceId { get; set; }
 }
