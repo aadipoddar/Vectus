@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using System.Globalization;
+using System.Linq;
 
 using VectusLibrary.APIService;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Vehicle.Models;
 
 namespace Vectus.Shared.Components.Map;
 
@@ -15,6 +17,7 @@ public partial class RouteMap : IAsyncDisposable
 	[Parameter] public decimal? DestinationLatitude { get; set; }
 	[Parameter] public decimal? DestinationLongitude { get; set; }
 	[Parameter] public string PlaceholderText { get; set; } = "Select a route to preview it on the map.";
+	[Parameter] public List<VehicleLocationModel> Vehicles { get; set; }
 
 	private readonly string _elementId = $"routeMap-{Guid.NewGuid():N}";
 	private string _origin;
@@ -65,7 +68,33 @@ public partial class RouteMap : IAsyncDisposable
 		await JSRuntime.InvokeVoidAsync("showRoute", _elementId,
 			Secrets.GoogleMapsApiKey, Secrets.GoogleMapsMapId,
 			_origin, _destination, result?.EncodedPolyline, result?.Summary);
+
+		if (Vehicles is { Count: > 0 })
+		{
+			var markers = Vehicles
+				.Where(v => v.HasValidPosition)
+				.Select(v => new
+				{
+					code = v.Code,
+					reg = v.RegNo,
+					lat = v.Latitude,
+					lng = v.Longitude,
+					status = Status(v),
+					speed = v.Speed,
+					mode = v.VehicleMode,
+					updated = v.LastUpdate == default
+						? ""
+						: v.LastUpdate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
+					address = v.Address
+				})
+				.ToArray();
+
+			await JSRuntime.InvokeVoidAsync("showVehicles", _elementId, markers);
+		}
 	}
+
+	private static string Status(VehicleLocationModel v) =>
+		v.Speed > 0 ? "Moving" : v.IgnitionOn ? "Idle" : "Stopped";
 
 	public async ValueTask DisposeAsync()
 	{

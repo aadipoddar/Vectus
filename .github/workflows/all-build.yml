@@ -25,6 +25,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore Vectus.slnx
 
+    - name: Build ExcelImport
+      run: dotnet build ExcelImport/ExcelImport.csproj --no-restore --configuration Release
+
     - name: Build VectusLibrary
       run: dotnet build VectusLibrary/VectusLibrary.csproj --no-restore --configuration Release
     

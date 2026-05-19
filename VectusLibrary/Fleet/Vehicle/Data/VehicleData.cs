@@ -1,3 +1,4 @@
+using VectusLibrary.APIService;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Vehicle.Models;
@@ -8,9 +9,58 @@ namespace VectusLibrary.Fleet.Vehicle.Data;
 
 public static class VehicleData
 {
-	public static async Task<int> InsertVehicle(VehicleModel vehicle, SqlDataAccessTransaction transaction = null) =>
+	private static async Task<int> InsertVehicle(VehicleModel vehicle, SqlDataAccessTransaction transaction = null) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertVehicle, vehicle, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Vehicle.");
+
+	public static async Task<List<VehicleLocationModel>> LoadVehicleLocations()
+	{
+		var vehicleLocations = await CommonData.LoadTableData<VehicleLocationModel>(FleetNames.Vehicle);
+
+		List<VamosysVehicleModel> vamosysVehicles = [];
+		try { vamosysVehicles = await VamosysApiService.GetLiveVehicles(); }
+		catch { /* tracker unreachable — still show the fleet, just without live data */ }
+
+		foreach (var vehicle in vehicleLocations)
+		{
+			var gps = vamosysVehicles.FirstOrDefault(v => string.Equals(v.VehicleId, vehicle.Code, StringComparison.OrdinalIgnoreCase));
+			if (gps is null)
+				continue;
+
+			vehicle.VehicleId = gps.VehicleId;
+			vehicle.RegNo = gps.RegNo;
+			vehicle.ShortName = gps.ShortName;
+			vehicle.VehicleType = gps.VehicleType;
+
+			vehicle.Latitude = gps.Latitude;
+			vehicle.Longitude = gps.Longitude;
+			vehicle.Address = gps.Address;
+
+			vehicle.Speed = gps.Speed;
+			vehicle.TopSpeed = gps.TopSpeed;
+			vehicle.AverageSpeed = gps.AverageSpeed;
+			vehicle.VehicleMode = gps.VehicleMode;
+			vehicle.IgnitionOn = gps.IgnitionOn;
+
+			vehicle.LastUpdate = gps.LastUpdate;
+
+			vehicle.FuelLitre = gps.FuelLitre;
+			vehicle.TankSize = gps.TankSize;
+			vehicle.ExpectedFuelMileage = gps.ExpectedFuelMileage;
+
+			vehicle.OdometerKM = gps.OdometerKM;
+			vehicle.DistanceCovered = gps.DistanceCovered;
+
+			vehicle.IsOverSpeed = gps.IsOverSpeed;
+			vehicle.InsideGeoFence = gps.InsideGeoFence;
+			vehicle.HasAlert = gps.HasAlert;
+
+			vehicle.GpsExpiryDate = gps.GpsExpiryDate;
+			vehicle.GpsExpiryDays = gps.GpsExpiryDays;
+		}
+
+		return vehicleLocations;
+	}
 
 	public static async Task DeleteTransaction(VehicleModel vehicle, int userId, string platform) =>
 		await SqlDataAccessTransaction.Run(async transaction =>

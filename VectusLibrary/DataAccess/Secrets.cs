@@ -18,15 +18,17 @@ public static partial class Secrets
 
 	public static string SyncfusionLicense = GetSecret(nameof(SyncfusionLicense));
 
-	public static string OpenRouteServiceApiKey = GetSecret(nameof(OpenRouteServiceApiKey));
-	public static string GoogleMapsApiKey = GetSecret(nameof(GoogleMapsApiKey));
-	public static string GoogleMapsMapId = GetSecret(nameof(GoogleMapsMapId));
-
 	public static string Email => "softaadi@gmail.com";
 	public static string EmailPassword = GetSecret(nameof(EmailPassword));
 
 	public static string ToEmail = "aadipoddarmail@gmail.com";
 	public static string ToName => "Vectus";
+
+	public static string OpenRouteServiceApiKey = GetSecret(nameof(OpenRouteServiceApiKey));
+	public static string GoogleMapsApiKey = GetSecret(nameof(GoogleMapsApiKey));
+	public static string GoogleMapsMapId = GetSecret(nameof(GoogleMapsMapId));
+
+	public static string VamosysAPI = GetSecret(nameof(VamosysAPI));
 
 	public static string OnlineFullLogoPath => "https://raw.githubusercontent.com/aadipoddar/Vectus/refs/heads/main/Vectus/Vectus.Web/wwwroot/images/logo_full.png";
 	public static string AadiSoftWebsite => "https://aadisoft.vercel.app";

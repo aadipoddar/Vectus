@@ -55,12 +55,6 @@ public static class GoogleMapsApiService
 		};
 	}
 
-	/// <summary>
-	/// Computes the drivable route geometry between two points using the
-	/// modern Routes API (same SKU/tier as <see cref="GetRouteEstimate"/> —
-	/// TRAFFIC_AWARE Essentials). Returns the encoded polyline plus a short
-	/// "distance · time by road" summary for the map preview.
-	/// </summary>
 	public static async Task<MapRouteModel> GetRoutePolyline(
 		decimal fromLatitude, decimal fromLongitude,
 		decimal toLatitude, decimal toLongitude)
@@ -97,10 +91,6 @@ public static class GoogleMapsApiService
 		};
 	}
 
-	/// <summary>
-	/// Searches places by text using the Google Geocoding API and returns
-	/// live "as you type" predictions (Google Maps style) for a search box.
-	/// </summary>
 	public static async Task<IEnumerable<PlaceModel>> SearchPlaces(string input)
 	{
 		var requestBody = new { input };
@@ -129,11 +119,6 @@ public static class GoogleMapsApiService
 		return places;
 	}
 
-	/// <summary>
-	/// Resolves a place prediction (by place id) to its coordinates using the
-	/// Google Place Details (New) API. Only the "location" field is requested,
-	/// which keeps the call in the cheapest Place Details Essentials SKU.
-	/// </summary>
 	public static async Task<LocationModel> GetPlaceDetails(string placeId)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, $"https://places.googleapis.com/v1/places/{placeId}");

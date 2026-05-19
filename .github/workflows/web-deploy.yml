@@ -51,6 +51,12 @@ jobs:
                   SyncfusionLicense = "${{ secrets.SyncfusionLicense }}";
 
                   EmailPassword = "${{ secrets.EmailPassword }}";
+
+                  OpenRouteServiceApiKey = "${{ secrets.OpenRouteServiceApiKey }}";
+                  GoogleMapsApiKey = "${{ secrets.GoogleMapsApiKey }}";
+                  GoogleMapsMapId = "${{ secrets.GoogleMapsMapId }}";
+
+                  VamosysAPI = "${{ secrets.VamosysAPI }}";
               }
           }
           "@

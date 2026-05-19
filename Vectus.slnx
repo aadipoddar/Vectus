@@ -3,6 +3,7 @@
     <Build />
     <Deploy />
   </Project>
+  <Project Path="ExcelImport/ExcelImport.csproj" Id="8790bb6d-d3fd-4b32-b94e-bb28ef3a32e9" />
   <Project Path="Vectus/Vectus.Shared/Vectus.Shared.csproj" />
   <Project Path="Vectus/Vectus.Web/Vectus.Web.csproj" />
   <Project Path="Vectus/Vectus/Vectus.csproj">

@@ -9,6 +9,7 @@ using VectusLibrary.Fleet.Route.Data;
 using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.TripRequest.Data;
 using VectusLibrary.Fleet.TripRequest.Models;
+using VectusLibrary.Fleet.Vehicle.Data;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
@@ -31,6 +32,7 @@ public partial class TripRequestPage
 	private List<CompanyModel> _companies = [];
 	private List<RouteOverviewModel> _routes = [];
 	private List<VehicleModel> _vehicles = [];
+	private List<VehicleLocationModel> _vehicleLocations = [];
 
 	private CustomAutoComplete<CompanyModel> _sfFirstFocus;
 	private ToastNotification _toastNotification;
@@ -67,6 +69,7 @@ public partial class TripRequestPage
 		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(AccountNames.Company);
 		_routes = await RouteData.LoadRouteOverview();
 		_vehicles = await CommonData.LoadTableDataByStatus<VehicleModel>(FleetNames.Vehicle);
+		_vehicleLocations = await VehicleData.LoadVehicleLocations();
 
 		_companies = [.. _companies.OrderBy(c => c.Name)];
 		_routes = [.. _routes.OrderBy(r => r.Code)];
