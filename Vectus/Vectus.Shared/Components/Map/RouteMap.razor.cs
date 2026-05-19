@@ -82,6 +82,14 @@ public partial class RouteMap : IAsyncDisposable
 					status = Status(v),
 					speed = v.Speed,
 					mode = v.VehicleMode,
+					type = v.VehicleType,
+					fuel = v.FuelLitre,
+					tank = v.TankSize,
+					odo = v.OdometerKM,
+					today = v.DistanceCovered,
+					ignition = v.IgnitionOn,
+					overspeed = v.IsOverSpeed,
+					alert = v.HasAlert,
 					updated = v.LastUpdate == default
 						? ""
 						: v.LastUpdate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),

@@ -115,6 +115,43 @@ function vehicleContent(color) {
 	return el;
 }
 
+// Builds the click-card for a vehicle: header + status chip, a small
+// stats grid, an alert line, then last-seen / address footer.
+function infoHtml(v) {
+	const color = VEHICLE_COLORS[v.status] ?? "#6b7280";
+	const cell = (label, value) =>
+		`<div><div style="color:#6b7280;font-size:11px">${label}</div>` +
+		`<div style="font-weight:600">${value}</div></div>`;
+
+	const fuel = v.tank > 0 ? `${Math.round(v.fuel)} / ${Math.round(v.tank)} L` : `${Math.round(v.fuel)} L`;
+	const sub = [v.reg, v.type].filter(Boolean).map(esc).join(" · ");
+	const alerts = [];
+	if (v.overspeed) alerts.push("Over speed");
+	if (v.alert) alerts.push("Alert");
+
+	const grid =
+		cell("Speed", `${v.speed} km/h`) +
+		cell("Fuel", fuel) +
+		cell("Odometer", `${Math.round(v.odo).toLocaleString()} km`) +
+		cell("Trip distance", `${Math.round(v.today)} km`) +
+		cell("Ignition", v.ignition ? "On" : "Off") +
+		cell("Mode", esc(v.mode || "—"));
+
+	return (
+		`<div style="font:13px/1.45 system-ui,sans-serif;color:#1f2937;min-width:230px;max-width:280px">` +
+		`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">` +
+		`<span style="font-weight:700;font-size:14px">${esc(v.code)}</span>` +
+		`<span style="background:${color};color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px">${esc(v.status)}</span>` +
+		`</div>` +
+		(sub ? `<div style="color:#6b7280;margin-top:2px">${sub}</div>` : "") +
+		`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:8px 0;padding:8px 0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb">${grid}</div>` +
+		(alerts.length ? `<div style="color:#dc2626;font-weight:600;margin-bottom:4px">⚠ ${esc(alerts.join(" · "))}</div>` : "") +
+		(v.updated ? `<div style="color:#6b7280">Updated ${esc(v.updated)}</div>` : "") +
+		(v.address ? `<div style="color:#6b7280;margin-top:2px">${esc(v.address)}</div>` : "") +
+		`</div>`
+	);
+}
+
 // Plot the live fleet once per map. Vehicle pins are smaller than the
 // route's origin/destination pins (scale 0.8) and coloured by status, so
 // they stay visually distinct. Click a pin for its details.
@@ -136,14 +173,7 @@ window.showVehicles = async function (elementId, vehicles) {
 			content: vehicleContent(color),
 		});
 		marker.addListener("gmp-click", () => {
-			info.setContent(
-				`<div style="font:13px/1.5 system-ui,sans-serif;min-width:180px">` +
-				`<strong>${esc(v.code)}</strong>${v.reg ? " · " + esc(v.reg) : ""}<br>` +
-				`${esc(v.status)} · ${v.speed} km/h<br>` +
-				(v.mode ? `${esc(v.mode)}<br>` : "") +
-				(v.updated ? `<span style="color:#6b7280">Updated ${esc(v.updated)}</span><br>` : "") +
-				(v.address ? `<span style="color:#6b7280">${esc(v.address)}</span>` : "") +
-				`</div>`);
+			info.setContent(infoHtml(v));
 			info.open(inst.map, marker);
 		});
 		inst.vehicleMarkers.push(marker);
