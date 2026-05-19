@@ -5,15 +5,17 @@ public enum CodeType
 	FinancialAccounting,
 	Ledger,
 
-	Location,
-	Route,
-	Driver,
-
 	SDR,
 	VehicleType,
 	VehicleDocumentType,
 
-	TripRequest
+	Location,
+	Route,
+	Driver,
+
+	TripRequest,
+
+	Garage
 }
 
 public class DecodeTransactionNoModel

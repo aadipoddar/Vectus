@@ -3,8 +3,11 @@ using VectusLibrary.Accounts.FinancialAccounting.Models;
 using VectusLibrary.Accounts.Masters.Exports;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Garage.Exports;
+using VectusLibrary.Fleet.Garage.Models;
 using VectusLibrary.Fleet.Route.Exports;
 using VectusLibrary.Fleet.Route.Models;
+using VectusLibrary.Fleet.TripRequest.Models;
 using VectusLibrary.Fleet.Vehicle.Exports;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Exports;
@@ -44,6 +47,29 @@ public static class DecodeCode
 				if (excel) decodeTransactionNoModel.ExcelStream = await LedgerExport.ExportMaster(ledgers, ReportExportType.Excel);
 				break;
 
+			case CodeType.VehicleType:
+				var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleTypeModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.Excel);
+				break;
+			case CodeType.SDR:
+				var sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<SDRModel>(FleetNames.SDR, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.SDRMaster}/{(decodeTransactionNoModel.TransactionModel as SDRModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await SDRExport.ExportMaster(sdrs, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await SDRExport.ExportMaster(sdrs, ReportExportType.Excel);
+				break;
+
+			case CodeType.VehicleDocumentType:
+				var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleDocumentTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleDocumentTypeModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.Excel);
+				break;
+
 			case CodeType.Location:
 				var locations = await CommonData.LoadTableData<LocationModel>(FleetNames.Location);
 				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<LocationModel>(FleetNames.Location, transactionNo);
@@ -66,27 +92,18 @@ public static class DecodeCode
 				if (excel) decodeTransactionNoModel.ExcelStream = await DriverExport.ExportMaster(drivers, ReportExportType.Excel);
 				break;
 
-			case CodeType.VehicleDocumentType:
-				var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType);
-				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, transactionNo);
-				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleDocumentTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleDocumentTypeModel).Id}";
-				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.PDF);
-				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleDocumentTypeExport.ExportMaster(vehicleDocumentTypes, ReportExportType.Excel);
+			case CodeType.TripRequest:
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByTransactionNo<TripRequestModel>(FleetNames.TripRequest, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.TripRequest}/{(decodeTransactionNoModel.TransactionModel as TripRequestModel).Id}";
+				// if (pdf) decodeTransactionNoModel.PDFStream = await TripRequestExport.ExportMaster(decodeTransactionNoModel.TransactionModel as TripRequestModel, ReportExportType.PDF);
+				// if (excel) decodeTransactionNoModel.ExcelStream = await TripRequestExport.ExportMaster(decodeTransactionNoModel.TransactionModel as TripRequestModel, ReportExportType.Excel);
 				break;
-
-			case CodeType.VehicleType:
-				var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
-				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, transactionNo);
-				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.VehicleTypeMaster}/{(decodeTransactionNoModel.TransactionModel as VehicleTypeModel).Id}";
-				if (pdf) decodeTransactionNoModel.PDFStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.PDF);
-				if (excel) decodeTransactionNoModel.ExcelStream = await VehicleTypeExport.ExportMaster(vehicleTypes, ReportExportType.Excel);
-				break;
-			case CodeType.SDR:
-				var sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
-				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<SDRModel>(FleetNames.SDR, transactionNo);
-				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.SDRMaster}/{(decodeTransactionNoModel.TransactionModel as SDRModel).Id}";
-				if (pdf) decodeTransactionNoModel.PDFStream = await SDRExport.ExportMaster(sdrs, ReportExportType.PDF);
-				if (excel) decodeTransactionNoModel.ExcelStream = await SDRExport.ExportMaster(sdrs, ReportExportType.Excel);
+			case CodeType.Garage:
+				var garages = await CommonData.LoadTableData<GarageModel>(FleetNames.Garage);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<GarageModel>(FleetNames.Garage, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.GarageMaster}/{(decodeTransactionNoModel.TransactionModel as GarageModel).Id}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await GarageExport.ExportMaster(garages, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await GarageExport.ExportMaster(garages, ReportExportType.Excel);
 				break;
 
 			default:

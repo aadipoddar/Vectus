@@ -40,17 +40,19 @@ public static class PageRouteNames
 	public const string FleetTransactionsDashboard = "/fleet-transactions";
 	public const string FleetMastersDashboard = "/fleet-masters";
 
+	public const string SDRMaster = "/fleet/sdr";
+	public const string VehicleMaster = "/fleet/vehicle";
+	public const string VehicleTypeMaster = "/fleet/vehicle-type";
+
+	public const string VehicleDocument = "/fleet/vehicle-document";
+	public const string VehicleDocumentTypeMaster = "/fleet/vehicle-document-type";
+
 	public const string LocationMaster = "/fleet/location";
 	public const string RouteMaster = "/fleet/route";
 	public const string DriverMaster = "/fleet/driver";
 
 	public const string TripRequest = "/fleet/trip-request";
 
-	public const string VehicleDocument = "/fleet/vehicle-document";
-	public const string VehicleDocumentTypeMaster = "/fleet/vehicle-document-type";
-
-	public const string SDRMaster = "/fleet/sdr";
-	public const string VehicleMaster = "/fleet/vehicle";
-	public const string VehicleTypeMaster = "/fleet/vehicle-type";
+	public const string GarageMaster = "/fleet/garage";
 	#endregion
 }

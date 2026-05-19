@@ -1,6 +1,7 @@
 ﻿using VectusLibrary.Accounts.FinancialAccounting.Models;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Garage.Models;
 using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.TripRequest.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
@@ -28,9 +29,17 @@ public static class GenerateCodes
 					isDuplicate = ledger is not null;
 					break;
 
-				case CodeType.TripRequest:
-					var tripRequest = await CommonData.LoadTableDataByCode<TripRequestModel>(FleetNames.TripRequest, code, sqlDataAccessTransaction);
-					isDuplicate = tripRequest is not null;
+				case CodeType.VehicleDocumentType:
+					var vehicleDocumentType = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, code, sqlDataAccessTransaction);
+					isDuplicate = vehicleDocumentType is not null;
+					break;
+				case CodeType.VehicleType:
+					var vehicleType = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, code, sqlDataAccessTransaction);
+					isDuplicate = vehicleType is not null;
+					break;
+				case CodeType.SDR:
+					var sdr = await CommonData.LoadTableDataByCode<SDRModel>(FleetNames.SDR, code, sqlDataAccessTransaction);
+					isDuplicate = sdr is not null;
 					break;
 
 				case CodeType.Driver:
@@ -46,17 +55,14 @@ public static class GenerateCodes
 					isDuplicate = route is not null;
 					break;
 
-				case CodeType.VehicleDocumentType:
-					var vehicleDocumentType = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, code, sqlDataAccessTransaction);
-					isDuplicate = vehicleDocumentType is not null;
+				case CodeType.TripRequest:
+					var tripRequest = await CommonData.LoadTableDataByCode<TripRequestModel>(FleetNames.TripRequest, code, sqlDataAccessTransaction);
+					isDuplicate = tripRequest is not null;
 					break;
-				case CodeType.VehicleType:
-					var vehicleType = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, code, sqlDataAccessTransaction);
-					isDuplicate = vehicleType is not null;
-					break;
-				case CodeType.SDR:
-					var sdr = await CommonData.LoadTableDataByCode<SDRModel>(FleetNames.SDR, code, sqlDataAccessTransaction);
-					isDuplicate = sdr is not null;
+
+				case CodeType.Garage:
+					var garage = await CommonData.LoadTableDataByCode<GarageModel>(FleetNames.Garage, code, sqlDataAccessTransaction);
+					isDuplicate = garage is not null;
 					break;
 			}
 
@@ -81,216 +87,241 @@ public static class GenerateCodes
 	{
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, accounting.FinancialYearId, sqlDataAccessTransaction);
 		var companyPrefix = (await CommonData.LoadTableDataById<CompanyModel>(AccountNames.Company, accounting.CompanyId, sqlDataAccessTransaction)).Code;
-		var accountingPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.FinancialAccountingTransactionPrefix, sqlDataAccessTransaction)).Value;
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.FinancialAccountingTransactionPrefix, sqlDataAccessTransaction)).Value;
 
-		var lastAccounting = await CommonData.LoadLastTableDataByFinancialYear<FinancialAccountingModel>(AccountNames.FinancialAccounting, accounting.FinancialYearId, sqlDataAccessTransaction);
-		if (lastAccounting is not null)
+		var lastItem = await CommonData.LoadLastTableDataByFinancialYear<FinancialAccountingModel>(AccountNames.FinancialAccounting, accounting.FinancialYearId, sqlDataAccessTransaction);
+		if (lastItem is not null)
 		{
-			var lastTransactionNo = lastAccounting.TransactionNo;
-			if (lastTransactionNo.StartsWith($"{companyPrefix}{financialYear.YearNo}{accountingPrefix}"))
+			var lastItemCode = lastItem.TransactionNo;
+			if (lastItemCode.StartsWith($"{companyPrefix}{financialYear.YearNo}{itemPrefix}"))
 			{
-				var lastNumberPart = lastTransactionNo[(companyPrefix.Length + financialYear.YearNo.ToString().Length + accountingPrefix.Length)..];
+				var lastNumberPart = lastItemCode[(companyPrefix.Length + financialYear.YearNo.ToString().Length + itemPrefix.Length)..];
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{accountingPrefix}{nextNumber:D5}", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
+					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}{nextNumber:D5}", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{accountingPrefix}00001", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
+		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}00001", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
 	}
 
 	public static async Task<string> GenerateLedgerCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
 	{
-		var ledgers = await CommonData.LoadTableData<LedgerModel>(AccountNames.Ledger, sqlDataAccessTransaction);
-		var ledgerPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.LedgerCodePrefix, sqlDataAccessTransaction)).Value;
+		var items = await CommonData.LoadTableData<LedgerModel>(AccountNames.Ledger, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.LedgerCodePrefix, sqlDataAccessTransaction)).Value;
 
-		var lastLedger = ledgers.OrderByDescending(l => l.Id).FirstOrDefault();
-		if (lastLedger is not null)
+		var lastItem = items.OrderByDescending(l => l.Id).FirstOrDefault();
+		if (lastItem is not null)
 		{
-			var lastLedgerCode = lastLedger.Code;
-			if (lastLedgerCode.StartsWith(ledgerPrefix))
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
 			{
-				var lastNumberPart = lastLedgerCode[ledgerPrefix.Length..];
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{ledgerPrefix}{nextNumber:D5}", 5, CodeType.Ledger, sqlDataAccessTransaction);
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.Ledger, sqlDataAccessTransaction);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{ledgerPrefix}00001", 5, CodeType.Ledger, sqlDataAccessTransaction);
-	}
-	#endregion
-
-	#region Trip Request
-	public static async Task<string> GenerateTripRequestCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	{
-		var tripRequests = await CommonData.LoadTableData<TripRequestModel>(FleetNames.TripRequest, sqlDataAccessTransaction);
-		var tripRequestPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.TripRequestTransactionPrefix, sqlDataAccessTransaction)).Value;
-
-		var lastTripRequest = tripRequests.OrderByDescending(tr => tr.Id).FirstOrDefault();
-		if (lastTripRequest is not null)
-		{
-			var lastTripRequestCode = lastTripRequest.TransactionNo;
-			if (lastTripRequestCode.StartsWith(tripRequestPrefix))
-			{
-				var lastNumberPart = lastTripRequestCode[tripRequestPrefix.Length..];
-				if (int.TryParse(lastNumberPart, out int lastNumber))
-				{
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{tripRequestPrefix}{nextNumber:D5}", 5, CodeType.TripRequest, sqlDataAccessTransaction);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{tripRequestPrefix}00001", 5, CodeType.TripRequest, sqlDataAccessTransaction);
-	}
-	#endregion
-
-	#region Route
-	public static async Task<string> GenerateLocationCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	{
-		var locations = await CommonData.LoadTableData<LocationModel>(FleetNames.Location, sqlDataAccessTransaction);
-		var locationPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.LocationCodePrefix, sqlDataAccessTransaction)).Value;
-
-		var lastLocation = locations.OrderByDescending(l => l.Id).FirstOrDefault();
-		if (lastLocation is not null)
-		{
-			var lastLocationCode = lastLocation.Code;
-			if (lastLocationCode.StartsWith(locationPrefix))
-			{
-				var lastNumberPart = lastLocationCode[locationPrefix.Length..];
-				if (int.TryParse(lastNumberPart, out int lastNumber))
-				{
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{locationPrefix}{nextNumber:D5}", 5, CodeType.Location, sqlDataAccessTransaction);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{locationPrefix}00001", 5, CodeType.Location, sqlDataAccessTransaction);
-	}
-
-	public static async Task<string> GenerateRouteCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	{
-		var routes = await CommonData.LoadTableData<RouteModel>(FleetNames.Route, sqlDataAccessTransaction);
-		var routePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.RouteCodePrefix, sqlDataAccessTransaction)).Value;
-
-		var lastRoute = routes.OrderByDescending(r => r.Id).FirstOrDefault();
-		if (lastRoute is not null)
-		{
-			var lastRouteCode = lastRoute.Code;
-			if (lastRouteCode.StartsWith(routePrefix))
-			{
-				var lastNumberPart = lastRouteCode[routePrefix.Length..];
-				if (int.TryParse(lastNumberPart, out int lastNumber))
-				{
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{routePrefix}{nextNumber:D5}", 5, CodeType.Route, sqlDataAccessTransaction);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{routePrefix}00001", 5, CodeType.Route, sqlDataAccessTransaction);
-	}
-
-	public static async Task<string> GenerateDriverCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	{
-		var drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver, sqlDataAccessTransaction);
-		var driverPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DriverCodePrefix, sqlDataAccessTransaction)).Value;
-
-		var lastDriver = drivers.OrderByDescending(vd => vd.Id).FirstOrDefault();
-		if (lastDriver is not null)
-		{
-			var lastDriverCode = lastDriver.Code;
-			if (lastDriverCode.StartsWith(driverPrefix))
-			{
-				var lastNumberPart = lastDriverCode[driverPrefix.Length..];
-				if (int.TryParse(lastNumberPart, out int lastNumber))
-				{
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{driverPrefix}{nextNumber:D5}", 5, CodeType.Driver, sqlDataAccessTransaction);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{driverPrefix}00001", 5, CodeType.Driver, sqlDataAccessTransaction);
-	}
-	#endregion
-
-	#region Vehicle Document
-	public static async Task<string> GenerateVehicleDocumentTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
-	{
-		var vehicleDocumentTypes = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, sqlDataAccessTransaction);
-		var vehicleDocumentTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DocumentTypeCodePrefix, sqlDataAccessTransaction)).Value;
-
-		var lastVehicleDocumentType = vehicleDocumentTypes.OrderByDescending(vdt => vdt.Id).FirstOrDefault();
-		if (lastVehicleDocumentType is not null)
-		{
-			var lastVehicleDocumentTypeCode = lastVehicleDocumentType.Code;
-			if (lastVehicleDocumentTypeCode.StartsWith(vehicleDocumentTypePrefix))
-			{
-				var lastNumberPart = lastVehicleDocumentTypeCode[vehicleDocumentTypePrefix.Length..];
-				if (int.TryParse(lastNumberPart, out int lastNumber))
-				{
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{vehicleDocumentTypePrefix}{nextNumber:D5}", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{vehicleDocumentTypePrefix}00001", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Ledger, sqlDataAccessTransaction);
 	}
 	#endregion
 
 	#region Vehicle
 	public static async Task<string> GenerateVehicleTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
 	{
-		var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType, sqlDataAccessTransaction);
-		var vehicleTypePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.VehicleTypeCodePrefix, sqlDataAccessTransaction)).Value;
+		var items = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.VehicleTypeCodePrefix, sqlDataAccessTransaction)).Value;
 
-		var lastVehicleType = vehicleTypes.OrderByDescending(vt => vt.Id).FirstOrDefault();
-		if (lastVehicleType is not null)
+		var lastItem = items.OrderByDescending(vt => vt.Id).FirstOrDefault();
+		if (lastItem is not null)
 		{
-			var lastVehicleTypeCode = lastVehicleType.Code;
-			if (lastVehicleTypeCode.StartsWith(vehicleTypePrefix))
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
 			{
-				var lastNumberPart = lastVehicleTypeCode[vehicleTypePrefix.Length..];
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{vehicleTypePrefix}{nextNumber:D5}", 5, CodeType.VehicleType, sqlDataAccessTransaction);
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.VehicleType, sqlDataAccessTransaction);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{vehicleTypePrefix}00001", 5, CodeType.VehicleType, sqlDataAccessTransaction);
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.VehicleType, sqlDataAccessTransaction);
 	}
 
 	public static async Task<string> GenerateSDRCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
 	{
-		var sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR, sqlDataAccessTransaction);
-		var sdrPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.SDRCodePrefix, sqlDataAccessTransaction)).Value;
+		var items = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.SDRCodePrefix, sqlDataAccessTransaction)).Value;
 
-		var lastSDR = sdrs.OrderByDescending(h => h.Id).FirstOrDefault();
-		if (lastSDR is not null)
+		var lastItem = items.OrderByDescending(h => h.Id).FirstOrDefault();
+		if (lastItem is not null)
 		{
-			var lastSDRCode = lastSDR.Code;
-			if (lastSDRCode.StartsWith(sdrPrefix))
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
 			{
-				var lastNumberPart = lastSDRCode[sdrPrefix.Length..];
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{sdrPrefix}{nextNumber:D5}", 5, CodeType.SDR, sqlDataAccessTransaction);
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.SDR, sqlDataAccessTransaction);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{sdrPrefix}00001", 5, CodeType.SDR, sqlDataAccessTransaction);
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.SDR, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Vehicle Document
+	public static async Task<string> GenerateVehicleDocumentTypeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DocumentTypeCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(vdt => vdt.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.VehicleDocumentType, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Route
+	public static async Task<string> GenerateLocationCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<LocationModel>(FleetNames.Location, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.LocationCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(l => l.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.Location, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Location, sqlDataAccessTransaction);
+	}
+
+	public static async Task<string> GenerateRouteCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<RouteModel>(FleetNames.Route, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.RouteCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(r => r.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.Route, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Route, sqlDataAccessTransaction);
+	}
+
+	public static async Task<string> GenerateDriverCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.DriverCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(vd => vd.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.Driver, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Driver, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Trip Request
+	public static async Task<string> GenerateTripRequestCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<TripRequestModel>(FleetNames.TripRequest, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.TripRequestTransactionPrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(tr => tr.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.TransactionNo;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.TripRequest, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.TripRequest, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Garage
+	public static async Task<string> GenerateGarageCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<GarageModel>(FleetNames.Garage, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.GarageCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(l => l.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.Garage, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Garage, sqlDataAccessTransaction);
 	}
 	#endregion
 }

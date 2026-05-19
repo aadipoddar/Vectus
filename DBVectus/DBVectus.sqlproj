@@ -82,6 +82,7 @@
     <Folder Include="Fleet\Route\Insert" />
     <Folder Include="Fleet\Route\Table" />
     <Folder Include="Fleet\TripRequest" />
+    <Folder Include="Fleet\Garage" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -145,6 +146,8 @@
     <Build Include="Fleet\Route\Table\Route.sql" />
     <Build Include="Fleet\TripRequest\TripRequest.sql" />
     <Build Include="Fleet\TripRequest\Insert_TripRequest.sql" />
+    <Build Include="Fleet\Garage\Garage.sql" />
+    <Build Include="Fleet\Garage\Insert_Garage.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

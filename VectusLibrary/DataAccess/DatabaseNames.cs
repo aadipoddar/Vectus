@@ -75,6 +75,12 @@ public static class AccountNames
 
 public static class FleetNames
 {
+	#region Garage
+	public static string Garage => "Garage";
+
+	public static string InsertGarage => "Insert_Garage";
+	#endregion
+
 	#region Trip Request
 	public static string TripRequest => "TripRequest";
 
