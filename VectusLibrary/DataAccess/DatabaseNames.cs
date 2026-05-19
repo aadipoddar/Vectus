@@ -75,6 +75,12 @@ public static class AccountNames
 
 public static class FleetNames
 {
+	#region Trip Request
+	public static string TripRequest => "TripRequest";
+
+	public static string InsertTripRequest => "Insert_TripRequest";
+	#endregion
+
 	#region Route
 	public static string Driver => "Driver";
 	public static string Location => "Location";

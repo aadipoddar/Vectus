@@ -449,6 +449,21 @@ h1:focus {
 		flex: 0 0 calc(25% - 16px);
 	}
 
+/* Two Column Layout (25-75 split) */
+.two-column-layout-reverse {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+	.two-column-layout-reverse > :first-child {
+		flex: 0 0 calc(25% - 16px);
+	}
+
+	.two-column-layout-reverse > :last-child {
+		flex: 0 0 75%;
+	}
+
 /* Two Column Layout (equal 50-50 split) */
 .two-column-layout-equal {
 	display: flex;

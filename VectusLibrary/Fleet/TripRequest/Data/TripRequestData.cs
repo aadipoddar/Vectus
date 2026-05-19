@@ -1,0 +1,105 @@
+using VectusLibrary.Accounts.Masters.Data;
+using VectusLibrary.Common;
+using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.TripRequest.Models;
+using VectusLibrary.Operations.Data;
+using VectusLibrary.Operations.Models;
+
+namespace VectusLibrary.Fleet.TripRequest.Data;
+
+public static class TripRequestData
+{
+	public static async Task<int> InsertTripRequest(TripRequestModel tripRequest, SqlDataAccessTransaction transaction = null) =>
+		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertTripRequest, tripRequest, transaction)).FirstOrDefault()
+			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Trip Request.");
+
+	public static async Task DeleteTransaction(TripRequestModel tripRequest) =>
+		await SqlDataAccessTransaction.Run(async transaction =>
+		{
+			tripRequest.Status = false;
+			await InsertTripRequest(tripRequest, transaction);
+			await AuditTrailData.SaveAuditTrail(new()
+			{
+				Action = AuditTrailActionTypes.Delete.ToString(),
+				TableName = FleetNames.TripRequest,
+				RecordNo = tripRequest.TransactionNo,
+				CreatedBy = tripRequest.LastModifiedBy.Value,
+				CreatedFromPlatform = tripRequest.LastModifiedFromPlatform
+			}, transaction);
+		});
+
+	public static async Task RecoverTransaction(TripRequestModel tripRequest) =>
+		await SqlDataAccessTransaction.Run(async transaction =>
+		{
+			tripRequest.Status = true;
+			await InsertTripRequest(tripRequest, transaction);
+			await AuditTrailData.SaveAuditTrail(new()
+			{
+				Action = AuditTrailActionTypes.Recover.ToString(),
+				TableName = FleetNames.TripRequest,
+				RecordNo = tripRequest.TransactionNo,
+				CreatedBy = tripRequest.LastModifiedBy.Value,
+				CreatedFromPlatform = tripRequest.LastModifiedFromPlatform
+			}, transaction);
+		});
+
+	private static async Task ValidateTransaction(TripRequestModel item, bool update)
+	{
+		item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? null : item.Remarks.Trim();
+		item.Status = true;
+
+		if (item.CompanyId <= 0)
+			throw new Exception("Company is required. Please select a valid company.");
+
+		var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(item.TransactionDateTime)
+			?? throw new Exception("No financial year found for the selected transaction date.");
+		await FinancialYearData.ValidateFinancialYear(item.TransactionDateTime);
+		item.FinancialYearId = financialYear.Id;
+
+		if (!update)
+		{
+			item.TransactionNo = await GenerateCodes.GenerateTripRequestCode();
+			item.RequestStatus = RequestStatus.Requested.ToString();
+		}
+
+		if (string.IsNullOrWhiteSpace(item.TransactionNo))
+			throw new Exception("Transaction No is required. Please enter a valid transaction number.");
+
+		if (string.IsNullOrWhiteSpace(item.RequestStatus))
+			throw new Exception("Request Status is required. Please select a valid request status.");
+
+		if (item.RouteId <= 0)
+			throw new Exception("Route is required. Please select a valid route.");
+
+		if (item.VehicleId <= 0)
+			throw new Exception("Vehicle is required. Please select a valid vehicle.");
+	}
+
+	public static async Task<int> SaveTransaction(TripRequestModel tripRequest)
+	{
+		var isUpdate = tripRequest.Id > 0;
+		await ValidateTransaction(tripRequest, isUpdate);
+		var previous = isUpdate
+			? await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, tripRequest.Id)
+			: null;
+
+		tripRequest.Id = await SqlDataAccessTransaction.Run(async transaction =>
+		{
+			var id = await InsertTripRequest(tripRequest, transaction);
+			var current = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, id, transaction);
+			var diff = AuditTrailData.GetDifference(previous, current);
+			await AuditTrailData.SaveAuditTrail(new()
+			{
+				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
+				TableName = FleetNames.TripRequest,
+				RecordNo = tripRequest.TransactionNo,
+				RecordValue = diff,
+				CreatedBy = isUpdate ? tripRequest.LastModifiedBy.Value : tripRequest.CreatedBy,
+				CreatedFromPlatform = isUpdate ? tripRequest.LastModifiedFromPlatform : tripRequest.CreatedFromPlatform
+			}, transaction);
+			return id;
+		});
+
+		return tripRequest.Id;
+	}
+}

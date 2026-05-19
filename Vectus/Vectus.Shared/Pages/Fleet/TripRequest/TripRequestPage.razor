@@ -1,0 +1,185 @@
+@using VectusLibrary.Accounts.Masters.Models
+@using VectusLibrary.Fleet.Route.Models
+@using VectusLibrary.Fleet.Vehicle.Models
+@using VectusLibrary.Fleet.TripRequest.Models
+
+@attribute [Route(PageRouteNames.TripRequest)]
+@attribute [Route(PageRouteNames.TripRequest + "/{Id:int}")]
+
+<PageTitle>Trip Request - Vectus</PageTitle>
+
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" />
+<MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" />
+<MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" />
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Trip Request Entry">
+			<LeftContent>
+				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
+					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
+					<MenuItems>
+						<MenuItem Text="File" IconCss="e-icons e-folder">
+							<MenuItems>
+								<MenuItem Text="New Transaction (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveTransaction" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+					</MenuItems>
+				</SfMenu>
+			</LeftContent>
+			<RightContent>
+				<IconButton Icon="IconType.Back" Title="Back (Ctrl + B)" OnClick="NavigateBack" />
+			</RightContent>
+		</Header>
+
+		<div class="page-container">
+
+			<div class="two-column-layout-reverse">
+
+				<!-- 25% : Transaction Summary -->
+				<div class="section-card">
+					<div class="section-header">
+						<div class="section-title-wrapper">
+							<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+								<polyline points="14 2 14 8 20 8" />
+								<line x1="16" y1="13" x2="8" y2="13" />
+								<line x1="16" y1="17" x2="8" y2="17" />
+							</svg>
+							<h2 class="section-title">Transaction Summary</h2>
+						</div>
+					</div>
+					<div class="section-body">
+						<div class="form-grid">
+							<div class="form-field">
+								<CustomAutoComplete @ref="_sfFirstFocus" T="CompanyModel"
+													@bind-Value="_selectedCompany"
+													@bind-Value:after="OnCompanyChanged"
+													DataSource="@_companies"
+													Placeholder="Select Company (Ctrl + F)"
+													Label="Company"
+													FieldValue="@nameof(CompanyModel.Name)"
+													AddNewRoute="@PageRouteNames.CompanyMaster" />
+							</div>
+
+							<div class="form-field">
+								<CustomDatePicker @bind-Value="_tripRequest.TransactionDateTime"
+												  Label="Transaction Date" ShowFinancialYear="false" />
+							</div>
+
+							<div class="form-field">
+								<CustomTextField @bind-Value="_tripRequest.TransactionNo"
+												 Label="Transaction No"
+												 Placeholder="Auto-generated on save"
+												 TabIndex="-1"
+												 ReadOnly="true" />
+							</div>
+
+							<div class="form-field">
+								<CustomAutoComplete T="RouteModel"
+													@bind-Value="_selectedRoute"
+													@bind-Value:after="OnRouteChanged"
+													DataSource="@_routes"
+													Placeholder="Select Route"
+													Label="Route"
+													FieldValue="@nameof(RouteModel.Code)"
+													AddNewRoute="@PageRouteNames.RouteMaster" />
+							</div>
+
+							<div class="form-field">
+								<CustomAutoComplete T="VehicleModel"
+													@bind-Value="_selectedVehicle"
+													@bind-Value:after="OnVehicleChanged"
+													DataSource="@_vehicles"
+													Placeholder="Select Vehicle"
+													Label="Vehicle"
+													FieldValue="@nameof(VehicleModel.Code)"
+													AddNewRoute="@PageRouteNames.VehicleMaster" />
+							</div>
+
+							@if (_selectedRoute is not null)
+							{
+								<div class="form-field">
+									<label class="field-label">Estimated Distance / Cost</label>
+									<div class="date-year-wrapper">
+										<CustomNumericField T="int"
+															@bind-Value="_selectedRoute.EstimatedDistance"
+															Placeholder="Estimated distance..."
+															Format="N0"
+															ReadOnly="true"
+															Required="false"
+															TabIndex="-1" />
+										<CustomNumericField T="decimal"
+															@bind-Value="_selectedRoute.EstimatedCost"
+															Placeholder="Estimated cost..."
+															ReadOnly="true"
+															Required="false"
+															TabIndex="-1" />
+									</div>
+								</div>
+
+								<div class="form-field">
+									<label class="field-label">Estimated Hours / Fuel</label>
+									<div class="date-year-wrapper">
+										<CustomNumericField T="int"
+															@bind-Value="_selectedRoute.EstimatedHours"
+															Placeholder="Estimated hours..."
+															Format="N0"
+															ReadOnly="true"
+															Required="false"
+															TabIndex="-1" />
+										<CustomNumericField T="int"
+															@bind-Value="_selectedRoute.EstimatedFuelConsumption"
+															Placeholder="Estimated fuel..."
+															Format="N0"
+															ReadOnly="true"
+															Required="false"
+															TabIndex="-1" />
+									</div>
+								</div>
+							}
+
+							<div class="form-field">
+								<CustomTextField @bind-Value="_tripRequest.Remarks"
+												 Label="Remarks"
+												 Placeholder="Enter remarks (optional)"
+												 Required="false"
+												 Lines="2" />
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 75% : Map (added later) -->
+				<div class="section-card">
+					<div class="section-header">
+						<div class="section-title-wrapper">
+							<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+								<line x1="8" y1="2" x2="8" y2="18" />
+								<line x1="16" y1="6" x2="16" y2="22" />
+							</svg>
+							<h2 class="section-title">Route Map</h2>
+						</div>
+					</div>
+					<div class="section-body">
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<ToastNotification @ref="_toastNotification" />

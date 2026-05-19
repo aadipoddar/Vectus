@@ -26,6 +26,8 @@ public static class SettingsKeys
 
 	public static string FinancialAccountingTransactionPrefix => "FinancialAccountingTransactionPrefix";
 
+	public static string TripRequestTransactionPrefix => "TripRequestTransactionPrefix";
+
 	public static string PrimaryCompanyLinkingId => "PrimaryCompanyLinkingId";
 
 	public static string CashLedgerId => "CashLedgerId";

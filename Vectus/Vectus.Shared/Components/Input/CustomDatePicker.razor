@@ -25,7 +25,7 @@
 					   IconSize="Size.Small" />
 		@if (ShowFinancialYear)
 		{
-			<CustomTextField Value="@(FinancialYear is null ? "Select Financial Year" : $"{FinancialYear.StartDate:yyyy} to {FinancialYear.EndDate:yyyy}")"
+			<CustomTextField Value="@(FinancialYear is null ? "Select FY" : $"{FinancialYear.StartDate:yyyy} to {FinancialYear.EndDate:yyyy}")"
 							 Placeholder="Financial Year"
 							 Label="Financial Year"
 							 ReadOnly="true"

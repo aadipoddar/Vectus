@@ -20,6 +20,8 @@ BEGIN
 	
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'FinancialAccountingTransactionPrefix'	, N'AC'	, N'Prefix for Financial Accounting Transaction Numbers')
 
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'TripRequestTransactionPrefix'			, N'TR'	, N'Prefix for Trip Request Transaction Numbers')
+
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'PrimaryCompanyLinkingId'			, N'1'		, N'Company Id for the Primary Company Account')
 
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'CashLedgerId'					, N'1'		, N'Cash ledger account for Cash Entries')

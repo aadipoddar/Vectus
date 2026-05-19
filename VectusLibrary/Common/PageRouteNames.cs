@@ -44,6 +44,8 @@ public static class PageRouteNames
 	public const string RouteMaster = "/fleet/route";
 	public const string DriverMaster = "/fleet/driver";
 
+	public const string TripRequest = "/fleet/trip-request";
+
 	public const string VehicleDocument = "/fleet/vehicle-document";
 	public const string VehicleDocumentTypeMaster = "/fleet/vehicle-document-type";
 

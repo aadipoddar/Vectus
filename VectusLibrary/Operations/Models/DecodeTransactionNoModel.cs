@@ -11,7 +11,9 @@ public enum CodeType
 
 	SDR,
 	VehicleType,
-	VehicleDocumentType
+	VehicleDocumentType,
+
+	TripRequest
 }
 
 public class DecodeTransactionNoModel

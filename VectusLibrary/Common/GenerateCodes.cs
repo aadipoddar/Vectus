@@ -2,6 +2,7 @@
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Route.Models;
+using VectusLibrary.Fleet.TripRequest.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Data;
@@ -25,6 +26,11 @@ public static class GenerateCodes
 				case CodeType.Ledger:
 					var ledger = await CommonData.LoadTableDataByCode<LedgerModel>(AccountNames.Ledger, code, sqlDataAccessTransaction);
 					isDuplicate = ledger is not null;
+					break;
+
+				case CodeType.TripRequest:
+					var tripRequest = await CommonData.LoadTableDataByCode<TripRequestModel>(FleetNames.TripRequest, code, sqlDataAccessTransaction);
+					isDuplicate = tripRequest is not null;
 					break;
 
 				case CodeType.Driver:
@@ -116,6 +122,31 @@ public static class GenerateCodes
 		}
 
 		return await CheckDuplicateCode($"{ledgerPrefix}00001", 5, CodeType.Ledger, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Trip Request
+	public static async Task<string> GenerateTripRequestCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var tripRequests = await CommonData.LoadTableData<TripRequestModel>(FleetNames.TripRequest, sqlDataAccessTransaction);
+		var tripRequestPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.TripRequestTransactionPrefix, sqlDataAccessTransaction)).Value;
+
+		var lastTripRequest = tripRequests.OrderByDescending(tr => tr.Id).FirstOrDefault();
+		if (lastTripRequest is not null)
+		{
+			var lastTripRequestCode = lastTripRequest.TransactionNo;
+			if (lastTripRequestCode.StartsWith(tripRequestPrefix))
+			{
+				var lastNumberPart = lastTripRequestCode[tripRequestPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{tripRequestPrefix}{nextNumber:D5}", 5, CodeType.TripRequest, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{tripRequestPrefix}00001", 5, CodeType.TripRequest, sqlDataAccessTransaction);
 	}
 	#endregion
 
