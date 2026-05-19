@@ -155,10 +155,12 @@ function infoHtml(v) {
 // Plot the live fleet once per map. Vehicle pins are smaller than the
 // route's origin/destination pins (scale 0.8) and coloured by status, so
 // they stay visually distinct. Click a pin for its details.
-window.showVehicles = async function (elementId, vehicles) {
+window.showVehicles = async function (elementId, vehicles, dotNetRef) {
 	const inst = maps.get(elementId);
 	if (!inst || inst.vehiclesDrawn) return;
 	inst.vehiclesDrawn = true;
+	inst.dotNetRef = dotNetRef;
+	inst.markerByCode = new Map();
 
 	const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 	const info = inst.infoWindow ?? (inst.infoWindow = new google.maps.InfoWindow());
@@ -175,9 +177,25 @@ window.showVehicles = async function (elementId, vehicles) {
 		marker.addListener("gmp-click", () => {
 			info.setContent(infoHtml(v));
 			info.open(inst.map, marker);
+			// Notify Blazor so the form/grid select this vehicle too.
+			inst.dotNetRef?.invokeMethodAsync("SelectVehicle", v.code);
 		});
 		inst.vehicleMarkers.push(marker);
+		inst.markerByCode.set(v.code, { marker, v });
 	}
+};
+
+// Selection driven from the form/grid: open the matching vehicle's card and
+// pan to it. A null/empty code just closes any open card.
+window.highlightVehicle = function (elementId, code) {
+	const inst = maps.get(elementId);
+	if (!inst || !inst.infoWindow) return;
+	if (!code) { inst.infoWindow.close(); return; }
+	const entry = inst.markerByCode?.get(code);
+	if (!entry) return;
+	inst.infoWindow.setContent(infoHtml(entry.v));
+	inst.infoWindow.open(inst.map, entry.marker);
+	inst.map.panTo(entry.marker.position);
 };
 
 // Create the map if needed, then (re)draw the route on it. `encodedPolyline`

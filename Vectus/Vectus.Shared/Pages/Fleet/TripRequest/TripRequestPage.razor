@@ -120,10 +120,10 @@ else
 						@if (_selectedRoute is not null)
 						{
 							<div class="form-field">
-								<label class="field-label">Estimated Distance / Cost</label>
 								<div class="date-year-wrapper">
 									<CustomNumericField T="int"
 														Value="_selectedRoute.EstimatedDistance"
+														Label="Est. Dist"
 														Placeholder="Estimated distance..."
 														Format="N0"
 														ReadOnly="true"
@@ -131,6 +131,7 @@ else
 														TabIndex="-1" />
 									<CustomNumericField T="decimal"
 														Value="_selectedRoute.EstimatedCost"
+														Label="Est. Cost"
 														Placeholder="Estimated cost..."
 														ReadOnly="true"
 														Required="false"
@@ -139,10 +140,10 @@ else
 							</div>
 
 							<div class="form-field">
-								<label class="field-label">Estimated Hours / Fuel</label>
 								<div class="date-year-wrapper">
 									<CustomNumericField T="int"
 														Value="_selectedRoute.EstimatedHours"
+														Label="Est. Hours"
 														Placeholder="Estimated hours..."
 														Format="N0"
 														ReadOnly="true"
@@ -150,6 +151,7 @@ else
 														TabIndex="-1" />
 									<CustomNumericField T="int"
 														Value="_selectedRoute.EstimatedFuelConsumption"
+														Label="Est. Fuel"
 														Placeholder="Estimated fuel..."
 														Format="N0"
 														ReadOnly="true"
@@ -226,6 +228,8 @@ else
 									  DestinationLatitude="_selectedRoute.ToLocationLatitude"
 									  DestinationLongitude="_selectedRoute.ToLocationLongitude"
 									  Vehicles="_vehicleLocations"
+									  SelectedVehicleCode="@(_selectedVehicle?.Code)"
+									  OnVehicleSelected="OnMapVehicleSelected"
 									  PlaceholderText="This route has no map coordinates set on its locations." />
 						}
 						else

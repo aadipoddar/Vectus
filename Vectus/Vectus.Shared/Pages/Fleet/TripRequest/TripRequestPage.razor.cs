@@ -187,6 +187,13 @@ public partial class TripRequestPage
 
 	private async Task OnVehicleRowDoubleClick(RecordDoubleClickEventArgs<VehicleLocationModel> args) =>
 		await OnVehicleChanged(args.RowData);
+
+	private async Task OnMapVehicleSelected(string code)
+	{
+		var vehicle = _vehicleLocations.FirstOrDefault(v => string.Equals(v.Code, code, StringComparison.OrdinalIgnoreCase));
+		await OnVehicleChanged(vehicle);
+		StateHasChanged();
+	}
 	#endregion
 
 	#region Saving

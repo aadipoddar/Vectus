@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using System.Globalization;
-using System.Linq;
 
 using VectusLibrary.APIService;
 using VectusLibrary.DataAccess;
@@ -19,10 +18,20 @@ public partial class RouteMap : IAsyncDisposable
 	[Parameter] public string PlaceholderText { get; set; } = "Select a route to preview it on the map.";
 	[Parameter] public List<VehicleLocationModel> Vehicles { get; set; }
 
+	// Two-way selection sync with the parent: clicking a marker raises
+	// OnVehicleSelected; setting SelectedVehicleCode opens/pans to that marker.
+	[Parameter] public string SelectedVehicleCode { get; set; }
+	[Parameter] public EventCallback<string> OnVehicleSelected { get; set; }
+
 	private readonly string _elementId = $"routeMap-{Guid.NewGuid():N}";
 	private string _origin;
 	private string _destination;
 	private string _drawn;
+	private string _highlighted;
+	private DotNetObjectReference<RouteMap> _selfRef;
+
+	[JSInvokable]
+	public Task SelectVehicle(string code) => OnVehicleSelected.InvokeAsync(code);
 
 	private bool HasRoute => _origin is not null && _destination is not null;
 
@@ -47,57 +56,66 @@ public partial class RouteMap : IAsyncDisposable
 			return;
 		}
 
-		// Skip the JS round-trip when the route hasn't actually changed.
+		// Skip the route JS round-trip when the route hasn't actually changed,
+		// but still sync the selection highlight below.
 		var route = $"{_origin}|{_destination}";
-		if (route == _drawn)
-			return;
-
-		_drawn = route;
-
-		// Route geometry is computed server-side/native (the Routes API has no
-		// browser CORS). A null result still draws the pins + an error badge.
-		MapRouteModel result = null;
-		try
+		if (route != _drawn)
 		{
-			result = await GoogleMapsApiService.GetRoutePolyline(
-				OriginLatitude.Value, OriginLongitude.Value,
-				DestinationLatitude.Value, DestinationLongitude.Value);
+			_drawn = route;
+
+			// Route geometry is computed server-side/native (the Routes API has no
+			// browser CORS). A null result still draws the pins + an error badge.
+			MapRouteModel result = null;
+			try
+			{
+				result = await GoogleMapsApiService.GetRoutePolyline(
+					OriginLatitude.Value, OriginLongitude.Value,
+					DestinationLatitude.Value, DestinationLongitude.Value);
+			}
+			catch { /* no route / quota / network — JS shows the fallback */ }
+
+			await JSRuntime.InvokeVoidAsync("showRoute", _elementId,
+				Secrets.GoogleMapsApiKey, Secrets.GoogleMapsMapId,
+				_origin, _destination, result?.EncodedPolyline, result?.Summary);
+
+			if (Vehicles is { Count: > 0 })
+			{
+				var markers = Vehicles
+					.Where(v => v.HasValidPosition)
+					.Select(v => new
+					{
+						code = v.Code,
+						reg = v.RegNo,
+						lat = v.Latitude,
+						lng = v.Longitude,
+						status = Status(v),
+						speed = v.Speed,
+						mode = v.VehicleMode,
+						type = v.VehicleType,
+						fuel = v.FuelLitre,
+						tank = v.TankSize,
+						odo = v.OdometerKM,
+						today = v.DistanceCovered,
+						ignition = v.IgnitionOn,
+						overspeed = v.IsOverSpeed,
+						alert = v.HasAlert,
+						updated = v.LastUpdate == default
+							? ""
+							: v.LastUpdate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
+						address = v.Address
+					})
+					.ToArray();
+
+				_selfRef ??= DotNetObjectReference.Create(this);
+				await JSRuntime.InvokeVoidAsync("showVehicles", _elementId, markers, _selfRef);
+			}
 		}
-		catch { /* no route / quota / network — JS shows the fallback */ }
 
-		await JSRuntime.InvokeVoidAsync("showRoute", _elementId,
-			Secrets.GoogleMapsApiKey, Secrets.GoogleMapsMapId,
-			_origin, _destination, result?.EncodedPolyline, result?.Summary);
-
-		if (Vehicles is { Count: > 0 })
+		// Open/pan to the marker for the parent's currently selected vehicle.
+		if (SelectedVehicleCode != _highlighted)
 		{
-			var markers = Vehicles
-				.Where(v => v.HasValidPosition)
-				.Select(v => new
-				{
-					code = v.Code,
-					reg = v.RegNo,
-					lat = v.Latitude,
-					lng = v.Longitude,
-					status = Status(v),
-					speed = v.Speed,
-					mode = v.VehicleMode,
-					type = v.VehicleType,
-					fuel = v.FuelLitre,
-					tank = v.TankSize,
-					odo = v.OdometerKM,
-					today = v.DistanceCovered,
-					ignition = v.IgnitionOn,
-					overspeed = v.IsOverSpeed,
-					alert = v.HasAlert,
-					updated = v.LastUpdate == default
-						? ""
-						: v.LastUpdate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
-					address = v.Address
-				})
-				.ToArray();
-
-			await JSRuntime.InvokeVoidAsync("showVehicles", _elementId, markers);
+			_highlighted = SelectedVehicleCode;
+			await JSRuntime.InvokeVoidAsync("highlightVehicle", _elementId, SelectedVehicleCode);
 		}
 	}
 
@@ -112,6 +130,7 @@ public partial class RouteMap : IAsyncDisposable
 			catch { /* circuit/WebView already gone — nothing to clean up */ }
 		}
 
+		_selfRef?.Dispose();
 		GC.SuppressFinalize(this);
 	}
 }
