@@ -1,0 +1,11 @@
+/* Map card fills the full 75% panel height */
+.route-map-card {
+	display: flex;
+	flex-direction: column;
+}
+
+	.route-map-card .section-body {
+		flex: 1;
+		padding: 0;
+		min-height: 0;
+	}

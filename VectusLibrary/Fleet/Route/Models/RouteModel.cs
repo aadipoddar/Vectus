@@ -19,8 +19,12 @@ public class RouteOverviewModel
 	public int Id { get; set; }
 	public int FromLocationId { get; set; }
 	public string FromLocationName { get; set; }
+	public decimal FromLocationLatitude { get; set; }
+	public decimal FromLocationLongitude { get; set; }
 	public int ToLocationId { get; set; }
 	public string ToLocationName { get; set; }
+	public decimal ToLocationLatitude { get; set; }
+	public decimal ToLocationLongitude { get; set; }
 	public string RouteDisplay { get; set; }
 	public string Code { get; set; }
 	public int EstimatedHours { get; set; }

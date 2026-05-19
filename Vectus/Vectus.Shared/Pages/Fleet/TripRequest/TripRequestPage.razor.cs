@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
@@ -7,6 +5,7 @@ using Vectus.Shared.Services;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Route.Data;
 using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.TripRequest.Data;
 using VectusLibrary.Fleet.TripRequest.Models;
@@ -18,19 +17,19 @@ namespace Vectus.Shared.Pages.Fleet.TripRequest;
 
 public partial class TripRequestPage
 {
-	[Parameter] public int? Id { get; set; }
+	[Microsoft.AspNetCore.Components.Parameter] public int? Id { get; set; }
 
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 
 	private CompanyModel _selectedCompany;
-	private RouteModel _selectedRoute;
-	private VehicleModel _selectedVehicle;
+	private RouteOverviewModel _selectedRoute;
+	private VehicleModel? _selectedVehicle = null;
 	private TripRequestModel _tripRequest = new();
 
 	private List<CompanyModel> _companies = [];
-	private List<RouteModel> _routes = [];
+	private List<RouteOverviewModel> _routes = [];
 	private List<VehicleModel> _vehicles = [];
 
 	private CustomAutoComplete<CompanyModel> _sfFirstFocus;
@@ -66,7 +65,7 @@ public partial class TripRequestPage
 	private async Task LoadData()
 	{
 		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(AccountNames.Company);
-		_routes = await CommonData.LoadTableDataByStatus<RouteModel>(FleetNames.Route);
+		_routes = await RouteData.LoadRouteOverview();
 		_vehicles = await CommonData.LoadTableDataByStatus<VehicleModel>(FleetNames.Vehicle);
 
 		_companies = [.. _companies.OrderBy(c => c.Name)];
@@ -139,35 +138,42 @@ public partial class TripRequestPage
 
 		_tripRequest.CompanyId = _selectedCompany.Id;
 		_tripRequest.RouteId = _selectedRoute.Id;
+		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
 	}
 	#endregion
 
 	#region Change Events
-	private Task OnCompanyChanged()
+	private async Task OnCompanyChanged(CompanyModel value)
 	{
-		if (_selectedCompany is null || _selectedCompany.Id <= 0)
-			return Task.CompletedTask;
+		if (value is null || value.Id == 0)
+			return;
 
+		_selectedCompany = value;
 		_tripRequest.CompanyId = _selectedCompany.Id;
-		return Task.CompletedTask;
 	}
 
-	private Task OnRouteChanged()
+	private async Task OnRouteChanged(RouteOverviewModel value)
 	{
-		if (_selectedRoute is null || _selectedRoute.Id <= 0)
-			return Task.CompletedTask;
+		if (value is null || value.Id == 0)
+			return;
 
+		_selectedRoute = value;
 		_tripRequest.RouteId = _selectedRoute.Id;
-		return Task.CompletedTask;
+
+		StateHasChanged();
 	}
 
-	private Task OnVehicleChanged()
+	private async Task OnVehicleChanged(VehicleModel value)
 	{
-		if (_selectedVehicle is null || _selectedVehicle.Id <= 0)
-			return Task.CompletedTask;
+		if (value is null || value.Id == 0)
+		{
+			_selectedVehicle = null;
+			_tripRequest.VehicleId = 0;
+			return;
+		}
 
+		_selectedVehicle = value;
 		_tripRequest.VehicleId = _selectedVehicle.Id;
-		return Task.CompletedTask;
 	}
 	#endregion
 
@@ -183,6 +189,9 @@ public partial class TripRequestPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
+			_tripRequest.CompanyId = _selectedCompany.Id;
+			_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
+			_tripRequest.RouteId = _selectedRoute.Id;
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
 			_tripRequest.Status = true;
 			_tripRequest.TransactionDateTime = DateOnly.FromDateTime(_tripRequest.TransactionDateTime).ToDateTime(new TimeOnly(currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second));

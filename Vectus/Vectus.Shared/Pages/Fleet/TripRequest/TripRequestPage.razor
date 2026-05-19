@@ -1,7 +1,6 @@
 @using VectusLibrary.Accounts.Masters.Models
 @using VectusLibrary.Fleet.Route.Models
 @using VectusLibrary.Fleet.Vehicle.Models
-@using VectusLibrary.Fleet.TripRequest.Models
 
 @attribute [Route(PageRouteNames.TripRequest)]
 @attribute [Route(PageRouteNames.TripRequest + "/{Id:int}")]
@@ -59,13 +58,16 @@ else
 					</div>
 					<div class="section-body">
 						<div class="form-grid">
+
+							<!-- Company -->
 							<div class="form-field">
-								<CustomAutoComplete @ref="_sfFirstFocus" T="CompanyModel"
-													@bind-Value="_selectedCompany"
-													@bind-Value:after="OnCompanyChanged"
+								<CustomAutoComplete T="CompanyModel"
+													@ref="_sfFirstFocus"
+													Value="_selectedCompany"
 													DataSource="@_companies"
-													Placeholder="Select Company (Ctrl + F)"
+													Placeholder="Select a Company"
 													Label="Company"
+													ValueChanged="OnCompanyChanged"
 													FieldValue="@nameof(CompanyModel.Name)"
 													AddNewRoute="@PageRouteNames.CompanyMaster" />
 							</div>
@@ -83,24 +85,26 @@ else
 												 ReadOnly="true" />
 							</div>
 
+							<!-- Route -->
 							<div class="form-field">
-								<CustomAutoComplete T="RouteModel"
-													@bind-Value="_selectedRoute"
-													@bind-Value:after="OnRouteChanged"
+								<CustomAutoComplete T="RouteOverviewModel"
+													Value="_selectedRoute"
 													DataSource="@_routes"
-													Placeholder="Select Route"
+													Placeholder="Select a Route"
 													Label="Route"
-													FieldValue="@nameof(RouteModel.Code)"
+													ValueChanged="OnRouteChanged"
+													FieldValue="@nameof(RouteOverviewModel.RouteDisplay)"
 													AddNewRoute="@PageRouteNames.RouteMaster" />
 							</div>
 
+							<!-- Vehicle -->
 							<div class="form-field">
 								<CustomAutoComplete T="VehicleModel"
-													@bind-Value="_selectedVehicle"
-													@bind-Value:after="OnVehicleChanged"
+													Value="_selectedVehicle"
 													DataSource="@_vehicles"
-													Placeholder="Select Vehicle"
+													Placeholder="Select a Vehicle (Ctrl + F)"
 													Label="Vehicle"
+													ValueChanged="OnVehicleChanged"
 													FieldValue="@nameof(VehicleModel.Code)"
 													AddNewRoute="@PageRouteNames.VehicleMaster" />
 							</div>
@@ -111,14 +115,14 @@ else
 									<label class="field-label">Estimated Distance / Cost</label>
 									<div class="date-year-wrapper">
 										<CustomNumericField T="int"
-															@bind-Value="_selectedRoute.EstimatedDistance"
+															Value="_selectedRoute.EstimatedDistance"
 															Placeholder="Estimated distance..."
 															Format="N0"
 															ReadOnly="true"
 															Required="false"
 															TabIndex="-1" />
 										<CustomNumericField T="decimal"
-															@bind-Value="_selectedRoute.EstimatedCost"
+															Value="_selectedRoute.EstimatedCost"
 															Placeholder="Estimated cost..."
 															ReadOnly="true"
 															Required="false"
@@ -130,14 +134,14 @@ else
 									<label class="field-label">Estimated Hours / Fuel</label>
 									<div class="date-year-wrapper">
 										<CustomNumericField T="int"
-															@bind-Value="_selectedRoute.EstimatedHours"
+															Value="_selectedRoute.EstimatedHours"
 															Placeholder="Estimated hours..."
 															Format="N0"
 															ReadOnly="true"
 															Required="false"
 															TabIndex="-1" />
 										<CustomNumericField T="int"
-															@bind-Value="_selectedRoute.EstimatedFuelConsumption"
+															Value="_selectedRoute.EstimatedFuelConsumption"
 															Placeholder="Estimated fuel..."
 															Format="N0"
 															ReadOnly="true"
@@ -158,8 +162,8 @@ else
 					</div>
 				</div>
 
-				<!-- 75% : Map (added later) -->
-				<div class="section-card">
+				<!-- 75% : Map -->
+				<div class="section-card route-map-card">
 					<div class="section-header">
 						<div class="section-title-wrapper">
 							<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -171,6 +175,10 @@ else
 						</div>
 					</div>
 					<div class="section-body">
+						<RouteMap OriginLatitude="_selectedRoute.FromLocationLatitude"
+								  OriginLongitude="_selectedRoute.FromLocationLongitude"
+								  DestinationLatitude="_selectedRoute.ToLocationLatitude"
+								  DestinationLongitude="_selectedRoute.ToLocationLongitude" />
 					</div>
 				</div>
 
