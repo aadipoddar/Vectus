@@ -58,7 +58,7 @@ public static class TripRequestData
 
 		if (!update)
 		{
-			item.TransactionNo = await GenerateCodes.GenerateTripRequestCode();
+			item.TransactionNo = await GenerateCodes.GenerateTripRequestTransactionNo(item);
 			item.RequestStatus = RequestStatus.Requested.ToString();
 		}
 

@@ -244,6 +244,7 @@ public partial class TripRequestPage
 		{
 			case "NewTransaction": ResetPage(); break;
 			case "SaveTransaction": await SaveTransaction(); break;
+			case "TripRequestReport": await AuthenticationService.NavigateToRoute(PageRouteNames.TripRequestReport, FormFactor, JSRuntime, NavigationManager); break;
 		}
 	}
 

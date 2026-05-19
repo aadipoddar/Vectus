@@ -52,6 +52,7 @@ public static class PageRouteNames
 	public const string DriverMaster = "/fleet/driver";
 
 	public const string TripRequest = "/fleet/trip-request";
+	public const string TripRequestReport = "/fleet/reports/trip-request";
 
 	public const string GarageMaster = "/fleet/garage";
 	#endregion

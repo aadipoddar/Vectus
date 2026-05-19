@@ -85,6 +85,8 @@ public static class FleetNames
 	public static string TripRequest => "TripRequest";
 
 	public static string InsertTripRequest => "Insert_TripRequest";
+
+	public static string TripRequestOverview => "TripRequest_Overview";
 	#endregion
 
 	#region Route

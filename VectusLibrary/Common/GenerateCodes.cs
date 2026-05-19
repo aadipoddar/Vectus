@@ -276,27 +276,28 @@ public static class GenerateCodes
 	#endregion
 
 	#region Trip Request
-	public static async Task<string> GenerateTripRequestCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	public static async Task<string> GenerateTripRequestTransactionNo(TripRequestModel tripRequest, SqlDataAccessTransaction sqlDataAccessTransaction = null)
 	{
-		var items = await CommonData.LoadTableData<TripRequestModel>(FleetNames.TripRequest, sqlDataAccessTransaction);
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, tripRequest.FinancialYearId, sqlDataAccessTransaction);
+		var companyPrefix = (await CommonData.LoadTableDataById<CompanyModel>(AccountNames.Company, tripRequest.CompanyId, sqlDataAccessTransaction)).Code;
 		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.TripRequestTransactionPrefix, sqlDataAccessTransaction)).Value;
 
-		var lastItem = items.OrderByDescending(tr => tr.Id).FirstOrDefault();
+		var lastItem = await CommonData.LoadLastTableDataByFinancialYear<TripRequestModel>(FleetNames.TripRequest, tripRequest.FinancialYearId, sqlDataAccessTransaction);
 		if (lastItem is not null)
 		{
 			var lastItemCode = lastItem.TransactionNo;
-			if (lastItemCode.StartsWith(itemPrefix))
+			if (lastItemCode.StartsWith($"{companyPrefix}{financialYear.YearNo}{itemPrefix}"))
 			{
-				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				var lastNumberPart = lastItemCode[(companyPrefix.Length + financialYear.YearNo.ToString().Length + itemPrefix.Length)..];
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.TripRequest, sqlDataAccessTransaction);
+					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}{nextNumber:D5}", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.TripRequest, sqlDataAccessTransaction);
+		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}00001", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
 	}
 	#endregion
 

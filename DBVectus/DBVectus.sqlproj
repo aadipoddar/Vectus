@@ -148,6 +148,7 @@
     <Build Include="Fleet\TripRequest\Insert_TripRequest.sql" />
     <Build Include="Fleet\Garage\Garage.sql" />
     <Build Include="Fleet\Garage\Insert_Garage.sql" />
+    <Build Include="Fleet\TripRequest\TripRequest_Overview.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />
