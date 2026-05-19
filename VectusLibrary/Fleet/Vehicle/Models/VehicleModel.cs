@@ -32,6 +32,8 @@ public class VehicleLocationModel
 	public string? Remarks { get; set; }
 	public bool Status { get; set; }
 
+	public string SDR { get; set; }
+
 	// Identity — map to Vectus Vehicle.Code via VehicleId (fallback RegNo).
 	public string VehicleId { get; set; }
 	public string RegNo { get; set; }
@@ -43,6 +45,9 @@ public class VehicleLocationModel
 	public decimal Longitude { get; set; }
 	public string Address { get; set; }
 	public bool HasValidPosition => Latitude != 0 && Longitude != 0;
+
+	// Haversine distance in KM
+	public decimal? HaversineDistance { get; set; }
 
 	// Movement
 	public int Speed { get; set; }

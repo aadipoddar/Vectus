@@ -8,7 +8,7 @@ namespace VectusLibrary.Fleet.Vehicle.Data;
 
 public static class SDRData
 {
-	public static async Task<int> InsertSDR(SDRModel sdr, SqlDataAccessTransaction transaction = null) =>
+	private static async Task<int> InsertSDR(SDRModel sdr, SqlDataAccessTransaction transaction = null) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertSDR, sdr, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert SDR.");
 

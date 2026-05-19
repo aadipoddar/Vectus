@@ -1,3 +1,5 @@
+using Syncfusion.Blazor.Grids;
+
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
@@ -26,12 +28,11 @@ public partial class TripRequestPage
 
 	private CompanyModel _selectedCompany;
 	private RouteOverviewModel _selectedRoute;
-	private VehicleModel? _selectedVehicle = null;
+	private VehicleLocationModel _selectedVehicle = null;
 	private TripRequestModel _tripRequest = new();
 
 	private List<CompanyModel> _companies = [];
 	private List<RouteOverviewModel> _routes = [];
-	private List<VehicleModel> _vehicles = [];
 	private List<VehicleLocationModel> _vehicleLocations = [];
 
 	private CustomAutoComplete<CompanyModel> _sfFirstFocus;
@@ -68,12 +69,9 @@ public partial class TripRequestPage
 	{
 		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(AccountNames.Company);
 		_routes = await RouteData.LoadRouteOverview();
-		_vehicles = await CommonData.LoadTableDataByStatus<VehicleModel>(FleetNames.Vehicle);
-		_vehicleLocations = await VehicleData.LoadVehicleLocations();
 
 		_companies = [.. _companies.OrderBy(c => c.Name)];
 		_routes = [.. _routes.OrderBy(r => r.Code)];
-		_vehicles = [.. _vehicles.OrderBy(v => v.Code)];
 	}
 
 	private async Task ResolveTransaction()
@@ -135,8 +133,10 @@ public partial class TripRequestPage
 			? _routes.FirstOrDefault(r => r.Id == _tripRequest.RouteId)
 			: _routes.FirstOrDefault();
 
+		_vehicleLocations = await VehicleData.LoadVehicleLocations(_selectedRoute);
+
 		_selectedVehicle = _tripRequest.VehicleId > 0
-			? _vehicles.FirstOrDefault(v => v.Id == _tripRequest.VehicleId)
+			? _vehicleLocations.FirstOrDefault(v => v.Id == _tripRequest.VehicleId)
 			: null;
 
 		_tripRequest.CompanyId = _selectedCompany.Id;
@@ -163,10 +163,16 @@ public partial class TripRequestPage
 		_selectedRoute = value;
 		_tripRequest.RouteId = _selectedRoute.Id;
 
+		_vehicleLocations = await VehicleData.LoadVehicleLocations(_selectedRoute);
+		_selectedVehicle = _selectedVehicle is not null
+			? _vehicleLocations.FirstOrDefault(v => v.Id == _selectedVehicle.Id)
+			: null;
+		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
+
 		StateHasChanged();
 	}
 
-	private async Task OnVehicleChanged(VehicleModel value)
+	private async Task OnVehicleChanged(VehicleLocationModel value)
 	{
 		if (value is null || value.Id == 0)
 		{
@@ -178,6 +184,9 @@ public partial class TripRequestPage
 		_selectedVehicle = value;
 		_tripRequest.VehicleId = _selectedVehicle.Id;
 	}
+
+	private async Task OnVehicleRowDoubleClick(RecordDoubleClickEventArgs<VehicleLocationModel> args) =>
+		await OnVehicleChanged(args.RowData);
 	#endregion
 
 	#region Saving

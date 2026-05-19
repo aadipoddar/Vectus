@@ -1,6 +1,7 @@
 using VectusLibrary.APIService;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
@@ -13,9 +14,10 @@ public static class VehicleData
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertVehicle, vehicle, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Vehicle.");
 
-	public static async Task<List<VehicleLocationModel>> LoadVehicleLocations()
+	public static async Task<List<VehicleLocationModel>> LoadVehicleLocations(RouteOverviewModel route = null)
 	{
 		var vehicleLocations = await CommonData.LoadTableData<VehicleLocationModel>(FleetNames.Vehicle);
+		var sdr = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
 
 		List<VamosysVehicleModel> vamosysVehicles = [];
 		try { vamosysVehicles = await VamosysApiService.GetLiveVehicles(); }
@@ -27,6 +29,8 @@ public static class VehicleData
 			if (gps is null)
 				continue;
 
+			vehicle.SDR = sdr.FirstOrDefault(s => s.Id == vehicle.SDRId)?.Name;
+
 			vehicle.VehicleId = gps.VehicleId;
 			vehicle.RegNo = gps.RegNo;
 			vehicle.ShortName = gps.ShortName;
@@ -35,6 +39,8 @@ public static class VehicleData
 			vehicle.Latitude = gps.Latitude;
 			vehicle.Longitude = gps.Longitude;
 			vehicle.Address = gps.Address;
+
+			vehicle.HaversineDistance = HaversineDistance(vehicle, route);
 
 			vehicle.Speed = gps.Speed;
 			vehicle.TopSpeed = gps.TopSpeed;
@@ -59,7 +65,35 @@ public static class VehicleData
 			vehicle.GpsExpiryDays = gps.GpsExpiryDays;
 		}
 
-		return vehicleLocations;
+		return [.. vehicleLocations.Where(v => v.HaversineDistance.HasValue).OrderBy(v => v.HaversineDistance)];
+	}
+
+	public static decimal? HaversineDistance(VehicleLocationModel vehicle, RouteOverviewModel route)
+	{
+		if (route is null || (route.FromLocationLatitude == 0 && route.FromLocationLongitude == 0) || !vehicle.HasValidPosition)
+			return null;
+
+		var locationLat = route.FromLocationLatitude;
+		var locationLon = route.FromLocationLongitude;
+		var vehicleLat = vehicle.Latitude;
+		var vehicleLon = vehicle.Longitude;
+
+		static double ToRadians(double degrees) => degrees * Math.PI / 180.0;
+
+		var deltaLat = ToRadians((double)(locationLat - vehicleLat));
+		var deltaLon = ToRadians((double)(locationLon - vehicleLon));
+
+		var a = (Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2))
+					+ (Math.Cos(ToRadians((double)locationLat))
+					* Math.Cos(ToRadians((double)vehicleLat))
+					* Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2));
+
+		var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+		var earthRadiusKm = 6371.0;
+		// Round to 3 decimals (≈1 m) so trucks near the origin don't collapse
+		// to 0.0; the grid formats this adaptively (metres under 1 km).
+		return (decimal)Math.Round(earthRadiusKm * c, 3);
 	}
 
 	public static async Task DeleteTransaction(VehicleModel vehicle, int userId, string platform) =>

@@ -8,7 +8,7 @@ namespace VectusLibrary.Fleet.Vehicle.Data;
 
 public static class VehicleTypeData
 {
-	public static async Task<int> InsertVehicleType(VehicleTypeModel vehicleType, SqlDataAccessTransaction transaction = null) =>
+	private static async Task<int> InsertVehicleType(VehicleTypeModel vehicleType, SqlDataAccessTransaction transaction = null) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertVehicleType, vehicleType, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Vehicle Type.");
 

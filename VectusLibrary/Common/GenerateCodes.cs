@@ -56,7 +56,7 @@ public static class GenerateCodes
 					break;
 
 				case CodeType.TripRequest:
-					var tripRequest = await CommonData.LoadTableDataByCode<TripRequestModel>(FleetNames.TripRequest, code, sqlDataAccessTransaction);
+					var tripRequest = await CommonData.LoadTableDataByTransactionNo<TripRequestModel>(FleetNames.TripRequest, code, sqlDataAccessTransaction);
 					isDuplicate = tripRequest is not null;
 					break;
 
