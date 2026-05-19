@@ -20,6 +20,7 @@ public static partial class Secrets
 
 	public static string OpenRouteServiceApiKey = GetSecret(nameof(OpenRouteServiceApiKey));
 	public static string GoogleMapsApiKey = GetSecret(nameof(GoogleMapsApiKey));
+	public static string GoogleMapsMapId = GetSecret(nameof(GoogleMapsMapId));
 
 	public static string Email => "softaadi@gmail.com";
 	public static string EmailPassword = GetSecret(nameof(EmailPassword));

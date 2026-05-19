@@ -1,8 +1,9 @@
-using System.Globalization;
-
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+using System.Globalization;
+
+using VectusLibrary.APIService;
 using VectusLibrary.DataAccess;
 
 namespace Vectus.Shared.Components.Map;
@@ -18,57 +19,61 @@ public partial class RouteMap : IAsyncDisposable
 	private readonly string _elementId = $"routeMap-{Guid.NewGuid():N}";
 	private string _origin;
 	private string _destination;
-	private bool _ready;
-	private bool _dirty;
-	private bool _initialized;
+	private string _drawn;
+
+	private bool HasRoute => _origin is not null && _destination is not null;
 
 	protected override void OnParametersSet()
 	{
-		var origin = Format(OriginLatitude, OriginLongitude);
-		var destination = Format(DestinationLatitude, DestinationLongitude);
-
-		if (origin == _origin && destination == _destination)
-			return;
-
-		_origin = origin;
-		_destination = destination;
-		_ready = origin is not null && destination is not null;
-		_dirty = _ready;
-
-		if (!_ready)
-			_initialized = false;
+		_origin = Format(OriginLatitude, OriginLongitude);
+		_destination = Format(DestinationLatitude, DestinationLongitude);
 	}
 
+	// A location with no geocoded coordinates arrives as (0, 0); treat that
+	// (and nulls) as "no point" so we never ask Google for an ocean route.
 	private static string Format(decimal? latitude, decimal? longitude) =>
-		latitude is null || longitude is null
+		latitude is null || longitude is null || (latitude == 0 && longitude == 0)
 			? null
 			: $"{latitude.Value.ToString(CultureInfo.InvariantCulture)},{longitude.Value.ToString(CultureInfo.InvariantCulture)}";
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (!_ready || !_dirty)
+		if (!HasRoute)
+		{
+			_drawn = null;
+			return;
+		}
+
+		// Skip the JS round-trip when the route hasn't actually changed.
+		var route = $"{_origin}|{_destination}";
+		if (route == _drawn)
 			return;
 
-		_dirty = false;
+		_drawn = route;
 
-		if (!_initialized)
+		// Route geometry is computed server-side/native (the Routes API has no
+		// browser CORS). A null result still draws the pins + an error badge.
+		MapRouteModel result = null;
+		try
 		{
-			_initialized = true;
-			await JSRuntime.InvokeVoidAsync("initRouteMap", _elementId, Secrets.GoogleMapsApiKey, _origin, _destination);
+			result = await GoogleMapsApiService.GetRoutePolyline(
+				OriginLatitude.Value, OriginLongitude.Value,
+				DestinationLatitude.Value, DestinationLongitude.Value);
 		}
-		else
-		{
-			await JSRuntime.InvokeVoidAsync("updateRouteMap", _elementId, _origin, _destination);
-		}
+		catch { /* no route / quota / network — JS shows the fallback */ }
+
+		await JSRuntime.InvokeVoidAsync("showRoute", _elementId,
+			Secrets.GoogleMapsApiKey, Secrets.GoogleMapsMapId,
+			_origin, _destination, result?.EncodedPolyline, result?.Summary);
 	}
 
 	public async ValueTask DisposeAsync()
 	{
-		if (!_initialized)
-			return;
-
-		try { await JSRuntime.InvokeVoidAsync("disposeRouteMap", _elementId); }
-		catch { /* circuit/WebView already gone — nothing to clean up */ }
+		if (_drawn is not null)
+		{
+			try { await JSRuntime.InvokeVoidAsync("disposeRouteMap", _elementId); }
+			catch { /* circuit/WebView already gone — nothing to clean up */ }
+		}
 
 		GC.SuppressFinalize(this);
 	}

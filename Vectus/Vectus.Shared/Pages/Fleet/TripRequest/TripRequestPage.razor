@@ -175,10 +175,18 @@ else
 						</div>
 					</div>
 					<div class="section-body">
-						<RouteMap OriginLatitude="_selectedRoute.FromLocationLatitude"
-								  OriginLongitude="_selectedRoute.FromLocationLongitude"
-								  DestinationLatitude="_selectedRoute.ToLocationLatitude"
-								  DestinationLongitude="_selectedRoute.ToLocationLongitude" />
+						@if (_selectedRoute is not null)
+						{
+							<RouteMap OriginLatitude="_selectedRoute.FromLocationLatitude"
+									  OriginLongitude="_selectedRoute.FromLocationLongitude"
+									  DestinationLatitude="_selectedRoute.ToLocationLatitude"
+									  DestinationLongitude="_selectedRoute.ToLocationLongitude"
+									  PlaceholderText="This route has no map coordinates set on its locations." />
+						}
+						else
+						{
+							<p class="section-subtitle">Select a route to preview it on the map.</p>
+						}
 					</div>
 				</div>
 
