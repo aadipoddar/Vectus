@@ -16,6 +16,8 @@
 <MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" />
 <MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" />
 <MudBlazor.MudHotkey Key=JsKey.KeyO KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ViewSelectedTransaction" />
+<MudBlazor.MudHotkey Key=JsKey.KeyA KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="AcceptSelectedTransaction" />
+<MudBlazor.MudHotkey Key=JsKey.KeyJ KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="RejectSelectedTransaction" />
 <MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedTransaction" />
 
 @if (_isLoading || _user is null)
@@ -59,6 +61,9 @@ else
 						<MenuItem Text="Transaction" IconCss="e-icons e-chart">
 							<MenuItems>
 								<MenuItem Text="View (Alt + O)" IconCss="e-icons e-eye" Id="ViewSelected" Disabled="@_isProcessing" />
+								<MenuItem Separator="true" />
+								<MenuItem Text="Accept (Alt + A)" IconCss="e-icons e-check" Id="AcceptSelected" Disabled="@_isProcessing" />
+								<MenuItem Text="Reject (Alt + J)" IconCss="e-icons e-close" Id="RejectSelected" Disabled="@_isProcessing" />
 								<MenuItem Separator="true" />
 								<MenuItem Text="Delete / Recover (Del)" IconCss="e-icons e-trash" Id="DeleteRecoverSelected" Disabled="@_isProcessing" />
 							</MenuItems>
@@ -333,5 +338,11 @@ else
 
 <RecoverConfirmationDialog @ref="_recoverConfirmationDialog" IdentifierValue="@_recoverTransactionNo"
 						   OnConfirm="ConfirmRecover" OnCancel="CancelRecover" />
+
+<AcceptConfirmationDialog @ref="_acceptConfirmationDialog" IdentifierValue="@_acceptTransactionNo"
+						  OnConfirm="ConfirmAccept" OnCancel="CancelAccept" />
+
+<RejectConfirmationDialog @ref="_rejectConfirmationDialog" IdentifierValue="@_rejectTransactionNo"
+						  OnConfirm="ConfirmReject" OnCancel="CancelReject" />
 
 <ToastNotification @ref="_toastNotification" />

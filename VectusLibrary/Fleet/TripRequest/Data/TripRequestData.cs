@@ -51,6 +51,12 @@ public static class TripRequestData
 		if (item.CompanyId <= 0)
 			throw new Exception("Company is required. Please select a valid company.");
 
+		if (item.RouteId <= 0)
+			throw new Exception("Route is required. Please select a valid route.");
+
+		if (item.VehicleId <= 0)
+			throw new Exception("Vehicle is required. Please select a valid vehicle.");
+
 		var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(item.TransactionDateTime)
 			?? throw new Exception("No financial year found for the selected transaction date.");
 		await FinancialYearData.ValidateFinancialYear(item.TransactionDateTime);
@@ -61,18 +67,11 @@ public static class TripRequestData
 			item.TransactionNo = await GenerateCodes.GenerateTripRequestTransactionNo(item);
 			item.RequestStatus = RequestStatus.Requested.ToString();
 		}
-
-		if (string.IsNullOrWhiteSpace(item.TransactionNo))
-			throw new Exception("Transaction No is required. Please enter a valid transaction number.");
-
-		if (string.IsNullOrWhiteSpace(item.RequestStatus))
-			throw new Exception("Request Status is required. Please select a valid request status.");
-
-		if (item.RouteId <= 0)
-			throw new Exception("Route is required. Please select a valid route.");
-
-		if (item.VehicleId <= 0)
-			throw new Exception("Vehicle is required. Please select a valid vehicle.");
+		else
+		{
+			var existing = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, item.Id);
+			item.TransactionNo = existing.TransactionNo;
+		}
 	}
 
 	public static async Task<int> SaveTransaction(TripRequestModel tripRequest)

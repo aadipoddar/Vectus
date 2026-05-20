@@ -1,0 +1,35 @@
+<div class="cd-scope">
+	<SfDialog @ref="_dialog" Width="400px" IsModal="true" ShowCloseIcon="true" @bind-Visible="_isVisible" CssClass="confirm-dialog">
+
+		<MudBlazor.MudHotkey Key=JsKey.Enter OnHotkeyPressed="HandleConfirm" />
+		<MudBlazor.MudHotkey Key=JsKey.Escape OnHotkeyPressed="HandleCancel" />
+
+		<DialogTemplates>
+			<Header>
+				<div class="cd-header">
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+						 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+						 style="color: #059669;">
+						<polyline points="20 6 9 17 4 12"></polyline>
+					</svg>
+					<span>Accept</span>
+				</div>
+			</Header>
+			<Content>
+				<div class="cd-body">
+					<div class="cd-detail">
+						<span class="cd-detail-label">Item:</span>
+						<span class="cd-detail-value">@IdentifierValue</span>
+					</div>
+					<p class="cd-note cd-note-info">
+						The trip request will be marked as Accepted.
+					</p>
+					<div class="cd-actions">
+						<button class="cd-btn cd-btn-cancel" @onclick="HandleCancel">Cancel</button>
+						<button class="cd-btn cd-btn-success" @onclick="HandleConfirm">Accept</button>
+					</div>
+				</div>
+			</Content>
+		</DialogTemplates>
+	</SfDialog>
+</div>
