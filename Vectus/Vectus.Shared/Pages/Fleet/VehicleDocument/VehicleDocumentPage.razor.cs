@@ -9,6 +9,7 @@ using Vectus.Shared.Services;
 
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Vehicle.Data;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Data;
 using VectusLibrary.Fleet.VehicleDocument.Exports;
@@ -28,11 +29,11 @@ public partial class VehicleDocumentPage
 
 	private VehicleDocumentModel _vehicleDocument = new() { TransactionDateTime = DateTime.Now, RenewalDate = DateTime.Now.AddYears(1) };
 	private VehicleDocumentTypeModel _selectedVehicleDocumentType;
-	private VehicleModel _selectedVehicle;
+	private VehicleLocationModel _selectedVehicle;
 
 	private List<VehicleDocumentModel> _vehicleDocuments = [];
 	private List<VehicleDocumentTypeModel> _vehicleDocumentTypes = [];
-	private List<VehicleModel> _vehicles = [];
+	private List<VehicleLocationModel> _vehicles = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
@@ -71,7 +72,7 @@ public partial class VehicleDocumentPage
 	{
 		_vehicleDocuments = await CommonData.LoadTableData<VehicleDocumentModel>(FleetNames.VehicleDocument);
 		_vehicleDocumentTypes = await CommonData.LoadTableDataByStatus<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType);
-		_vehicles = await CommonData.LoadTableDataByStatus<VehicleModel>(FleetNames.Vehicle);
+		_vehicles = await VehicleData.LoadVehicleLocations();
 
 		_vehicleDocumentTypes = [.. _vehicleDocumentTypes.OrderBy(vdt => vdt.Name)];
 		_vehicles = [.. _vehicles.OrderBy(v => v.Code)];
@@ -94,23 +95,24 @@ public partial class VehicleDocumentPage
 	#endregion
 
 	#region Change Events
-	private Task OnVehicleDocumentTypeChanged()
+	private async Task OnVehicleDocumentTypeChanged(VehicleDocumentTypeModel value)
 	{
-		if (_selectedVehicleDocumentType is null || _selectedVehicleDocumentType.Id <= 0)
-			return Task.CompletedTask;
+		if (value is null || value.Id == 0)
+			return;
 
+		_selectedVehicleDocumentType = value;
 		_vehicleDocument.VehicleDocumentTypeId = _selectedVehicleDocumentType.Id;
 		_vehicleDocument.Rate = _selectedVehicleDocumentType.Rate;
-		return Task.CompletedTask;
 	}
 
-	private Task OnVehicleChanged()
+	private async Task OnVehicleChanged(VehicleLocationModel value)
 	{
-		if (_selectedVehicle is null || _selectedVehicle.Id <= 0)
-			return Task.CompletedTask;
+		if (value is null || value.Id <= 0)
+			return;
 
+		_selectedVehicle = value;
 		_vehicleDocument.VehicleId = _selectedVehicle.Id;
-		return Task.CompletedTask;
+		_vehicleDocument.CurrentKM = _selectedVehicle.OdometerKM;
 	}
 	#endregion
 

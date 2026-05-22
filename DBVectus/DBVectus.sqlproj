@@ -88,6 +88,10 @@
     <Folder Include="Fleet\Repair\Insert" />
     <Folder Include="Fleet\Repair\Load" />
     <Folder Include="Fleet\Route\Delete" />
+    <Folder Include="Fleet\Tyre" />
+    <Folder Include="Fleet\Tyre\Delete" />
+    <Folder Include="Fleet\Tyre\Insert" />
+    <Folder Include="Fleet\Tyre\Table" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -165,6 +169,11 @@
     <Build Include="Fleet\Route\Table\VehicleDriver.sql" />
     <Build Include="Fleet\Route\Insert\Insert_VehicleDriver.sql" />
     <Build Include="Fleet\Route\Delete\Delete_VehicleDriver.sql" />
+    <Build Include="Fleet\Tyre\Delete\Delete_TyreMounting.sql" />
+    <Build Include="Fleet\Tyre\Insert\Insert_TyreCompany.sql" />
+    <Build Include="Fleet\Tyre\Insert\Insert_TyreMounting.sql" />
+    <Build Include="Fleet\Tyre\Table\TyreMounting.sql" />
+    <Build Include="Fleet\Tyre\Table\TyreCompany.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

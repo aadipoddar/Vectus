@@ -87,8 +87,8 @@ else
 
 						<div class="form-field">
 							<CustomAutoComplete T="VehicleDocumentTypeModel"
-												@bind-Value="_selectedVehicleDocumentType"
-												@bind-Value:after="OnVehicleDocumentTypeChanged"
+												Value="_selectedVehicleDocumentType"
+												ValueChanged="OnVehicleDocumentTypeChanged"
 												DataSource="@_vehicleDocumentTypes"
 												Placeholder="Select Document Type"
 												Label="Document Type"
@@ -97,13 +97,13 @@ else
 						</div>
 
 						<div class="form-field">
-							<CustomAutoComplete T="VehicleModel"
-												@bind-Value="_selectedVehicle"
-												@bind-Value:after="OnVehicleChanged"
+							<CustomAutoComplete T="VehicleLocationModel"
+												Value="_selectedVehicle"
+												ValueChanged="OnVehicleChanged"
 												DataSource="@_vehicles"
 												Placeholder="Select Vehicle"
 												Label="Vehicle"
-												FieldValue="@nameof(VehicleModel.Code)"
+												FieldValue="@nameof(VehicleLocationModel.Code)"
 												AddNewRoute="@PageRouteNames.VehicleMaster" />
 						</div>
 

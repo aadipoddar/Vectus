@@ -15,6 +15,44 @@ else
 
 		<div class="page-container">
 
+			<!-- TYRE -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="10" />
+							<circle cx="12" cy="12" r="4" />
+						</svg>
+						<h2 class="section-title">Tyre</h2>
+					</div>
+					<p class="section-subtitle">Reference data for tyre suppliers and brands</p>
+				</div>
+				<div class="section-body">
+					<div class="dashboard-grid">
+
+						<FileCard Title="Tyre Company" Description="Manage tyre manufacturers and suppliers" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.TyreCompanyMaster)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="9" />
+									<circle cx="12" cy="12" r="3" />
+								</svg>
+							</IconContent>
+						</FileCard>
+
+						<FileCard Title="Tyre Mounting" Description="Track tyres mounted on and dismounted from vehicles" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.TyreMounting)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="9" />
+									<circle cx="12" cy="12" r="3" />
+									<path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+								</svg>
+							</IconContent>
+						</FileCard>
+
+					</div>
+				</div>
+			</div>
+
 			<!-- ROUTES & DRIVERS -->
 			<div class="section-card">
 				<div class="section-header">
@@ -71,35 +109,6 @@ else
 							</IconContent>
 						</FileCard>
 
-					</div>
-				</div>
-			</div>
-
-			<!-- REPAIR -->
-			<div class="section-card">
-				<div class="section-header">
-					<div class="section-title-wrapper">
-						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M3 10.5 12 3l9 7.5" />
-							<path d="M5 9.5V21h14V9.5" />
-							<path d="M8 21v-6h8v6" />
-						</svg>
-						<h2 class="section-title">Repair</h2>
-					</div>
-					<p class="section-subtitle">Manage repair-related facilities and garage master data</p>
-				</div>
-				<div class="section-body">
-					<div class="dashboard-grid">
-						<FileCard Title="Garage" Description="Manage garages and map them to operating locations" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.GarageMaster)">
-							<IconContent>
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M3 10.5 12 3l9 7.5" />
-									<path d="M5 9.5V21h14V9.5" />
-									<path d="M8 21v-6h8v6" />
-									<path d="M10 12h4" />
-								</svg>
-							</IconContent>
-						</FileCard>
 					</div>
 				</div>
 			</div>
@@ -196,6 +205,33 @@ else
 							</IconContent>
 						</FileCard>
 
+					</div>
+				</div>
+			</div>
+
+			<!-- REPAIR -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+						</svg>
+						<h2 class="section-title">Repair</h2>
+					</div>
+					<p class="section-subtitle">Manage repair-related facilities and garage master data</p>
+				</div>
+				<div class="section-body">
+					<div class="dashboard-grid">
+						<FileCard Title="Garage" Description="Manage garages and map them to operating locations" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.GarageMaster)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M3 10.5 12 3l9 7.5" />
+									<path d="M5 9.5V21h14V9.5" />
+									<path d="M8 21v-6h8v6" />
+									<path d="M10 12h4" />
+								</svg>
+							</IconContent>
+						</FileCard>
 					</div>
 				</div>
 			</div>

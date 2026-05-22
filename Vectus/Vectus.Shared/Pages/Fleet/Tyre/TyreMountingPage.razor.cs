@@ -6,38 +6,38 @@ using Vectus.Shared.Services;
 
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
-using VectusLibrary.Fleet.Route.Data;
-using VectusLibrary.Fleet.Route.Exports;
-using VectusLibrary.Fleet.Route.Models;
+using VectusLibrary.Fleet.Tyre.Data;
+using VectusLibrary.Fleet.Tyre.Exports;
+using VectusLibrary.Fleet.Tyre.Models;
+using VectusLibrary.Fleet.Vehicle.Data;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
-namespace Vectus.Shared.Pages.Fleet.Route;
+namespace Vectus.Shared.Pages.Fleet.Tyre;
 
-public partial class VehicleDriverPage
+public partial class TyreMountingPage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 
-	private VehicleDriverModel _vehicleDriver = new();
-	private VehicleModel _selectedVehicle;
-	private DriverModel _selectedDriver;
-	private DateTime _endDateTime;
+	private TyreMountingModel _tyreMounting = new();
+	private TyreCompanyModel _selectedTyreCompany;
+	private VehicleLocationModel _selectedVehicle;
 
-	private List<VehicleDriverModel> _vehicleDrivers = [];
-	private List<VehicleModel> _vehicles = [];
-	private List<DriverModel> _drivers = [];
+	private List<TyreMountingModel> _tyreMountings = [];
+	private List<TyreCompanyModel> _tyreCompanies = [];
+	private List<VehicleLocationModel> _vehicles = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
 		new() { Text = "Delete (Del)", Id = "DeleteSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private SfGrid<VehicleDriverModel> _sfGrid;
+	private SfGrid<TyreMountingModel> _sfGrid;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private CustomAutoComplete<VehicleModel> _sfFirstFocus;
+	private CustomTextField _sfFirstFocus;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionName = string.Empty;
@@ -60,12 +60,12 @@ public partial class VehicleDriverPage
 
 	private async Task LoadData()
 	{
-		_vehicleDrivers = await CommonData.LoadTableData<VehicleDriverModel>(FleetNames.VehicleDriver);
-		_vehicles = await CommonData.LoadTableData<VehicleModel>(FleetNames.Vehicle);
-		_drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver);
+		_tyreMountings = await CommonData.LoadTableData<TyreMountingModel>(FleetNames.TyreMounting);
+		_tyreCompanies = await CommonData.LoadTableData<TyreCompanyModel>(FleetNames.TyreCompany);
+		_vehicles = await VehicleData.LoadVehicleLocations();
 
-		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDriver.VehicleId);
-		_selectedDriver = _drivers.FirstOrDefault(d => d.Id == _vehicleDriver.DriverId);
+		_selectedTyreCompany = _tyreCompanies.FirstOrDefault(tc => tc.Id == _tyreMounting.TyreCompanyId);
+		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _tyreMounting.VehicleId);
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -94,11 +94,15 @@ public partial class VehicleDriverPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			_vehicleDriver.VehicleId = _selectedVehicle?.Id ?? 0;
-			_vehicleDriver.DriverId = _selectedDriver?.Id ?? 0;
-			_vehicleDriver.EndDateTime = _endDateTime == default ? null : _endDateTime;
+			_tyreMounting.TyreCompanyId = _selectedTyreCompany?.Id ?? 0;
+			_tyreMounting.VehicleId = _selectedVehicle?.Id ?? 0;
 
-			await VehicleDriverData.SaveTransaction(_vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			// Dismounting is optional and captured as a pair (date + KM). A missing dismounting date
+			// means the tyre is still mounted, so both values are cleared.
+			_tyreMounting.DismountingDateTime = _tyreMounting.DismountingDateTime == default ? null : _tyreMounting.DismountingDateTime;
+			_tyreMounting.DismountingKM = _tyreMounting.DismountingDateTime == default ? null : _tyreMounting.DismountingKM;
+
+			await TyreMountingData.SaveTransaction(_tyreMounting, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
 			ResetPage();
@@ -125,10 +129,10 @@ public partial class VehicleDriverPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, _deleteTransactionId)
+			var tyreMounting = await CommonData.LoadTableDataById<TyreMountingModel>(FleetNames.TyreMounting, _deleteTransactionId)
 				?? throw new Exception("Transaction not found.");
 
-			await VehicleDriverData.DeleteTransaction(vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await TyreMountingData.DeleteTransaction(tyreMounting, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Deleted", "Transaction has been deleted successfully.", ToastType.Success);
 			ResetPage();
@@ -158,7 +162,7 @@ public partial class VehicleDriverPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, ReportExportType.Excel);
+			var (stream, fileName) = await TyreMountingExport.ExportTransaction(_tyreMountings, ReportExportType.Excel);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -185,7 +189,7 @@ public partial class VehicleDriverPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, ReportExportType.PDF);
+			var (stream, fileName) = await TyreMountingExport.ExportTransaction(_tyreMountings, ReportExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -216,7 +220,7 @@ public partial class VehicleDriverPage
 		}
 	}
 
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<VehicleDriverModel> args)
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<TyreMountingModel> args)
 	{
 		switch (args.Item.Id)
 		{
@@ -231,13 +235,12 @@ public partial class VehicleDriverPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		_vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, selectedRecords[0].Id);
-		if (_vehicleDriver is null)
+		_tyreMounting = await CommonData.LoadTableDataById<TyreMountingModel>(FleetNames.TyreMounting, selectedRecords[0].Id);
+		if (_tyreMounting is null)
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
 
-		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDriver.VehicleId);
-		_selectedDriver = _drivers.FirstOrDefault(d => d.Id == _vehicleDriver.DriverId);
-		_endDateTime = _vehicleDriver.EndDateTime ?? default;
+		_selectedTyreCompany = _tyreCompanies.FirstOrDefault(tc => tc.Id == _tyreMounting.TyreCompanyId);
+		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _tyreMounting.VehicleId);
 
 		StateHasChanged();
 
@@ -250,10 +253,7 @@ public partial class VehicleDriverPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		var vehicleDriver = selectedRecords[0];
-		var vehicle = _vehicles.FirstOrDefault(v => v.Id == vehicleDriver.VehicleId)?.Code ?? vehicleDriver.VehicleId.ToString();
-		var driver = _drivers.FirstOrDefault(d => d.Id == vehicleDriver.DriverId)?.Name ?? vehicleDriver.DriverId.ToString();
-		await ShowDeleteConfirmation(vehicleDriver.Id, $"{vehicle} - {driver}");
+		await ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].TyreNo);
 	}
 
 	private async Task ShowDeleteConfirmation(int id, string name)
@@ -271,7 +271,7 @@ public partial class VehicleDriverPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.VehicleDriverMaster, true);
+		NavigationManager.NavigateTo(PageRouteNames.TyreMounting, true);
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);

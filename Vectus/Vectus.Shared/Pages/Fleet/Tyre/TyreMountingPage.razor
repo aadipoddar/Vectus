@@ -1,9 +1,9 @@
-@attribute [Route(PageRouteNames.VehicleDriverMaster)]
+@attribute [Route(PageRouteNames.TyreMounting)]
 
-@using VectusLibrary.Fleet.Route.Models
+@using VectusLibrary.Fleet.Tyre.Models
 @using VectusLibrary.Fleet.Vehicle.Models
 
-<PageTitle>Vehicle Driver Management - Vectus</PageTitle>
+<PageTitle>Tyre Mounting - Vectus</PageTitle>
 
 <MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" />
 <MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
@@ -21,7 +21,7 @@
 else
 {
 	<div class="page-shell">
-		<Header Title="Vehicle Driver Management">
+		<Header Title="Tyre Mounting">
 			<LeftContent>
 				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
 					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
@@ -57,53 +57,90 @@ else
 						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
 							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 							 stroke-linejoin="round">
-							<path d="M10 17h4V5H2v12h3" />
-							<path d="M14 9h4l4 4v4h-3" />
-							<circle cx="7.5" cy="17.5" r="2.5" />
-							<circle cx="17.5" cy="17.5" r="2.5" />
+							<circle cx="12" cy="12" r="9" />
+							<circle cx="12" cy="12" r="3" />
 						</svg>
-						<h2 class="section-title">Vehicle Driver Details</h2>
+						<h2 class="section-title">Tyre Mounting Details</h2>
 					</div>
 				</div>
 				<div class="section-body">
 					<div class="form-grid">
 						<div class="form-field">
-							<CustomAutoComplete @ref="_sfFirstFocus" T="VehicleModel"
+							<CustomTextField @ref="_sfFirstFocus"
+											 @bind-Value="_tyreMounting.TyreNo"
+											 Label="Tyre No (Ctrl + F)"
+											 Placeholder="Enter Tyre Number" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="TyreCompanyModel"
+												@bind-Value="_selectedTyreCompany"
+												DataSource="@_tyreCompanies"
+												Placeholder="Select Tyre Company"
+												Label="Tyre Company"
+												FieldValue="@nameof(TyreCompanyModel.Name)"
+												AddNewRoute="@PageRouteNames.TyreCompanyMaster" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_tyreMounting.TyreModel"
+											 Label="Tyre Model"
+											 Placeholder="Enter Tyre Model (optional)"
+											 Required="false" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="VehicleLocationModel"
 												@bind-Value="_selectedVehicle"
-												DataSource="@_vehicles"
+												DataSource="_vehicles"
 												Placeholder="Select Vehicle"
-												Label="Vehicle (Ctrl + F)"
-												FieldValue="@nameof(VehicleModel.Code)"
+												Label="Vehicle"
+												FieldValue="@nameof(VehicleLocationModel.Code)"
 												AddNewRoute="@PageRouteNames.VehicleMaster" />
 						</div>
 
 						<div class="form-field">
-							<CustomAutoComplete T="DriverModel"
-												@bind-Value="_selectedDriver"
-												DataSource="@_drivers"
-												Placeholder="Select Driver"
-												Label="Driver"
-												FieldValue="@nameof(DriverModel.Name)"
-												AddNewRoute="@PageRouteNames.DriverMaster" />
+							<CustomNumericField T="decimal"
+												@bind-Value="_tyreMounting.MountingKM"
+												Label="Mounting KM"
+												Placeholder="Enter mounting KM"
+												Format="N2"
+												Min="0"
+												AdornmentIcon="@MudBlazor.Icons.Material.Filled.Download"
+												OnAdornmentClick="@(() => _tyreMounting.MountingKM = _selectedVehicle?.OdometerKM ?? 0)"
+												AdornmentAriaLabel="Get Current KM" />
 						</div>
 
 						<div class="form-field">
-							<CustomDatePicker @bind-Value="_vehicleDriver.StartDateTime"
-											  Label="Start Date"
+							<CustomDatePicker @bind-Value="_tyreMounting.MountingDateTime"
+											  Label="Mounting Date"
 											  ShowFinancialYear="false"
 											  AddNewRoute="@(null)" />
 						</div>
 
 						<div class="form-field">
-							<CustomDatePicker @bind-Value="_endDateTime"
-											  Label="End Date (optional)"
+							<CustomNumericField T="decimal?"
+												@bind-Value="_tyreMounting.DismountingKM"
+												Label="Dismounting KM"
+												Placeholder="Enter dismounting KM (optional)"
+												Format="N2"
+												Min="0"
+												Required="false"
+												AdornmentIcon="@MudBlazor.Icons.Material.Filled.Download"
+												OnAdornmentClick="@(() => _tyreMounting.DismountingKM = _selectedVehicle?.OdometerKM)"
+												AdornmentAriaLabel="Get Current KM" />
+						</div>
+
+						<div class="form-field">
+							<CustomDatePicker @bind-NullableValue="_tyreMounting.DismountingDateTime"
+											  Label="Dismounting Date"
 											  Required="false"
 											  ShowFinancialYear="false"
 											  AddNewRoute="@(null)" />
 						</div>
 
 						<div class="form-field">
-							<CustomTextField @bind-Value="_vehicleDriver.Remarks"
+							<CustomTextField @bind-Value="_tyreMounting.Remarks"
 											 Label="Remarks"
 											 Placeholder="Enter remarks (optional)"
 											 Required="false"
@@ -122,39 +159,43 @@ else
 							<path d="M9 11l3 3L22 4" />
 							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
 						</svg>
-						<h2 class="section-title">Vehicle Drivers List</h2>
+						<h2 class="section-title">Tyre Mountings List</h2>
 					</div>
 				</div>
 				<div class="section-body grid-body">
-					<SfGrid @ref="_sfGrid" DataSource="@_vehicleDrivers" AllowPaging="true" AllowSorting="true"
+					<SfGrid @ref="_sfGrid" DataSource="@_tyreMountings" AllowPaging="true" AllowSorting="true"
 							AllowFiltering="true" AllowResizing="true" CssClass="professional-grid"
 							Toolbar="@(new List<string>() { "Search" })" ContextMenuItems="@_gridContextMenuItems">
 						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
-						<GridEvents TValue="VehicleDriverModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridEvents TValue="TyreMountingModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(VehicleDriverModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(VehicleDriverModel.VehicleId)" HeaderText="Vehicle" Width="200">
+							<GridColumn Field="@nameof(TyreMountingModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(TyreMountingModel.TyreNo)" HeaderText="Tyre No" Width="160" />
+							<GridColumn Field="@nameof(TyreMountingModel.TyreCompanyId)" HeaderText="Tyre Company" Width="200">
 								<Template>
 									@{
-										var item = (context as VehicleDriverModel);
+										var item = (context as TyreMountingModel);
+										var tyreCompany = _tyreCompanies.FirstOrDefault(tc => tc.Id == item.TyreCompanyId);
+										<span>@(tyreCompany is not null ? tyreCompany.Name : "N/A")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(TyreMountingModel.TyreModel)" HeaderText="Tyre Model" Width="160" />
+							<GridColumn Field="@nameof(TyreMountingModel.VehicleId)" HeaderText="Vehicle" Width="180">
+								<Template>
+									@{
+										var item = (context as TyreMountingModel);
 										var vehicle = _vehicles.FirstOrDefault(v => v.Id == item.VehicleId);
 										<span>@(vehicle is not null ? vehicle.Code : "N/A")</span>
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(VehicleDriverModel.DriverId)" HeaderText="Driver" Width="220">
-								<Template>
-									@{
-										var item = (context as VehicleDriverModel);
-										var driver = _drivers.FirstOrDefault(d => d.Id == item.DriverId);
-										<span>@(driver is not null ? driver.Name : "N/A")</span>
-									}
-								</Template>
-							</GridColumn>
-							<GridColumn Field="@nameof(VehicleDriverModel.StartDateTime)" HeaderText="Start" Width="160" Format="dd-MMM-yy" Type="ColumnType.DateTime" TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(VehicleDriverModel.EndDateTime)" HeaderText="End" Width="160" Format="dd-MMM-yy" Type="ColumnType.DateTime" TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(VehicleDriverModel.Remarks)" HeaderText="Remarks" Width="300" />
+							<GridColumn Field="@nameof(TyreMountingModel.MountingKM)" HeaderText="Mounting KM" Width="150" Format="N0" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(TyreMountingModel.DismountingKM)" HeaderText="Dismounting KM" Width="160" Format="N0" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(TyreMountingModel.MountingDateTime)" HeaderText="Mounting Date" Width="150" Format="dd-MMM-yy" Type="ColumnType.DateTime" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(TyreMountingModel.DismountingDateTime)" HeaderText="Dismounting Date" Width="160" Format="dd-MMM-yy" Type="ColumnType.DateTime" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(TyreMountingModel.Remarks)" HeaderText="Remarks" Width="250" />
 						</GridColumns>
 					</SfGrid>
 				</div>

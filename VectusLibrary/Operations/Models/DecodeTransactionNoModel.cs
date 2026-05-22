@@ -13,6 +13,8 @@ public enum CodeType
 	Route,
 	Driver,
 
+	TyreCompany,
+
 	TripRequest,
 
 	Repair,

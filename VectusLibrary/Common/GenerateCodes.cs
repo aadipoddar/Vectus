@@ -5,6 +5,7 @@ using VectusLibrary.Fleet.Garage.Models;
 using VectusLibrary.Fleet.Repair.Models;
 using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.TripRequest.Models;
+using VectusLibrary.Fleet.Tyre.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Data;
@@ -69,6 +70,11 @@ public static class GenerateCodes
 				case CodeType.Garage:
 					var garage = await CommonData.LoadTableDataByCode<GarageModel>(FleetNames.Garage, code, sqlDataAccessTransaction);
 					isDuplicate = garage is not null;
+					break;
+
+				case CodeType.TyreCompany:
+					var tyreCompany = await CommonData.LoadTableDataByCode<TyreCompanyModel>(FleetNames.TyreCompany, code, sqlDataAccessTransaction);
+					isDuplicate = tyreCompany is not null;
 					break;
 			}
 
@@ -355,6 +361,31 @@ public static class GenerateCodes
 		}
 
 		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Garage, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Tyre
+	public static async Task<string> GenerateTyreCompanyCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<TyreCompanyModel>(FleetNames.TyreCompany, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.TyreCompanyCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(tc => tc.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.TyreCompany, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.TyreCompany, sqlDataAccessTransaction);
 	}
 	#endregion
 }

@@ -6,41 +6,40 @@ using Vectus.Shared.Services;
 
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
-using VectusLibrary.Fleet.Route.Data;
-using VectusLibrary.Fleet.Route.Exports;
-using VectusLibrary.Fleet.Route.Models;
-using VectusLibrary.Fleet.Vehicle.Models;
+using VectusLibrary.Fleet.Tyre.Data;
+using VectusLibrary.Fleet.Tyre.Exports;
+using VectusLibrary.Fleet.Tyre.Models;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
-namespace Vectus.Shared.Pages.Fleet.Route;
+namespace Vectus.Shared.Pages.Fleet.Tyre;
 
-public partial class VehicleDriverPage
+public partial class TyreCompanyPage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
+	private bool _showDeleted = false;
 
-	private VehicleDriverModel _vehicleDriver = new();
-	private VehicleModel _selectedVehicle;
-	private DriverModel _selectedDriver;
-	private DateTime _endDateTime;
+	private TyreCompanyModel _tyreCompany = new();
 
-	private List<VehicleDriverModel> _vehicleDrivers = [];
-	private List<VehicleModel> _vehicles = [];
-	private List<DriverModel> _drivers = [];
+	private List<TyreCompanyModel> _tyreCompanies = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
-		new() { Text = "Delete (Del)", Id = "DeleteSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
+		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private SfGrid<VehicleDriverModel> _sfGrid;
+	private SfGrid<TyreCompanyModel> _sfGrid;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private CustomAutoComplete<VehicleModel> _sfFirstFocus;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
+	private CustomTextField _sfFirstFocus;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionName = string.Empty;
+
+	private int _recoverTransactionId = 0;
+	private string _recoverTransactionName = string.Empty;
 
 	private ToastNotification _toastNotification;
 
@@ -60,12 +59,10 @@ public partial class VehicleDriverPage
 
 	private async Task LoadData()
 	{
-		_vehicleDrivers = await CommonData.LoadTableData<VehicleDriverModel>(FleetNames.VehicleDriver);
-		_vehicles = await CommonData.LoadTableData<VehicleModel>(FleetNames.Vehicle);
-		_drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver);
+		_tyreCompanies = await CommonData.LoadTableData<TyreCompanyModel>(FleetNames.TyreCompany);
 
-		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDriver.VehicleId);
-		_selectedDriver = _drivers.FirstOrDefault(d => d.Id == _vehicleDriver.DriverId);
+		if (!_showDeleted)
+			_tyreCompanies = [.. _tyreCompanies.Where(tc => tc.Status)];
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -94,11 +91,7 @@ public partial class VehicleDriverPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			_vehicleDriver.VehicleId = _selectedVehicle?.Id ?? 0;
-			_vehicleDriver.DriverId = _selectedDriver?.Id ?? 0;
-			_vehicleDriver.EndDateTime = _endDateTime == default ? null : _endDateTime;
-
-			await VehicleDriverData.SaveTransaction(_vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await TyreCompanyData.SaveTransaction(_tyreCompany, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
 			ResetPage();
@@ -125,10 +118,10 @@ public partial class VehicleDriverPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, _deleteTransactionId)
+			var tyreCompany = await CommonData.LoadTableDataById<TyreCompanyModel>(FleetNames.TyreCompany, _deleteTransactionId)
 				?? throw new Exception("Transaction not found.");
 
-			await VehicleDriverData.DeleteTransaction(vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await TyreCompanyData.DeleteTransaction(tyreCompany, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Deleted", "Transaction has been deleted successfully.", ToastType.Success);
 			ResetPage();
@@ -142,6 +135,36 @@ public partial class VehicleDriverPage
 			_isProcessing = false;
 			_deleteTransactionId = 0;
 			_deleteTransactionName = string.Empty;
+		}
+	}
+
+	private async Task ConfirmRecover()
+	{
+		try
+		{
+			_isProcessing = true;
+			await _recoverConfirmationDialog.HideAsync();
+
+			if (!_user.Admin)
+				throw new Exception("You do not have permission to perform this action.");
+
+			var tyreCompany = await CommonData.LoadTableDataById<TyreCompanyModel>(FleetNames.TyreCompany, _recoverTransactionId)
+				?? throw new Exception("Transaction not found.");
+
+			await TyreCompanyData.RecoverTransaction(tyreCompany, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+
+			await _toastNotification.ShowAsync("Recovered", "Transaction has been recovered successfully.", ToastType.Success);
+			ResetPage();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Recovering", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			_recoverTransactionId = 0;
+			_recoverTransactionName = string.Empty;
 		}
 	}
 	#endregion
@@ -158,7 +181,7 @@ public partial class VehicleDriverPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, ReportExportType.Excel);
+			var (stream, fileName) = await TyreCompanyExport.ExportMaster(_tyreCompanies, ReportExportType.Excel);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -185,7 +208,7 @@ public partial class VehicleDriverPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, ReportExportType.PDF);
+			var (stream, fileName) = await TyreCompanyExport.ExportMaster(_tyreCompanies, ReportExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -209,19 +232,20 @@ public partial class VehicleDriverPage
 		{
 			case "NewTransaction": ResetPage(); break;
 			case "SaveTransaction": await SaveTransaction(); break;
+			case "ToggleDeleted": await ToggleDeleted(); break;
 			case "ExportExcel": await ExportExcel(); break;
 			case "ExportPdf": await ExportPdf(); break;
 			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
+			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
 		}
 	}
 
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<VehicleDriverModel> args)
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<TyreCompanyModel> args)
 	{
 		switch (args.Item.Id)
 		{
 			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
+			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
 		}
 	}
 
@@ -231,29 +255,25 @@ public partial class VehicleDriverPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		_vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, selectedRecords[0].Id);
-		if (_vehicleDriver is null)
+		_tyreCompany = await CommonData.LoadTableDataById<TyreCompanyModel>(FleetNames.TyreCompany, selectedRecords[0].Id);
+		if (_tyreCompany is null)
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
-
-		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDriver.VehicleId);
-		_selectedDriver = _drivers.FirstOrDefault(d => d.Id == _vehicleDriver.DriverId);
-		_endDateTime = _vehicleDriver.EndDateTime ?? default;
 
 		StateHasChanged();
 
 		await _sfFirstFocus.FocusAsync();
 	}
 
-	private async Task DeleteSelectedItem()
+	private async Task DeleteRecoverSelectedItem()
 	{
 		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
-		if (selectedRecords.Count == 0)
-			return;
-
-		var vehicleDriver = selectedRecords[0];
-		var vehicle = _vehicles.FirstOrDefault(v => v.Id == vehicleDriver.VehicleId)?.Code ?? vehicleDriver.VehicleId.ToString();
-		var driver = _drivers.FirstOrDefault(d => d.Id == vehicleDriver.DriverId)?.Name ?? vehicleDriver.DriverId.ToString();
-		await ShowDeleteConfirmation(vehicleDriver.Id, $"{vehicle} - {driver}");
+		if (selectedRecords.Count > 0)
+		{
+			if (selectedRecords[0].Status)
+				await ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+			else
+				await ShowRecoverConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+		}
 	}
 
 	private async Task ShowDeleteConfirmation(int id, string name)
@@ -270,8 +290,28 @@ public partial class VehicleDriverPage
 		await _deleteConfirmationDialog.HideAsync();
 	}
 
+	private async Task ShowRecoverConfirmation(int id, string name)
+	{
+		_recoverTransactionId = id;
+		_recoverTransactionName = name;
+		await _recoverConfirmationDialog.ShowAsync();
+	}
+
+	private async Task CancelRecover()
+	{
+		_recoverTransactionId = 0;
+		_recoverTransactionName = string.Empty;
+		await _recoverConfirmationDialog.HideAsync();
+	}
+
+	private async Task ToggleDeleted()
+	{
+		_showDeleted = !_showDeleted;
+		await LoadData();
+	}
+
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.VehicleDriverMaster, true);
+		NavigationManager.NavigateTo(PageRouteNames.TyreCompanyMaster, true);
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);
