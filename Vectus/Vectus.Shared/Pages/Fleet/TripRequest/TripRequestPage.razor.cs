@@ -4,6 +4,7 @@ using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
+using VectusLibrary.Accounts.Masters.Data;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
@@ -29,11 +30,12 @@ public partial class TripRequestPage
 	private CompanyModel _selectedCompany;
 	private RouteOverviewModel _selectedRoute;
 	private VehicleLocationModel _selectedVehicle = null;
+	private FinancialYearModel _selectedFinancialYear = new();
 	private TripRequestModel _tripRequest = new();
 
 	private List<CompanyModel> _companies = [];
 	private List<RouteOverviewModel> _routes = [];
-	private List<VehicleLocationModel> _vehicleLocations = [];
+	private List<VehicleLocationModel> _vehicles = [];
 
 	private CustomAutoComplete<CompanyModel> _sfFirstFocus;
 	private ToastNotification _toastNotification;
@@ -133,19 +135,36 @@ public partial class TripRequestPage
 			? _routes.FirstOrDefault(r => r.Id == _tripRequest.RouteId)
 			: _routes.FirstOrDefault();
 
-		_vehicleLocations = await VehicleData.LoadVehicleLocations(_selectedRoute);
+		_vehicles = await VehicleData.LoadVehicleLocations(_selectedRoute, _tripRequest.TransactionDateTime);
+		_vehicles = [.. _vehicles.Where(v => !v.InGarage)];
 
 		_selectedVehicle = _tripRequest.VehicleId > 0
-			? _vehicleLocations.FirstOrDefault(v => v.Id == _tripRequest.VehicleId)
+			? _vehicles.FirstOrDefault(v => v.Id == _tripRequest.VehicleId)
 			: null;
 
 		_tripRequest.CompanyId = _selectedCompany.Id;
 		_tripRequest.RouteId = _selectedRoute.Id;
 		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
+
+		_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_tripRequest.TransactionDateTime);
+		if (_selectedFinancialYear is not null)
+			_tripRequest.FinancialYearId = _selectedFinancialYear.Id;
 	}
 	#endregion
 
 	#region Change Events
+	private async Task OnTransactionDateChanged(DateTime value)
+	{
+		_tripRequest.TransactionDateTime = value;
+
+		_vehicles = await VehicleData.LoadVehicleLocations(_selectedRoute, _tripRequest.TransactionDateTime);
+		_vehicles = [.. _vehicles.Where(v => !v.InGarage)];
+		_selectedVehicle = _selectedVehicle is not null
+			? _vehicles.FirstOrDefault(v => v.Id == _selectedVehicle.Id)
+			: null;
+		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
+	}
+
 	private async Task OnCompanyChanged(CompanyModel value)
 	{
 		if (value is null || value.Id == 0)
@@ -163,9 +182,10 @@ public partial class TripRequestPage
 		_selectedRoute = value;
 		_tripRequest.RouteId = _selectedRoute.Id;
 
-		_vehicleLocations = await VehicleData.LoadVehicleLocations(_selectedRoute);
+		_vehicles = await VehicleData.LoadVehicleLocations(_selectedRoute, _tripRequest.TransactionDateTime);
+		_vehicles = [.. _vehicles.Where(v => !v.InGarage)];
 		_selectedVehicle = _selectedVehicle is not null
-			? _vehicleLocations.FirstOrDefault(v => v.Id == _selectedVehicle.Id)
+			? _vehicles.FirstOrDefault(v => v.Id == _selectedVehicle.Id)
 			: null;
 		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
 
@@ -190,7 +210,7 @@ public partial class TripRequestPage
 
 	private async Task OnMapVehicleSelected(string code)
 	{
-		var vehicle = _vehicleLocations.FirstOrDefault(v => string.Equals(v.Code, code, StringComparison.OrdinalIgnoreCase));
+		var vehicle = _vehicles.FirstOrDefault(v => string.Equals(v.Code, code, StringComparison.OrdinalIgnoreCase));
 		await OnVehicleChanged(vehicle);
 		StateHasChanged();
 	}

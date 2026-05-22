@@ -5,6 +5,8 @@ CREATE PROCEDURE [dbo].[Insert_Driver]
 	@Code VARCHAR(10),
 	@Remarks VARCHAR(MAX),
 	@LicenseUrl VARCHAR(MAX),
+	@LicenseNo VARCHAR(100),
+	@LicenseExpiryDateTime DATETIME,
 	@Status BIT = 1
 AS
 BEGIN
@@ -17,6 +19,8 @@ BEGIN
 			[Code],
 			[Remarks],
 			[LicenseUrl],
+			[LicenseNo],
+			[LicenseExpiryDateTime],
 			[Status]
 		)
 		VALUES
@@ -26,6 +30,8 @@ BEGIN
 			@Code,
 			@Remarks,
 			@LicenseUrl,
+			@LicenseNo,
+			@LicenseExpiryDateTime,
 			@Status
 		);
 
@@ -40,6 +46,8 @@ BEGIN
 			[Code] = @Code,
 			[Remarks] = @Remarks,
 			[LicenseUrl] = @LicenseUrl,
+			[LicenseNo] = @LicenseNo,
+			[LicenseExpiryDateTime] = @LicenseExpiryDateTime,
 			[Status] = @Status
 		WHERE [Id] = @Id;
 	END

@@ -17,6 +17,8 @@ public static class DriverExport
 			driver.Mobile,
 			driver.Code,
 			driver.Remarks,
+			driver.LicenseNo,
+			LicenseExpiryDateTime = driver.LicenseExpiryDateTime.ToString("dd/MM/yyyy"),
 			Status = driver.Status ? "Active" : "Deleted"
 		});
 
@@ -27,6 +29,8 @@ public static class DriverExport
 			[nameof(DriverModel.Mobile)] = new() { DisplayName = "Mobile", Alignment = CellAlignment.Left, IsRequired = true },
 			[nameof(DriverModel.Code)] = new() { DisplayName = "Code", Alignment = CellAlignment.Left, IsRequired = true },
 			[nameof(DriverModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
+			[nameof(DriverModel.LicenseNo)] = new() { DisplayName = "License No", Alignment = CellAlignment.Left, IsRequired = true },
+			[nameof(DriverModel.LicenseExpiryDateTime)] = new() { DisplayName = "License Expiry", Alignment = CellAlignment.Center, IncludeInTotal = false },
 			[nameof(DriverModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
 
@@ -37,6 +41,8 @@ public static class DriverExport
 			nameof(DriverModel.Mobile),
 			nameof(DriverModel.Code),
 			nameof(DriverModel.Remarks),
+			nameof(DriverModel.LicenseNo),
+			nameof(DriverModel.LicenseExpiryDateTime),
 			nameof(DriverModel.Status)
 		];
 

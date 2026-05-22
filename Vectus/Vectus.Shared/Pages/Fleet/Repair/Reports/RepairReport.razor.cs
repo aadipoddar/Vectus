@@ -8,19 +8,18 @@ using VectusLibrary.Accounts.Masters.Data;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
-using VectusLibrary.Fleet.Route.Data;
-using VectusLibrary.Fleet.Route.Models;
-using VectusLibrary.Fleet.TripRequest.Data;
-using VectusLibrary.Fleet.TripRequest.Exports;
-using VectusLibrary.Fleet.TripRequest.Models;
+using VectusLibrary.Fleet.Garage.Models;
+using VectusLibrary.Fleet.Repair.Data;
+using VectusLibrary.Fleet.Repair.Exports;
+using VectusLibrary.Fleet.Repair.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
-namespace Vectus.Shared.Pages.Fleet.TripRequest.Reports;
+namespace Vectus.Shared.Pages.Fleet.Repair.Reports;
 
-public partial class TripRequestReport : IAsyncDisposable
+public partial class RepairReport : IAsyncDisposable
 {
 	private PeriodicTimer _autoRefreshTimer;
 	private CancellationTokenSource _autoRefreshCts;
@@ -37,26 +36,22 @@ public partial class TripRequestReport : IAsyncDisposable
 
 	private CompanyModel? _selectedCompany = null;
 	private VehicleModel? _selectedVehicle = null;
-	private RouteOverviewModel? _selectedRoute = null;
-	private SDRModel? _selectedSDR = null;
-	private string _selectedRequestStatus = null;
+	private GarageModel? _selectedGarage = null;
 
 	private List<CompanyModel> _companies = [];
 	private List<VehicleModel> _vehicles = [];
-	private List<RouteOverviewModel> _routes = [];
-	private List<SDRModel> _sdrs = [];
-	private List<string> _requestStatuses = [.. Enum.GetNames<RequestStatus>()];
-	private List<TripRequestOverviewModel> _transactionOverviews = [];
+	private List<GarageModel> _garages = [];
+	private List<RepairOverviewModel> _transactionOverviews = [];
 
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "View (Alt + O)", Id = "View", IconCss = "e-icons e-eye", Target = ".e-content" },
-		new() { Text = "Accept (Alt + A)", Id = "Accept", IconCss = "e-icons e-check", Target = ".e-content" },
-		new() { Text = "Reject (Alt + J)", Id = "Reject", IconCss = "e-icons e-close", Target = ".e-content" },
+		new() { Text = "Export PDF (Alt + P)", Id = "ExportSelectedPdf", IconCss = "e-icons e-export-pdf", Target = ".e-content" },
+		new() { Text = "Export Excel (Alt + E)", Id = "ExportSelectedExcel", IconCss = "e-icons e-export-excel", Target = ".e-content" },
 		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecover", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private SfGrid<TripRequestOverviewModel> _sfGrid;
+	private SfGrid<RepairOverviewModel> _sfGrid;
 	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
 
@@ -64,15 +59,9 @@ public partial class TripRequestReport : IAsyncDisposable
 	private int _deleteTransactionId = 0;
 	private string _recoverTransactionNo = string.Empty;
 	private int _recoverTransactionId = 0;
-	private string _acceptTransactionNo = string.Empty;
-	private int _acceptTransactionId = 0;
-	private string _rejectTransactionNo = string.Empty;
-	private int _rejectTransactionId = 0;
 
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private AcceptConfirmationDialog _acceptConfirmationDialog;
-	private RejectConfirmationDialog _rejectConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -111,13 +100,11 @@ public partial class TripRequestReport : IAsyncDisposable
 
 		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(AccountNames.Company);
 		_vehicles = await CommonData.LoadTableDataByStatus<VehicleModel>(FleetNames.Vehicle);
-		_routes = await RouteData.LoadRouteOverview();
-		_sdrs = await CommonData.LoadTableDataByStatus<SDRModel>(FleetNames.SDR);
+		_garages = await CommonData.LoadTableDataByStatus<GarageModel>(FleetNames.Garage);
 
 		_companies = [.. _companies.OrderBy(s => s.Name)];
 		_vehicles = [.. _vehicles.OrderBy(s => s.Code)];
-		_routes = [.. _routes.OrderBy(s => s.Code)];
-		_sdrs = [.. _sdrs.OrderBy(s => s.Name)];
+		_garages = [.. _garages.OrderBy(s => s.Name)];
 	}
 
 	private async Task LoadTransactionOverviews()
@@ -131,8 +118,8 @@ public partial class TripRequestReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
 
-			_transactionOverviews = await CommonData.LoadTableDataByDate<TripRequestOverviewModel>(
-				FleetNames.TripRequestOverview,
+			_transactionOverviews = await CommonData.LoadTableDataByDate<RepairOverviewModel>(
+				FleetNames.RepairOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
 
@@ -145,14 +132,8 @@ public partial class TripRequestReport : IAsyncDisposable
 			if (_selectedVehicle?.Id > 0)
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.VehicleId == _selectedVehicle.Id)];
 
-			if (_selectedRoute?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.RouteId == _selectedRoute.Id)];
-
-			if (_selectedSDR?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.SDRId == _selectedSDR.Id)];
-
-			if (!string.IsNullOrWhiteSpace(_selectedRequestStatus))
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.RequestStatus == _selectedRequestStatus)];
+			if (_selectedGarage?.Id > 0)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.GarageId == _selectedGarage.Id)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
 		}
@@ -190,21 +171,9 @@ public partial class TripRequestReport : IAsyncDisposable
 		await LoadTransactionOverviews();
 	}
 
-	private async Task OnRouteChanged(RouteOverviewModel value)
+	private async Task OnGarageChanged(GarageModel value)
 	{
-		_selectedRoute = value;
-		await LoadTransactionOverviews();
-	}
-
-	private async Task OnSDRChanged(SDRModel value)
-	{
-		_selectedSDR = value;
-		await LoadTransactionOverviews();
-	}
-
-	private async Task OnRequestStatusChanged(string value)
-	{
-		_selectedRequestStatus = value;
+		_selectedGarage = value;
 		await LoadTransactionOverviews();
 	}
 
@@ -227,7 +196,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await TripRequestReportExport.ExportReport(
+			var (stream, fileName) = await RepairReportExport.ExportReport(
 				_transactionOverviews,
 				ReportExportType.Excel,
 				DateOnly.FromDateTime(_fromDate),
@@ -236,9 +205,7 @@ public partial class TripRequestReport : IAsyncDisposable
 				_showDeleted,
 				_selectedCompany?.Id > 0 ? _selectedCompany : null,
 				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedRoute?.Id > 0 ? _selectedRoute : null,
-				_selectedSDR?.Id > 0 ? _selectedSDR : null,
-				_selectedRequestStatus
+				_selectedGarage?.Id > 0 ? _selectedGarage : null
 			);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
@@ -266,7 +233,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await TripRequestReportExport.ExportReport(
+			var (stream, fileName) = await RepairReportExport.ExportReport(
 				_transactionOverviews,
 				ReportExportType.PDF,
 				DateOnly.FromDateTime(_fromDate),
@@ -275,13 +242,65 @@ public partial class TripRequestReport : IAsyncDisposable
 				_showDeleted,
 				_selectedCompany?.Id > 0 ? _selectedCompany : null,
 				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedRoute?.Id > 0 ? _selectedRoute : null,
-				_selectedSDR?.Id > 0 ? _selectedSDR : null,
-				_selectedRequestStatus
+				_selectedGarage?.Id > 0 ? _selectedGarage : null
 			);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportSelectedTransactionPdf()
+	{
+		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the invoice...", ToastType.Info);
+
+			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, InvoiceExportType.PDF);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The invoice has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportSelectedTransactionExcel()
+	{
+		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the invoice...", ToastType.Info);
+
+			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, InvoiceExportType.Excel);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The invoice has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
@@ -308,7 +327,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			return;
 		}
 
-		await AuthenticationService.NavigateToRoute($"{PageRouteNames.TripRequest}/{selected.Id}", FormFactor, JSRuntime, NavigationManager);
+		await AuthenticationService.NavigateToRoute($"{PageRouteNames.Repair}/{selected.Id}", FormFactor, JSRuntime, NavigationManager);
 	}
 
 	private async Task ConfirmDelete()
@@ -327,13 +346,12 @@ public partial class TripRequestReport : IAsyncDisposable
 
 			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
 
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _deleteTransactionId)
+			var repair = await CommonData.LoadTableDataById<RepairModel>(FleetNames.Repair, _deleteTransactionId)
 				?? throw new Exception("Transaction not found.");
-			tripRequest.Status = false;
-			tripRequest.LastModifiedBy = _user.Id;
-			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await TripRequestData.DeleteTransaction(tripRequest);
+			repair.LastModifiedBy = _user.Id;
+			repair.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+			repair.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+			await RepairData.DeleteTransaction(repair);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", ToastType.Success);
 
@@ -368,13 +386,12 @@ public partial class TripRequestReport : IAsyncDisposable
 
 			await _toastNotification.ShowAsync("Processing", "Recovering transaction...", ToastType.Info);
 
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _recoverTransactionId)
+			var repair = await CommonData.LoadTableDataById<RepairModel>(FleetNames.Repair, _recoverTransactionId)
 				?? throw new Exception("Transaction not found.");
-			tripRequest.Status = true;
-			tripRequest.LastModifiedBy = _user.Id;
-			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await TripRequestData.RecoverTransaction(tripRequest);
+			repair.LastModifiedBy = _user.Id;
+			repair.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+			repair.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+			await RepairData.RecoverTransaction(repair);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", ToastType.Success);
 
@@ -384,102 +401,6 @@ public partial class TripRequestReport : IAsyncDisposable
 		catch (Exception ex)
 		{
 			await _toastNotification.ShowAsync("Error", $"An error occurred while recovering transaction: {ex.Message}", ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadTransactionOverviews();
-		}
-	}
-
-	private async Task ConfirmAccept()
-	{
-		if (_isProcessing || _acceptTransactionId == 0)
-			return;
-
-		try
-		{
-			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to accept this transaction.");
-
-			await _acceptConfirmationDialog.HideAsync();
-			_isProcessing = true;
-			StateHasChanged();
-
-			await _toastNotification.ShowAsync("Processing", "Accepting transaction...", ToastType.Info);
-
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _acceptTransactionId)
-				?? throw new Exception("Transaction not found.");
-
-			if (!tripRequest.Status)
-				throw new InvalidOperationException("Cannot accept a deleted transaction. Please recover it first.");
-
-			if (string.Equals(tripRequest.RequestStatus, RequestStatus.Accepted.ToString(), StringComparison.OrdinalIgnoreCase))
-				throw new InvalidOperationException("Transaction is already accepted.");
-
-			tripRequest.RequestStatus = RequestStatus.Accepted.ToString();
-			tripRequest.LastModifiedBy = _user.Id;
-			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await TripRequestData.SaveTransaction(tripRequest);
-
-			await _toastNotification.ShowAsync("Success", $"Transaction {_acceptTransactionNo} has been accepted successfully.", ToastType.Success);
-
-			_acceptTransactionId = 0;
-			_acceptTransactionNo = string.Empty;
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while accepting transaction: {ex.Message}", ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadTransactionOverviews();
-		}
-	}
-
-	private async Task ConfirmReject()
-	{
-		if (_isProcessing || _rejectTransactionId == 0)
-			return;
-
-		try
-		{
-			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to reject this transaction.");
-
-			await _rejectConfirmationDialog.HideAsync();
-			_isProcessing = true;
-			StateHasChanged();
-
-			await _toastNotification.ShowAsync("Processing", "Rejecting transaction...", ToastType.Info);
-
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _rejectTransactionId)
-				?? throw new Exception("Transaction not found.");
-
-			if (!tripRequest.Status)
-				throw new InvalidOperationException("Cannot reject a deleted transaction. Please recover it first.");
-
-			if (string.Equals(tripRequest.RequestStatus, RequestStatus.Accepted.ToString(), StringComparison.OrdinalIgnoreCase))
-				throw new InvalidOperationException("Cannot reject an accepted transaction. Please accept it first before rejecting.");
-
-			tripRequest.RequestStatus = RequestStatus.Rejected.ToString();
-			tripRequest.LastModifiedBy = _user.Id;
-			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await TripRequestData.SaveTransaction(tripRequest);
-
-			await _toastNotification.ShowAsync("Success", $"Transaction {_rejectTransactionNo} has been rejected successfully.", ToastType.Success);
-
-			_rejectTransactionId = 0;
-			_rejectTransactionNo = string.Empty;
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while rejecting transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -529,42 +450,6 @@ public partial class TripRequestReport : IAsyncDisposable
 		_recoverTransactionNo = string.Empty;
 		await _recoverConfirmationDialog.HideAsync();
 	}
-
-	private async Task AcceptSelectedTransaction()
-	{
-		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
-			return;
-
-		_acceptTransactionId = _sfGrid.SelectedRecords.First().Id;
-		_acceptTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _acceptConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelAccept()
-	{
-		_acceptTransactionId = 0;
-		_acceptTransactionNo = string.Empty;
-		await _acceptConfirmationDialog.HideAsync();
-	}
-
-	private async Task RejectSelectedTransaction()
-	{
-		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
-			return;
-
-		_rejectTransactionId = _sfGrid.SelectedRecords.First().Id;
-		_rejectTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _rejectConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelReject()
-	{
-		_rejectTransactionId = 0;
-		_rejectTransactionNo = string.Empty;
-		await _rejectConfirmationDialog.HideAsync();
-	}
 	#endregion
 
 	#region Utilities
@@ -572,16 +457,17 @@ public partial class TripRequestReport : IAsyncDisposable
 	{
 		switch (args.Item.Id)
 		{
-			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.TripRequest, FormFactor, JSRuntime, NavigationManager); break;
+			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.Repair, FormFactor, JSRuntime, NavigationManager); break;
+			case "JobReport": await AuthenticationService.NavigateToRoute(PageRouteNames.RepairJobReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "Refresh": await LoadTransactionOverviews(); break;
 			case "ToggleDeleted": await ToggleDeleted(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
 			case "ExportPdf": await ExportPdf(); break;
 			case "ExportExcel": await ExportExcel(); break;
 			case "ViewSelected": await ViewSelectedTransaction(); break;
+			case "ExportSelectedPdf": await ExportSelectedTransactionPdf(); break;
+			case "ExportSelectedExcel": await ExportSelectedTransactionExcel(); break;
 			case "DeleteRecoverSelected": await DeleteRecoverSelectedTransaction(); break;
-			case "AcceptSelected": await AcceptSelectedTransaction(); break;
-			case "RejectSelected": await RejectSelectedTransaction(); break;
 			case "PeriodToday": await HandleDatesChanged(DateRangeType.Today); break;
 			case "PeriodPreviousDay": await HandleDatesChanged(DateRangeType.Yesterday); break;
 			case "PeriodNextDay": await HandleDatesChanged(DateRangeType.NextDay); break;
@@ -595,14 +481,14 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 	}
 
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<TripRequestOverviewModel> args)
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<RepairOverviewModel> args)
 	{
 		switch (args.Item.Id)
 		{
 			case "View": await ViewSelectedTransaction(); break;
+			case "ExportSelectedPdf": await ExportSelectedTransactionPdf(); break;
+			case "ExportSelectedExcel": await ExportSelectedTransactionExcel(); break;
 			case "DeleteRecover": await DeleteRecoverSelectedTransaction(); break;
-			case "Accept": await AcceptSelectedTransaction(); break;
-			case "Reject": await RejectSelectedTransaction(); break;
 		}
 	}
 

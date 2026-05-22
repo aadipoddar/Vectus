@@ -15,6 +15,8 @@ public enum CodeType
 
 	TripRequest,
 
+	Repair,
+
 	Garage
 }
 

@@ -1,9 +1,11 @@
 using VectusLibrary.Accounts.Masters.Data;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.TripRequest.Exports;
 using VectusLibrary.Fleet.TripRequest.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
+using VectusLibrary.Utils.MailUtils;
 
 namespace VectusLibrary.Fleet.TripRequest.Data;
 
@@ -13,7 +15,8 @@ public static class TripRequestData
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertTripRequest, tripRequest, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Trip Request.");
 
-	public static async Task DeleteTransaction(TripRequestModel tripRequest) =>
+	public static async Task DeleteTransaction(TripRequestModel tripRequest)
+	{
 		await SqlDataAccessTransaction.Run(async transaction =>
 		{
 			tripRequest.Status = false;
@@ -28,7 +31,11 @@ public static class TripRequestData
 			}, transaction);
 		});
 
-	public static async Task RecoverTransaction(TripRequestModel tripRequest) =>
+		await TripRequestNotify.Notify(tripRequest.Id, NotifyType.Deleted);
+	}
+
+	public static async Task RecoverTransaction(TripRequestModel tripRequest)
+	{
 		await SqlDataAccessTransaction.Run(async transaction =>
 		{
 			tripRequest.Status = true;
@@ -42,6 +49,9 @@ public static class TripRequestData
 				CreatedFromPlatform = tripRequest.LastModifiedFromPlatform
 			}, transaction);
 		});
+
+		await TripRequestNotify.Notify(tripRequest.Id, NotifyType.Recovered);
+	}
 
 	private static async Task ValidateTransaction(TripRequestModel item, bool update)
 	{
@@ -98,6 +108,8 @@ public static class TripRequestData
 			}, transaction);
 			return id;
 		});
+
+		await TripRequestNotify.Notify(tripRequest.Id, isUpdate ? NotifyType.Updated : NotifyType.Created);
 
 		return tripRequest.Id;
 	}

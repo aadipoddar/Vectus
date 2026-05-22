@@ -38,6 +38,9 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 
 		await LocalRemove(StorageFileNames.FinancialAccountingDataFileName);
 		await LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
+
+		await LocalRemove(StorageFileNames.RepairDataFileName);
+		await LocalRemove(StorageFileNames.RepairJobCartDataFileName);
 	}
 
 

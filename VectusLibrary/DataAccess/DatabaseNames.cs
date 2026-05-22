@@ -89,6 +89,19 @@ public static class FleetNames
 	public static string TripRequestOverview => "TripRequest_Overview";
 	#endregion
 
+	#region Repair
+	public static string Repair => "Repair";
+	public static string RepairJob => "RepairJob";
+
+	public static string InsertRepair => "Insert_Repair";
+	public static string InsertRepairJob => "Insert_RepairJob";
+
+	public static string RepairOverview => "Repair_Overview";
+	public static string RepairJobOverview => "RepairJob_Overview";
+
+	public static string LoadGarageVehiclesByDate => "Load_GarageVehicles_By_Date";
+	#endregion
+
 	#region Route
 	public static string Driver => "Driver";
 	public static string Location => "Location";

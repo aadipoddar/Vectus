@@ -1,13 +1,13 @@
 @using VectusLibrary.Accounts.Masters.Models
-@using VectusLibrary.Fleet.Route.Models
-@using VectusLibrary.Fleet.TripRequest.Models
+@using VectusLibrary.Fleet.Garage.Models
+@using VectusLibrary.Fleet.Repair.Models
 @using VectusLibrary.Fleet.Vehicle.Models
 
-@attribute [Route(PageRouteNames.TripRequestReport)]
+@attribute [Route(PageRouteNames.RepairReport)]
 
-<PageTitle>Trip Request Report - Vectus</PageTitle>
+<PageTitle>Repair Report - Vectus</PageTitle>
 
-<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => AuthenticationService.NavigateToRoute(PageRouteNames.TripRequest, FormFactor, JSRuntime, NavigationManager)" />
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => AuthenticationService.NavigateToRoute(PageRouteNames.Repair, FormFactor, JSRuntime, NavigationManager)" />
 <MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
 <MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" />
 <MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadTransactionOverviews" />
@@ -17,8 +17,8 @@
 <MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" />
 <MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" />
 <MudBlazor.MudHotkey Key=JsKey.KeyO KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ViewSelectedTransaction" />
-<MudBlazor.MudHotkey Key=JsKey.KeyA KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="AcceptSelectedTransaction" />
-<MudBlazor.MudHotkey Key=JsKey.KeyJ KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="RejectSelectedTransaction" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ExportSelectedTransactionPdf" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ExportSelectedTransactionExcel" />
 <MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedTransaction" />
 
 @if (_isLoading || _user is null)
@@ -28,7 +28,7 @@
 else
 {
 	<div class="page-shell">
-		<Header Title="Trip Request Report">
+		<Header Title="Repair Report">
 			<LeftContent>
 				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
 					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
@@ -43,6 +43,11 @@ else
 								<MenuItem Separator="true" />
 								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
 								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Open" IconCss="e-icons e-folder-open">
+							<MenuItems>
+								<MenuItem Text="Repair Job Report" Id="JobReport" Disabled="@_isProcessing" />
 							</MenuItems>
 						</MenuItem>
 						<MenuItem Text="Periods" IconCss="e-icons e-clock">
@@ -63,8 +68,8 @@ else
 							<MenuItems>
 								<MenuItem Text="View (Alt + O)" IconCss="e-icons e-eye" Id="ViewSelected" Disabled="@_isProcessing" />
 								<MenuItem Separator="true" />
-								<MenuItem Text="Accept (Alt + A)" IconCss="e-icons e-check" Id="AcceptSelected" Disabled="@_isProcessing" />
-								<MenuItem Text="Reject (Alt + J)" IconCss="e-icons e-close" Id="RejectSelected" Disabled="@_isProcessing" />
+								<MenuItem Text="Export PDF (Alt + P)" IconCss="e-icons e-export-pdf" Id="ExportSelectedPdf" Disabled="@_isProcessing" />
+								<MenuItem Text="Export Excel (Alt + E)" IconCss="e-icons e-export-excel" Id="ExportSelectedExcel" Disabled="@_isProcessing" />
 								<MenuItem Separator="true" />
 								<MenuItem Text="Delete / Recover (Del)" IconCss="e-icons e-trash" Id="DeleteRecoverSelected" Disabled="@_isProcessing" />
 							</MenuItems>
@@ -127,38 +132,16 @@ else
 													AddNewRoute="@PageRouteNames.VehicleMaster" />
 							</div>
 
-							<!-- Route -->
+							<!-- Garage -->
 							<div class="form-field">
-								<CustomAutoComplete T="RouteOverviewModel"
-													Value="_selectedRoute"
-													DataSource="@_routes"
-													Placeholder="All Routes"
-													Label="Route" Required="false"
-													ValueChanged="OnRouteChanged"
-													FieldValue="@nameof(RouteOverviewModel.RouteDisplay)"
-													AddNewRoute="@PageRouteNames.RouteMaster" />
-							</div>
-
-							<!-- SDR -->
-							<div class="form-field">
-								<CustomAutoComplete T="SDRModel"
-													Value="_selectedSDR"
-													DataSource="@_sdrs"
-													Placeholder="All SDRs"
-													Label="SDR" Required="false"
-													ValueChanged="OnSDRChanged"
-													FieldValue="@nameof(SDRModel.Name)"
-													AddNewRoute="@PageRouteNames.SDRMaster" />
-							</div>
-
-							<!-- Request Status -->
-							<div class="form-field">
-								<CustomAutoComplete T="string"
-													Value="_selectedRequestStatus"
-													DataSource="@_requestStatuses"
-													Placeholder="All Statuses"
-													Label="Request Status" Required="false"
-													ValueChanged="OnRequestStatusChanged" />
+								<CustomAutoComplete T="GarageModel"
+													Value="_selectedGarage"
+													DataSource="@_garages"
+													Placeholder="All Garages"
+													Label="Garage" Required="false"
+													ValueChanged="OnGarageChanged"
+													FieldValue="@nameof(GarageModel.Name)"
+													AddNewRoute="@PageRouteNames.GarageMaster" />
 							</div>
 						</div>
 					</div>
@@ -179,17 +162,17 @@ else
 							<line x1="3" y1="12" x2="3.01" y2="12" />
 							<line x1="3" y1="18" x2="3.01" y2="18" />
 						</svg>
-						<h2 class="section-title">Trip Requests</h2>
+						<h2 class="section-title">Repairs</h2>
 					</div>
 				</div>
 				<div class="section-body grid-body">
-					<SfGrid @ref="_sfGrid" TValue="TripRequestOverviewModel" DataSource="_transactionOverviews"
+					<SfGrid @ref="_sfGrid" TValue="RepairOverviewModel" DataSource="_transactionOverviews"
 							AllowTextWrap="true" AllowPaging="true" AllowSorting="true" AllowResizing="true"
 							AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true" GridLines="GridLine.Horizontal"
 							AllowGrouping="true" CssClass="professional-grid" ContextMenuItems="@_gridContextMenuItems"
 							Toolbar="@(new List<string>() { "Search" })">
 
-						<GridEvents TValue="TripRequestOverviewModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridEvents TValue="RepairOverviewModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
 						<GridGroupSettings ShowDropArea="true" ShowGroupedColumn="true" ShowUngroupButton="true" />
 						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "10", "20", "50", "100", "All" })" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
@@ -197,7 +180,7 @@ else
 						<GridAggregates>
 							<GridAggregate>
 								<GridAggregateColumns>
-									<GridAggregateColumn Field="@nameof(TripRequestOverviewModel.TransactionNo)" Type="AggregateType.Count">
+									<GridAggregateColumn Field="@nameof(RepairOverviewModel.TransactionNo)" Type="AggregateType.Count">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -217,7 +200,7 @@ else
 											<div class="aggregate-label"><strong>Total Transactions: @aggregate.Count</strong></div>
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TripRequestOverviewModel.EstimatedDistance)" Type="AggregateType.Sum" Format="N0">
+									<GridAggregateColumn Field="@nameof(RepairOverviewModel.TotalItems)" Type="AggregateType.Sum" Format="N0">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -237,27 +220,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TripRequestOverviewModel.EstimatedFuelConsumption)" Type="AggregateType.Sum" Format="N0">
-										<FooterTemplate>
-											@{
-												var aggregate = (context as AggregateTemplateContext);
-												<div><strong>@aggregate.Sum</strong></div>
-											}
-										</FooterTemplate>
-										<GroupFooterTemplate>
-											@{
-												var aggregate = (context as AggregateTemplateContext);
-												<div><strong>@aggregate.Sum</strong></div>
-											}
-										</GroupFooterTemplate>
-										<GroupCaptionTemplate>
-											@{
-												var aggregate = (context as AggregateTemplateContext);
-												<div><strong>@aggregate.Sum</strong></div>
-											}
-										</GroupCaptionTemplate>
-									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TripRequestOverviewModel.EstimatedCost)" Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(RepairOverviewModel.TotalAmount)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -282,42 +245,39 @@ else
 						</GridAggregates>
 
 						<GridColumns>
-							<GridColumn Field="@nameof(TripRequestOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns || _selectedCompany is null || _selectedCompany.Id <= 0)" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.VehicleCode)" HeaderText="Vehicle" Width="140" Visible="@(_showAllColumns || _selectedVehicle is null || _selectedVehicle.Id <= 0)" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.SDRName)" HeaderText="SDR" Width="150" Visible="@(_showAllColumns || _selectedSDR is null || _selectedSDR.Id <= 0)" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.RouteCode)" HeaderText="Route Code" Width="130" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.FromLocation)" HeaderText="From" Width="170" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.ToLocation)" HeaderText="To" Width="170" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.RouteDisplay)" HeaderText="Route" Width="220" Visible="@(_showAllColumns || _selectedRoute is null || _selectedRoute.Id <= 0)" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.RequestStatus)" HeaderText="Request Status" Width="140" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(RepairOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
+							<GridColumn Field="@nameof(RepairOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" />
+							<GridColumn Field="@nameof(RepairOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns || _selectedCompany is null || _selectedCompany.Id <= 0)" />
+							<GridColumn Field="@nameof(RepairOverviewModel.VehicleCode)" HeaderText="Vehicle" Width="140" Visible="@(_showAllColumns || _selectedVehicle is null || _selectedVehicle.Id <= 0)" />
+							<GridColumn Field="@nameof(RepairOverviewModel.GarageName)" HeaderText="Garage" Width="180" Visible="@(_showAllColumns || _selectedGarage is null || _selectedGarage.Id <= 0)" />
+							<GridColumn Field="@nameof(RepairOverviewModel.CurrentKM)" HeaderText="Current KM" Width="130" TextAlign="TextAlign.Right" Format="N0" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.GarageInDateTime)" HeaderText="Garage In" Width="140" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.GarageOutDateTime)" HeaderText="Garage Out" Width="140" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
 
-							<GridColumn Field="@nameof(TripRequestOverviewModel.EstimatedDistance)" HeaderText="Est. Dist" Width="120" TextAlign="TextAlign.Right" Format="N0" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.EstimatedHours)" HeaderText="Est. Hours" Width="120" TextAlign="TextAlign.Right" Format="N0" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.EstimatedFuelConsumption)" HeaderText="Est. Fuel" Width="120" TextAlign="TextAlign.Right" Format="N0" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.EstimatedCost)" HeaderText="Est. Cost" Width="140" TextAlign="TextAlign.Right">
+							<GridColumn Field="@nameof(RepairOverviewModel.TotalItems)" HeaderText="Items" Width="110" TextAlign="TextAlign.Right" Format="N0" />
+							<GridColumn Field="@nameof(RepairOverviewModel.TotalQuantity)" HeaderText="Quantity" Width="120" TextAlign="TextAlign.Right" Format="N2" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.TotalAmount)" HeaderText="Total Amount" Width="150" TextAlign="TextAlign.Right">
 								<Template>
 									@{
-										var item = (context as TripRequestOverviewModel);
-										<span class="grid-total">@item.EstimatedCost.ToString("N2")</span>
+										var item = (context as RepairOverviewModel);
+										<span class="grid-total">@item.TotalAmount.ToString("N2")</span>
 									}
 								</Template>
 							</GridColumn>
 
-							<GridColumn Field="@nameof(TripRequestOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="160" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TripRequestOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="160" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(RepairOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
 
-							<GridColumn Field="@nameof(TripRequestOverviewModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+							<GridColumn Field="@nameof(RepairOverviewModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
 									@{
-										var item = (context as TripRequestOverviewModel);
+										var item = (context as RepairOverviewModel);
 										<span class="@(item.Status ? string.Empty : "grid-debit")">
 											@(item.Status ? "Active" : "Deleted")
 										</span>
@@ -339,11 +299,5 @@ else
 
 <RecoverConfirmationDialog @ref="_recoverConfirmationDialog" IdentifierValue="@_recoverTransactionNo"
 						   OnConfirm="ConfirmRecover" OnCancel="CancelRecover" />
-
-<AcceptConfirmationDialog @ref="_acceptConfirmationDialog" IdentifierValue="@_acceptTransactionNo"
-						  OnConfirm="ConfirmAccept" OnCancel="CancelAccept" />
-
-<RejectConfirmationDialog @ref="_rejectConfirmationDialog" IdentifierValue="@_rejectTransactionNo"
-						  OnConfirm="ConfirmReject" OnCancel="CancelReject" />
 
 <ToastNotification @ref="_toastNotification" />

@@ -8,6 +8,8 @@ public class DriverModel
 	public string Code { get; set; }
 	public string? Remarks { get; set; }
 	public string? LicenseUrl { get; set; }
+	public string LicenseNo { get; set; }
+	public DateTime LicenseExpiryDateTime { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -19,5 +21,7 @@ public class DriverOverviewModel
 	public string DisplayName => $"{Name} ({Mobile})";
 	public string Code { get; set; }
 	public string? Remarks { get; set; }
+	public string LicenseNo { get; set; }
+	public DateTime LicenseExpiryDateTime { get; set; }
 	public bool Status { get; set; }
 }

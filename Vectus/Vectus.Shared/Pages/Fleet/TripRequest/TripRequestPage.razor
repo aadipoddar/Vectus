@@ -70,15 +70,16 @@ else
 												Value="_selectedCompany"
 												DataSource="@_companies"
 												Placeholder="Select a Company"
-												Label="Company"
+												Label="Company (Ctrl + F)"
 												ValueChanged="OnCompanyChanged"
 												FieldValue="@nameof(CompanyModel.Name)"
 												AddNewRoute="@PageRouteNames.CompanyMaster" />
 						</div>
 
 						<div class="form-field">
-							<CustomDatePicker @bind-Value="_tripRequest.TransactionDateTime"
-											  Label="Transaction Date" ShowFinancialYear="false" />
+							<CustomDatePicker Value="_tripRequest.TransactionDateTime"
+											  ValueChanged="OnTransactionDateChanged"
+											  FinancialYear="@_selectedFinancialYear" />
 						</div>
 
 						<div class="form-field">
@@ -105,7 +106,7 @@ else
 						<div class="form-field">
 							<CustomAutoComplete T="VehicleLocationModel"
 												Value="_selectedVehicle"
-												DataSource="@_vehicleLocations"
+												DataSource="@_vehicles"
 												Placeholder="Select a Vehicle (Ctrl + F)"
 												Label="Vehicle"
 												ValueChanged="OnVehicleChanged"
@@ -194,7 +195,7 @@ else
 						</div>
 					</div>
 					<div class="section-body grid-body">
-						<SfGrid DataSource="@_vehicleLocations" AllowSorting="true" AllowResizing="true"
+						<SfGrid DataSource="@_vehicles" AllowSorting="true" AllowResizing="true"
 								EnableVirtualization="true" Height="600" CssClass="professional-grid"
 								Toolbar="@(new List<string>() { "Search" })">
 							<GridEvents TValue="VehicleLocationModel" OnRecordDoubleClick="OnVehicleRowDoubleClick" />
@@ -233,7 +234,7 @@ else
 									  OriginLongitude="_selectedRoute.FromLocationLongitude"
 									  DestinationLatitude="_selectedRoute.ToLocationLatitude"
 									  DestinationLongitude="_selectedRoute.ToLocationLongitude"
-									  Vehicles="_vehicleLocations"
+									  Vehicles="_vehicles"
 									  SelectedVehicleCode="@(_selectedVehicle?.Code)"
 									  OnVehicleSelected="OnMapVehicleSelected"
 									  PlaceholderText="This route has no map coordinates set on its locations." />

@@ -1,6 +1,7 @@
 using VectusLibrary.APIService;
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Repair.Data;
 using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Operations.Data;
@@ -14,10 +15,11 @@ public static class VehicleData
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertVehicle, vehicle, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Vehicle.");
 
-	public static async Task<List<VehicleLocationModel>> LoadVehicleLocations(RouteOverviewModel route = null)
+	public static async Task<List<VehicleLocationModel>> LoadVehicleLocations(RouteOverviewModel route = null, DateTime? startDateTime = null, DateTime? endDateTime = null, bool onlyActive = true)
 	{
 		var vehicleLocations = await CommonData.LoadTableData<VehicleLocationModel>(FleetNames.Vehicle);
 		var sdr = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
+		var garageVehicles = await RepairData.LoadGarageVehiclesByDate(startDateTime ?? DateTime.Now, endDateTime);
 
 		List<VamosysVehicleModel> vamosysVehicles = [];
 		try { vamosysVehicles = await VamosysApiService.GetLiveVehicles(); }
@@ -25,11 +27,12 @@ public static class VehicleData
 
 		foreach (var vehicle in vehicleLocations)
 		{
+			vehicle.SDR = sdr.FirstOrDefault(s => s.Id == vehicle.SDRId)?.Name;
+			vehicle.InGarage = garageVehicles.Any(g => g.VehicleId == vehicle.Id);
+
 			var gps = vamosysVehicles.FirstOrDefault(v => string.Equals(v.VehicleId, vehicle.Code, StringComparison.OrdinalIgnoreCase));
 			if (gps is null)
 				continue;
-
-			vehicle.SDR = sdr.FirstOrDefault(s => s.Id == vehicle.SDRId)?.Name;
 
 			vehicle.VehicleId = gps.VehicleId;
 			vehicle.RegNo = gps.RegNo;
@@ -65,7 +68,13 @@ public static class VehicleData
 			vehicle.GpsExpiryDays = gps.GpsExpiryDays;
 		}
 
-		return [.. vehicleLocations.Where(v => v.HaversineDistance.HasValue).OrderBy(v => v.HaversineDistance)];
+		if (onlyActive)
+			vehicleLocations = [.. vehicleLocations.Where(v => v.Status)];
+
+		if (route is null)
+			return vehicleLocations;
+		else
+			return [.. vehicleLocations.Where(v => v.HaversineDistance.HasValue).OrderBy(v => v.HaversineDistance)];
 	}
 
 	public static decimal? HaversineDistance(VehicleLocationModel vehicle, RouteOverviewModel route)

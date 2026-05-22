@@ -91,6 +91,20 @@ else
 						</div>
 
 						<div class="form-field">
+							<CustomTextField @bind-Value="_driver.LicenseNo"
+											 Label="License No"
+											 Placeholder="Enter license number"
+											 MaxLength="100" />
+						</div>
+
+						<div class="form-field">
+							<CustomDatePicker @bind-Value="_driver.LicenseExpiryDateTime"
+											  Label="License Expiry Date"
+											  ShowFinancialYear="false"
+											  AddNewRoute="null" />
+						</div>
+
+						<div class="form-field">
 							<CustomTextField @bind-Value="_driver.Remarks"
 											 Label="Remarks"
 											 Placeholder="Enter remarks (optional)"
@@ -125,6 +139,8 @@ else
 							<GridColumn Field="@nameof(DriverModel.Name)" HeaderText="Driver Name" Width="300" />
 							<GridColumn Field="@nameof(DriverModel.Mobile)" HeaderText="Mobile" Width="150" />
 							<GridColumn Field="@nameof(DriverModel.Code)" HeaderText="Code" Width="150" />
+							<GridColumn Field="@nameof(DriverModel.LicenseNo)" HeaderText="License No" Width="180" />
+							<GridColumn Field="@nameof(DriverModel.LicenseExpiryDateTime)" HeaderText="License Expiry" Width="150" Format="dd/MM/yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(DriverModel.Remarks)" HeaderText="Remarks" Width="400" />
 							<GridColumn Field="@nameof(DriverModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>

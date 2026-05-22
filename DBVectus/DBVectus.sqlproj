@@ -83,6 +83,10 @@
     <Folder Include="Fleet\Route\Table" />
     <Folder Include="Fleet\TripRequest" />
     <Folder Include="Fleet\Garage" />
+    <Folder Include="Fleet\Repair" />
+    <Folder Include="Fleet\Repair\Table" />
+    <Folder Include="Fleet\Repair\Insert" />
+    <Folder Include="Fleet\Repair\Load" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -149,6 +153,13 @@
     <Build Include="Fleet\Garage\Garage.sql" />
     <Build Include="Fleet\Garage\Insert_Garage.sql" />
     <Build Include="Fleet\TripRequest\TripRequest_Overview.sql" />
+    <Build Include="Fleet\Repair\Table\Repair.sql" />
+    <Build Include="Fleet\Repair\Table\RepairJob.sql" />
+    <Build Include="Fleet\Repair\Insert\Insert_Repair.sql" />
+    <Build Include="Fleet\Repair\Insert\Insert_RepairJob.sql" />
+    <Build Include="Fleet\Repair\Load\Repair_Overview.sql" />
+    <Build Include="Fleet\Repair\Load\RepairJob_Overview.sql" />
+    <Build Include="Fleet\Repair\Load\Load_GarageVehicles_By_Date.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

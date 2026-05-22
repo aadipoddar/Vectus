@@ -2,6 +2,7 @@
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Garage.Models;
+using VectusLibrary.Fleet.Repair.Models;
 using VectusLibrary.Fleet.Route.Models;
 using VectusLibrary.Fleet.TripRequest.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
@@ -58,6 +59,11 @@ public static class GenerateCodes
 				case CodeType.TripRequest:
 					var tripRequest = await CommonData.LoadTableDataByTransactionNo<TripRequestModel>(FleetNames.TripRequest, code, sqlDataAccessTransaction);
 					isDuplicate = tripRequest is not null;
+					break;
+
+				case CodeType.Repair:
+					var repair = await CommonData.LoadTableDataByTransactionNo<RepairModel>(FleetNames.Repair, code, sqlDataAccessTransaction);
+					isDuplicate = repair is not null;
 					break;
 
 				case CodeType.Garage:
@@ -298,6 +304,32 @@ public static class GenerateCodes
 		}
 
 		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}00001", 5, CodeType.FinancialAccounting, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Repair
+	public static async Task<string> GenerateRepairTransactionNo(RepairModel repair, SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, repair.FinancialYearId, sqlDataAccessTransaction);
+		var companyPrefix = (await CommonData.LoadTableDataById<CompanyModel>(AccountNames.Company, repair.CompanyId, sqlDataAccessTransaction)).Code;
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.RepairTransactionPrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = await CommonData.LoadLastTableDataByFinancialYear<RepairModel>(FleetNames.Repair, repair.FinancialYearId, sqlDataAccessTransaction);
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.TransactionNo;
+			if (lastItemCode.StartsWith($"{companyPrefix}{financialYear.YearNo}{itemPrefix}"))
+			{
+				var lastNumberPart = lastItemCode[(companyPrefix.Length + financialYear.YearNo.ToString().Length + itemPrefix.Length)..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}{nextNumber:D5}", 5, CodeType.Repair, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{itemPrefix}00001", 5, CodeType.Repair, sqlDataAccessTransaction);
 	}
 	#endregion
 
