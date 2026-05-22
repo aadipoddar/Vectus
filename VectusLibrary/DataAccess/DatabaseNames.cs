@@ -100,16 +100,21 @@ public static class FleetNames
 	public static string RepairJobOverview => "RepairJob_Overview";
 
 	public static string LoadGarageVehiclesByDate => "Load_GarageVehicles_By_Date";
+	public static string CheckRepairOverlap => "Check_Repair_Overlap";
 	#endregion
 
 	#region Route
+	public static string VehicleDriver => "VehicleDriver";
 	public static string Driver => "Driver";
 	public static string Location => "Location";
 	public static string Route => "Route";
 
+	public static string InsertVehicleDriver => "Insert_VehicleDriver";
 	public static string InsertDriver => "Insert_Driver";
 	public static string InsertLocation => "Insert_Location";
 	public static string InsertRoute => "Insert_Route";
+
+	public static string DeleteVehicleDriver => "Delete_VehicleDriver";
 	#endregion
 
 	#region Vehicle Document

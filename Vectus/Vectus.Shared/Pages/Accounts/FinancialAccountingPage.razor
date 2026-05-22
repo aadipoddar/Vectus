@@ -88,8 +88,8 @@ else
 								<CustomAutoComplete @ref="_sfFirstFocus" T="CompanyModel"
 													Value="_selectedCompany"
 													DataSource="@_companies"
-													Placeholder="Select Company (Ctrl + F)"
-													Label="Company" Required="true"
+													Placeholder="Select Company"
+													Label="Company (Ctrl + F)" Required="true"
 													ValueChanged="OnCompanyChanged"
 													FieldValue="@nameof(CompanyModel.Name)"
 													AddNewRoute="@PageRouteNames.CompanyMaster" />

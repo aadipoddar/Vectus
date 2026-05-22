@@ -87,6 +87,7 @@
     <Folder Include="Fleet\Repair\Table" />
     <Folder Include="Fleet\Repair\Insert" />
     <Folder Include="Fleet\Repair\Load" />
+    <Folder Include="Fleet\Route\Delete" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -160,6 +161,10 @@
     <Build Include="Fleet\Repair\Load\Repair_Overview.sql" />
     <Build Include="Fleet\Repair\Load\RepairJob_Overview.sql" />
     <Build Include="Fleet\Repair\Load\Load_GarageVehicles_By_Date.sql" />
+    <Build Include="Fleet\Repair\Load\Check_Repair_Overlap.sql" />
+    <Build Include="Fleet\Route\Table\VehicleDriver.sql" />
+    <Build Include="Fleet\Route\Insert\Insert_VehicleDriver.sql" />
+    <Build Include="Fleet\Route\Delete\Delete_VehicleDriver.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

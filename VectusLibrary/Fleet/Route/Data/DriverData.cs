@@ -12,6 +12,22 @@ public static class DriverData
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertDriver, driver, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Driver.");
 
+	public static async Task<List<DriverOverviewModel>> LoadDriverOverview()
+	{
+		var drivers = await CommonData.LoadTableDataByStatus<DriverModel>(FleetNames.Driver);
+		return [.. drivers.Select(d => new DriverOverviewModel
+		{
+			Id = d.Id,
+			Name = d.Name,
+			Mobile = d.Mobile,
+			Code = d.Code,
+			Remarks = d.Remarks,
+			LicenseNo = d.LicenseNo,
+			LicenseExpiryDateTime = d.LicenseExpiryDateTime,
+			Status = d.Status
+		})];
+	}
+
 	public static async Task DeleteTransaction(DriverModel driver, int userId, string platform) =>
 		await SqlDataAccessTransaction.Run(async transaction =>
 		{
@@ -41,22 +57,6 @@ public static class DriverData
 				CreatedFromPlatform = platform
 			}, transaction);
 		});
-
-	public static async Task<List<DriverOverviewModel>> LoadDriverOverview()
-	{
-		var drivers = await CommonData.LoadTableDataByStatus<DriverModel>(FleetNames.Driver);
-		return [.. drivers.Select(d => new DriverOverviewModel
-		{
-			Id = d.Id,
-			Name = d.Name,
-			Mobile = d.Mobile,
-			Code = d.Code,
-			Remarks = d.Remarks,
-			LicenseNo = d.LicenseNo,
-			LicenseExpiryDateTime = d.LicenseExpiryDateTime,
-			Status = d.Status
-		})];
-	}
 
 	private static async Task ValidateTransaction(DriverModel item)
 	{

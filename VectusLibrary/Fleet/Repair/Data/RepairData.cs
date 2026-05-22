@@ -23,6 +23,9 @@ public static class RepairData
 	public static async Task<List<RepairOverviewModel>> LoadGarageVehiclesByDate(DateTime StartDate, DateTime? EndDate = null) =>
 		await SqlDataAccess.LoadData<RepairOverviewModel, dynamic>(FleetNames.LoadGarageVehiclesByDate, new { StartDate, EndDate });
 
+	public static async Task<RepairModel> CheckRepairOverlap(RepairModel repair) =>
+		(await SqlDataAccess.LoadData<RepairModel, dynamic>(FleetNames.CheckRepairOverlap, new { repair.Id, repair.VehicleId, repair.GarageInDateTime, repair.GarageOutDateTime })).FirstOrDefault();
+
 	public static List<RepairJobModel> ConvertCartToJobs(List<RepairJobCartModel> cart, int masterId = 0) =>
 		[.. cart.Select(item => new RepairJobModel
 		{
@@ -85,6 +88,10 @@ public static class RepairData
 
 		if (repair.GarageOutDateTime is not null && repair.GarageOutDateTime < repair.GarageInDateTime)
 			throw new InvalidOperationException("Garage-out date/time cannot be earlier than garage-in date/time.");
+
+		var overlap = await CheckRepairOverlap(repair);
+		if (overlap is not null)
+			throw new InvalidOperationException($"This vehicle is already in a garage for an overlapping period (Transaction: {overlap.TransactionNo}, Garage In: {overlap.GarageInDateTime}, Garage Out: {(overlap.GarageOutDateTime.HasValue ? overlap.GarageOutDateTime.Value.ToString() : "Still in garage")}). Please adjust the garage-in/out dates.");
 
 		if (repair.TotalAmount <= 0)
 			throw new InvalidOperationException("Total amount must be greater than zero.");

@@ -14,34 +14,29 @@ public static class RouteData
 
 	public static async Task<List<RouteOverviewModel>> LoadRouteOverview()
 	{
-		var routes = await CommonData.LoadTableData<RouteModel>(FleetNames.Route);
-		routes = [.. routes.Where(r => r.Status)];
+		var routes = await CommonData.LoadTableDataByStatus<RouteModel>(FleetNames.Route);
 		var locations = await CommonData.LoadTableData<LocationModel>(FleetNames.Location);
-		List<RouteOverviewModel> routeLocations = [];
 
-		foreach (var route in routes)
-			routeLocations.Add(new()
-			{
-				Id = route.Id,
-				FromLocationId = route.FromLocationId,
-				FromLocationName = locations.FirstOrDefault(l => l.Id == route.FromLocationId)?.Name ?? string.Empty,
-				FromLocationLatitude = locations.FirstOrDefault(l => l.Id == route.FromLocationId)?.Latitude ?? 0,
-				FromLocationLongitude = locations.FirstOrDefault(l => l.Id == route.FromLocationId)?.Longitude ?? 0,
-				ToLocationId = route.ToLocationId,
-				ToLocationName = locations.FirstOrDefault(l => l.Id == route.ToLocationId)?.Name ?? string.Empty,
-				ToLocationLatitude = locations.FirstOrDefault(l => l.Id == route.ToLocationId)?.Latitude ?? 0,
-				ToLocationLongitude = locations.FirstOrDefault(l => l.Id == route.ToLocationId)?.Longitude ?? 0,
-				RouteDisplay = $"{locations.FirstOrDefault(l => l.Id == route.FromLocationId)?.Name ?? route.FromLocationId.ToString()} - {locations.FirstOrDefault(l => l.Id == route.ToLocationId)?.Name ?? route.ToLocationId.ToString()}",
-				Code = route.Code,
-				EstimatedHours = route.EstimatedHours,
-				EstimatedDistance = route.EstimatedDistance,
-				EstimatedFuelConsumption = route.EstimatedFuelConsumption,
-				EstimatedCost = route.EstimatedCost,
-				Remarks = route.Remarks,
-				Status = route.Status
-			});
-
-		return routeLocations;
+		return [.. routes.Select(r => new RouteOverviewModel
+		{
+			Id = r.Id,
+			FromLocationId = r.FromLocationId,
+			FromLocationName = locations.FirstOrDefault(l => l.Id == r.FromLocationId)?.Name ?? string.Empty,
+			FromLocationLatitude = locations.FirstOrDefault(l => l.Id == r.FromLocationId)?.Latitude ?? 0,
+			FromLocationLongitude = locations.FirstOrDefault(l => l.Id == r.FromLocationId)?.Longitude ?? 0,
+			ToLocationId = r.ToLocationId,
+			ToLocationName = locations.FirstOrDefault(l => l.Id == r.ToLocationId)?.Name ?? string.Empty,
+			ToLocationLatitude = locations.FirstOrDefault(l => l.Id == r.ToLocationId)?.Latitude ?? 0,
+			ToLocationLongitude = locations.FirstOrDefault(l => l.Id == r.ToLocationId)?.Longitude ?? 0,
+			RouteDisplay = $"{locations.FirstOrDefault(l => l.Id == r.FromLocationId)?.Name ?? r.FromLocationId.ToString()} - {locations.FirstOrDefault(l => l.Id == r.ToLocationId)?.Name ?? r.ToLocationId.ToString()}",
+			Code = r.Code,
+			EstimatedHours = r.EstimatedHours,
+			EstimatedDistance = r.EstimatedDistance,
+			EstimatedFuelConsumption = r.EstimatedFuelConsumption,
+			EstimatedCost = r.EstimatedCost,
+			Remarks = r.Remarks,
+			Status = r.Status
+		})];
 	}
 
 	public static async Task DeleteTransaction(RouteModel route, int userId, string platform) =>

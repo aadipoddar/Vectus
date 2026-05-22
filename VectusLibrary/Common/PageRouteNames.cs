@@ -50,6 +50,7 @@ public static class PageRouteNames
 	public const string LocationMaster = "/fleet/location";
 	public const string RouteMaster = "/fleet/route";
 	public const string DriverMaster = "/fleet/driver";
+	public const string VehicleDriverMaster = "/fleet/vehicle-driver";
 
 	public const string TripRequest = "/fleet/trip-request";
 	public const string TripRequestReport = "/fleet/reports/trip-request";

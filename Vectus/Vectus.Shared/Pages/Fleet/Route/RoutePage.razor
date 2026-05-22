@@ -71,8 +71,8 @@ else
 							<CustomAutoComplete @ref="_sfFirstFocus" T="LocationModel"
 												@bind-Value="_selectedFromLocation"
 												DataSource="@_locations"
-												Placeholder="Select From Location (Ctrl + F)"
-												Label="From Location"
+												Placeholder="Select From Location"
+												Label="From Location (Ctrl + F)"
 												FieldValue="@nameof(LocationModel.Name)"
 												AddNewRoute="@PageRouteNames.LocationMaster" />
 						</div>
