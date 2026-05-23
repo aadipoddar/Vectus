@@ -18,7 +18,7 @@ public static class DriverExport
 			driver.Code,
 			driver.Remarks,
 			driver.LicenseNo,
-			LicenseExpiryDateTime = driver.LicenseExpiryDateTime.ToString("dd/MM/yyyy"),
+			LicenseExpiryDateTime = driver.LicenseExpiryDateTime?.ToString("dd/MM/yyyy"),
 			Status = driver.Status ? "Active" : "Deleted"
 		});
 

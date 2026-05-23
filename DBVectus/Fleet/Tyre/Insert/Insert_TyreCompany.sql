@@ -3,7 +3,7 @@ CREATE PROCEDURE [dbo].[Insert_TyreCompany]
 	@Name VARCHAR(250),
 	@Code VARCHAR(250),
 	@Remarks VARCHAR(MAX),
-	@Status BIT = 1
+	@Status BIT
 AS
 BEGIN
 	IF @Id = 0

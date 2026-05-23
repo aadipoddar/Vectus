@@ -79,7 +79,7 @@ public partial class GroupPage
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private void OnNatureChanged(NatureModel value)
 	{
 		_selectedNature = value;
@@ -101,7 +101,7 @@ public partial class GroupPage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			await _toastNotification.ShowAsync("Processing", "Please wait...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			await GroupData.SaveTransaction(_group, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
@@ -323,10 +323,7 @@ public partial class GroupPage
 		await LoadData();
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 	#endregion
 }

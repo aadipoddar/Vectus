@@ -93,7 +93,7 @@ public partial class VehicleDocumentPage
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private async Task OnVehicleDocumentTypeChanged(VehicleDocumentTypeModel value)
 	{
 		if (value is null || value.Id == 0)
@@ -496,10 +496,7 @@ public partial class VehicleDocumentPage
 		await LoadData();
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
 	#endregion
 }

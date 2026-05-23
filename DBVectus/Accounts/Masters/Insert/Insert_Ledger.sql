@@ -13,7 +13,7 @@
 	@Email VARCHAR(MAX),
 	@Address VARCHAR(MAX),
 	@Remarks VARCHAR(MAX),
-	@Status BIT = 1
+	@Status BIT
 AS
 BEGIN
 	IF @Id = 0

@@ -98,10 +98,11 @@ else
 						</div>
 
 						<div class="form-field">
-							<CustomDatePicker @bind-Value="_driver.LicenseExpiryDateTime"
+							<CustomDatePicker @bind-NullableValue="_driver.LicenseExpiryDateTime"
 											  Label="License Expiry Date"
+											  Required="false"
 											  ShowFinancialYear="false"
-											  AddNewRoute="null" />
+											  AddNewRoute="@(null)" />
 						</div>
 
 						<div class="form-field">

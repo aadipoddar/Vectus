@@ -87,7 +87,7 @@ public partial class AccountTypePage
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			await _toastNotification.ShowAsync("Processing", "Please wait...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			await AccountTypeData.SaveTransaction(_accountType, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
@@ -308,10 +308,7 @@ public partial class AccountTypePage
 		await LoadData();
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 	#endregion
 }

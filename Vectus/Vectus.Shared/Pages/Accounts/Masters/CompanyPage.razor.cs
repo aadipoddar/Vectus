@@ -79,7 +79,7 @@ public partial class CompanyPage
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private void OnStateUTChanged(StateUTModel value)
 	{
 		_selectedStateUT = value;
@@ -323,10 +323,7 @@ public partial class CompanyPage
 		await LoadData();
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 	#endregion
 }

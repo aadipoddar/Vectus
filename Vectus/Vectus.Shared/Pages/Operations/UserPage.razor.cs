@@ -305,10 +305,7 @@ public partial class UserPage
 		await LoadData();
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard);
 	#endregion
 }

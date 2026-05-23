@@ -1,16 +1,18 @@
-﻿using VectusLibrary.DataAccess;
+﻿using OfficeOpenXml;
+
+using VectusLibrary.DataAccess;
 
 SqlDataAccess.SetupConfiguration();
 
-//FileInfo fileInfo = new(@"C:\Others\vehicle.xlsx");
+FileInfo fileInfo = new(@"C:\Others\driver.xlsx");
 
-//ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-//using var package = new ExcelPackage(fileInfo);
+using var package = new ExcelPackage(fileInfo);
 
-//await package.LoadAsync(fileInfo);
+await package.LoadAsync(fileInfo);
 
-//var worksheet1 = package.Workbook.Worksheets[0];
+var worksheet1 = package.Workbook.Worksheets[0];
 
 
 Console.WriteLine("Finished importing Items.");
@@ -104,6 +106,40 @@ static async Task InsertVehicles()
 		}
 	}
 }
- 
+
+static async Task InsertDrivers(ExcelWorksheet worksheet1)
+{
+	int row = 2;
+	while (worksheet1.Cells[row, 1].Value != null)
+	{
+		var mobile = worksheet1.Cells[row, 1].Value.ToString();
+		var name = worksheet1.Cells[row, 2].Value.ToString();
+		var license = worksheet1.Cells[row, 3].Value.ToString();
+
+		if (string.IsNullOrWhiteSpace(mobile) ||
+			string.IsNullOrWhiteSpace(license) ||
+			string.IsNullOrWhiteSpace(name))
+		{
+			Console.WriteLine("Not Inserted Row = " + row);
+			continue;
+		}
+
+		name = name.Trim();
+		license = license.Trim();
+		mobile = mobile.Trim();
+
+		Console.WriteLine("Inserting New Driver: " + name);
+		await DriverData.SaveTransaction(new()
+		{
+			Id = 0,
+			Name = name,
+			LicenseNo = license,
+			Mobile = mobile,
+			Status = true
+		}, 1, "Import Script");
+		row++;
+	}
+}
+
 */
 #endregion

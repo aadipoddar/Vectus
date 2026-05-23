@@ -88,7 +88,7 @@ public partial class LedgerPage
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private void SyncSelections()
 	{
 		_selectedGroup = _groups.FirstOrDefault(g => g.Id == _ledger.GroupId);
@@ -351,10 +351,7 @@ public partial class LedgerPage
 		await LoadData();
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 	#endregion
 }

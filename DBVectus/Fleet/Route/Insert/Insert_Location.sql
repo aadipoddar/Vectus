@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[Insert_Location]
 	@Latitude DECIMAL(13, 10),
 	@Longitude DECIMAL(13, 10),
 	@Remarks VARCHAR(MAX),
-	@Status BIT = 1
+	@Status BIT
 AS
 BEGIN
 	IF @Id = 0

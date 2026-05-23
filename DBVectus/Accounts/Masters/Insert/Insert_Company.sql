@@ -3,15 +3,15 @@
 	@Name VARCHAR(250),
 	@Code VARCHAR(10),
 	@StateUTId INT,
-	@GSTNo VARCHAR(MAX) = NULL,
-	@PANNo VARCHAR(MAX) = NULL,
-	@CINNo VARCHAR(MAX) = NULL,
-	@Alias VARCHAR(MAX) = NULL,
-	@Phone VARCHAR(10) = NULL,
-	@Email VARCHAR(MAX) = NULL,
-	@Address VARCHAR(MAX) = NULL,
-	@Remarks VARCHAR(MAX) = NULL,
-	@Status BIT = 1
+	@GSTNo VARCHAR(MAX),
+	@PANNo VARCHAR(MAX),
+	@CINNo VARCHAR(MAX),
+	@Alias VARCHAR(MAX),
+	@Phone VARCHAR(10),
+	@Email VARCHAR(MAX),
+	@Address VARCHAR(MAX),
+	@Remarks VARCHAR(MAX),
+	@Status BIT
 AS
 BEGIN
 

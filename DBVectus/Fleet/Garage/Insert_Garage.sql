@@ -4,7 +4,7 @@
 	@Code VARCHAR(10),
 	@LocationId INT,
 	@Remarks VARCHAR(MAX),
-	@Status BIT = 1
+	@Status BIT
 AS
 BEGIN
 	IF @Id = 0

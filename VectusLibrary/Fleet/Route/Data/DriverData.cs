@@ -8,7 +8,7 @@ namespace VectusLibrary.Fleet.Route.Data;
 
 public static class DriverData
 {
-	public static async Task<int> InsertDriver(DriverModel driver, SqlDataAccessTransaction transaction = null) =>
+	private static async Task<int> InsertDriver(DriverModel driver, SqlDataAccessTransaction transaction = null) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertDriver, driver, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Driver.");
 
@@ -65,6 +65,7 @@ public static class DriverData
 		item.Code = item.Code?.Trim().ToUpper() ?? string.Empty;
 		item.LicenseNo = item.LicenseNo?.Trim().ToUpper() ?? string.Empty;
 		item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? null : item.Remarks.Trim();
+		item.LicenseExpiryDateTime = item.LicenseExpiryDateTime == default ? null : item.LicenseExpiryDateTime;
 		item.Status = true;
 
 		if (string.IsNullOrWhiteSpace(item.Name))
@@ -78,9 +79,6 @@ public static class DriverData
 
 		if (string.IsNullOrWhiteSpace(item.LicenseNo))
 			throw new Exception("License number is required. Please enter a valid license number.");
-
-		if (item.LicenseExpiryDateTime == default)
-			throw new Exception("License expiry date is required. Please select a valid date.");
 
 		if (item.Id == 0)
 			item.Code = await GenerateCodes.GenerateDriverCode();

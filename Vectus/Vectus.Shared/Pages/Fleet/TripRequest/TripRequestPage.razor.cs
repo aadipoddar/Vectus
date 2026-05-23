@@ -152,7 +152,7 @@ public partial class TripRequestPage
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private async Task OnTransactionDateChanged(DateTime value)
 	{
 		_tripRequest.TransactionDateTime = value;
@@ -268,10 +268,7 @@ public partial class TripRequestPage
 		}
 	}
 
-	private void ResetPage() =>
-		PageRefresh.Request();
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.FleetTransactionsDashboard);
+	private void ResetPage() => PageRefresh.Request();
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
 	#endregion
 }

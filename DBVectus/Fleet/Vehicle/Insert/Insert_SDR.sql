@@ -3,7 +3,7 @@
 	@Name VARCHAR(250),
 	@Code VARCHAR(10),
 	@Remarks VARCHAR(MAX),
-	@Status BIT = 1
+	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
