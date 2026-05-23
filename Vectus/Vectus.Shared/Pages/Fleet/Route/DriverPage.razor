@@ -164,7 +164,6 @@ else
 <DocumentUploadDialog Title="Upload Driver License"
 					  ExistingDocumentUrl="@_driver.LicenseUrl"
 					  @bind-IsVisible="_isUploadDialogVisible"
-					  UploaderReference="_sfLicenseUploader"
 					  OnFileChange="OnUploaderFileChange" OnFileRemove="OnRemoveFile"
 					  OnDownloadClick="DownloadExistingLicense" OnRemoveClick="RemoveExistingLicense"
 					  OnClose="CloseUploadDialog" />

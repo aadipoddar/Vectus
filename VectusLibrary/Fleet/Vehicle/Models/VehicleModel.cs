@@ -36,8 +36,7 @@ public class VehicleLocationModel
 	public bool InGarage { get; set; }
 
 	// Identity — map to Vectus Vehicle.Code via VehicleId (fallback RegNo).
-	public string VehicleId
-	{ get; set; }
+	public string VehicleId { get; set; }
 	public string RegNo { get; set; }
 	public string ShortName { get; set; }
 	public string VehicleType { get; set; }

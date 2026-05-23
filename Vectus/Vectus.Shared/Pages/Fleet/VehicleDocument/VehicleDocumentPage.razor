@@ -204,7 +204,6 @@ else
 
 <DocumentUploadDialog ExistingDocumentUrl="@_vehicleDocument.DocumentUrl"
 					  @bind-IsVisible="_isUploadDialogVisible"
-					  UploaderReference="_sfDocumentUploader"
 					  OnFileChange="OnUploaderFileChange" OnFileRemove="OnRemoveFile"
 					  OnDownloadClick="DownloadExistingDocument" OnRemoveClick="RemoveExistingDocument"
 					  OnClose="CloseUploadDialog" />

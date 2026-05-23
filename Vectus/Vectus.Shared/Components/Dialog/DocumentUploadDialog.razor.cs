@@ -14,7 +14,6 @@ public partial class DocumentUploadDialog
 	[Parameter] public string ExistingDocumentUrl { get; set; }
 	[Parameter] public bool IsVisible { get; set; } = false;
 	[Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
-	[Parameter] public SfUploader UploaderReference { get; set; }
 
 	[Parameter] public EventCallback<UploadChangeEventArgs> OnFileChange { get; set; }
 	[Parameter] public EventCallback<RemovingEventArgs> OnFileRemove { get; set; }

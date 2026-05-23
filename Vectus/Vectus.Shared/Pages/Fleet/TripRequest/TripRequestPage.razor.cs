@@ -142,8 +142,8 @@ public partial class TripRequestPage
 			? _vehicles.FirstOrDefault(v => v.Id == _tripRequest.VehicleId)
 			: null;
 
-		_tripRequest.CompanyId = _selectedCompany.Id;
-		_tripRequest.RouteId = _selectedRoute.Id;
+		_tripRequest.CompanyId = _selectedCompany?.Id ?? 0;
+		_tripRequest.RouteId = _selectedRoute?.Id ?? 0;
 		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
 
 		_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_tripRequest.TransactionDateTime);
@@ -163,15 +163,6 @@ public partial class TripRequestPage
 			? _vehicles.FirstOrDefault(v => v.Id == _selectedVehicle.Id)
 			: null;
 		_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
-	}
-
-	private async Task OnCompanyChanged(CompanyModel value)
-	{
-		if (value is null || value.Id == 0)
-			return;
-
-		_selectedCompany = value;
-		_tripRequest.CompanyId = _selectedCompany.Id;
 	}
 
 	private async Task OnRouteChanged(RouteOverviewModel value)
@@ -228,7 +219,7 @@ public partial class TripRequestPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			_tripRequest.CompanyId = _selectedCompany.Id;
+			_tripRequest.CompanyId = _selectedCompany?.Id ?? 0;
 			_tripRequest.VehicleId = _selectedVehicle?.Id ?? 0;
 			_tripRequest.RouteId = _selectedRoute.Id;
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -269,6 +260,6 @@ public partial class TripRequestPage
 	}
 
 	private void ResetPage() => PageRefresh.Request();
-	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
+	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.FleetTransactionsDashboard);
 	#endregion
 }

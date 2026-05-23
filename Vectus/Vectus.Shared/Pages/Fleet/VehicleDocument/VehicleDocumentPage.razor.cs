@@ -42,7 +42,6 @@ public partial class VehicleDocumentPage
 	];
 
 	private SfGrid<VehicleDocumentModel> _sfGrid;
-	private SfUploader _sfDocumentUploader;
 	private CustomTextField _sfFirstFocus;
 	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
@@ -154,14 +153,6 @@ public partial class VehicleDocumentPage
 	#endregion
 
 	#region Actions
-	private async Task OnEditVehicleDocument(VehicleDocumentModel vehicleDocument)
-	{
-		_vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, vehicleDocument.Id)
-			?? throw new Exception("Vehicle Document transaction not found for editing.");
-		_isUploadDialogVisible = false;
-		StateHasChanged();
-	}
-
 	private async Task ConfirmDelete()
 	{
 		try
@@ -345,9 +336,6 @@ public partial class VehicleDocumentPage
 			var fileName = _vehicleDocument.DocumentUrl.Split('/').Last();
 			await BlobStorageAccess.DeleteFileFromBlobStorage(fileName, BlobStorageContainers.vehicledocument);
 			_vehicleDocument.DocumentUrl = null;
-
-			if (_sfDocumentUploader is not null)
-				await _sfDocumentUploader.ClearAllAsync();
 
 			await _toastNotification.ShowAsync("Removed", "The document has been removed successfully.", ToastType.Success);
 			StateHasChanged();

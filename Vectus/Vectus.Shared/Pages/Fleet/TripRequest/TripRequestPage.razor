@@ -67,11 +67,10 @@ else
 						<div class="form-field">
 							<CustomAutoComplete T="CompanyModel"
 												@ref="_sfFirstFocus"
-												Value="_selectedCompany"
+												@bind-Value="_selectedCompany"
 												DataSource="@_companies"
 												Placeholder="Select Company"
 												Label="Company (Ctrl + F)"
-												ValueChanged="OnCompanyChanged"
 												FieldValue="@nameof(CompanyModel.Name)"
 												AddNewRoute="@PageRouteNames.CompanyMaster" />
 						</div>

@@ -37,8 +37,8 @@ else
 							<MenuItems>
 								<MenuItem Text="New Transaction (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
 								<MenuItem Text="Refresh Data (Ctrl + R / F5)" IconCss="e-icons e-refresh" Id="Refresh" Disabled="@_isProcessing" />
+								<MenuItem Text="@(_showDeleted ? "Hide Deleted (Ctrl + Delete)" : "Show Deleted (Ctrl + Delete)")" IconCss="e-icons e-trash" Id="ToggleDeleted" Disabled="@_isProcessing" />
 								<MenuItem Text="@(_showAllColumns ? "Hide Details (Ctrl + Q)" : "Show Details (Ctrl + Q)")" IconCss="e-icons e-table" Id="ToggleDetailsView" Disabled="@_isProcessing" />
-								<MenuItem Text="@(_showDeleted ? "Hide Deleted (Ctrl + Del)" : "Show Deleted (Ctrl + Del)")" IconCss="e-icons e-eye" Id="ToggleDeleted" Disabled="@_isProcessing" />
 								<MenuItem Separator="true" />
 								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
 								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
@@ -168,7 +168,7 @@ else
 					</div>
 				</div>
 				<div class="section-body grid-body">
-					<SfGrid ID="_sfGrid" @ref="_sfGrid" TValue="FinancialAccountingLedgerOverviewModel"
+					<SfGrid @ref="_sfGrid" TValue="FinancialAccountingLedgerOverviewModel"
 							DataSource="_transactionOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
 							AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
 							GridLines="GridLine.Horizontal" CssClass="professional-grid" AllowGrouping="true"

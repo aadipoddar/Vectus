@@ -34,7 +34,6 @@ public partial class DriverPage
 	];
 
 	private SfGrid<DriverModel> _sfGrid;
-	private SfUploader _sfLicenseUploader;
 	private CustomTextField _sfFirstFocus;
 	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
@@ -279,9 +278,6 @@ public partial class DriverPage
 			var fileName = _driver.LicenseUrl.Split('/').Last();
 			await BlobStorageAccess.DeleteFileFromBlobStorage(fileName, BlobStorageContainers.driverlicense);
 			_driver.LicenseUrl = null;
-
-			if (_sfLicenseUploader is not null)
-				await _sfLicenseUploader.ClearAllAsync();
 
 			await _toastNotification.ShowAsync("Removed", "The license has been removed successfully.", ToastType.Success);
 			StateHasChanged();

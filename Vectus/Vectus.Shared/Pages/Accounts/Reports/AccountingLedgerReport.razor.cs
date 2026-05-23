@@ -142,7 +142,9 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 
 					var referenceLedgerNamesWithAmount = string.Join("\n",
 						referenceLedgers.Select(l =>
-						$"{l.LedgerName}\t({(l.Debit is > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit is > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})")); item.LedgerName = referenceLedgerNamesWithAmount;
+						$"{l.LedgerName}\t({(l.Debit is > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit is > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})"));
+
+					item.LedgerName = referenceLedgerNamesWithAmount;
 					filteredOverviews.Add(item);
 				}
 
@@ -390,21 +392,6 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 	}
 
-	private async Task ShowDeleteConfirmation()
-	{
-		_deleteTransactionId = _sfGrid.SelectedRecords.First().MasterId;
-		_deleteTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _deleteConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelDelete()
-	{
-		_deleteTransactionId = 0;
-		_deleteTransactionNo = string.Empty;
-		await _deleteConfirmationDialog.HideAsync();
-	}
-
 	private async Task ConfirmRecover()
 	{
 		if (_isProcessing || _recoverTransactionId == 0)
@@ -444,6 +431,32 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 	}
 
+	private async Task DeleteRecoverSelectedTransaction()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		if (_sfGrid.SelectedRecords.First().Status)
+			await ShowDeleteConfirmation();
+		else
+			await ShowRecoverConfirmation();
+	}
+
+	private async Task ShowDeleteConfirmation()
+	{
+		_deleteTransactionId = _sfGrid.SelectedRecords.First().MasterId;
+		_deleteTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
+		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
+	}
+
+	private async Task CancelDelete()
+	{
+		_deleteTransactionId = 0;
+		_deleteTransactionNo = string.Empty;
+		await _deleteConfirmationDialog.HideAsync();
+	}
+
 	private async Task ShowRecoverConfirmation()
 	{
 		_recoverTransactionId = _sfGrid.SelectedRecords.First().MasterId;
@@ -457,24 +470,6 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		_recoverTransactionId = 0;
 		_recoverTransactionNo = string.Empty;
 		await _recoverConfirmationDialog.HideAsync();
-	}
-
-	private async Task DeleteRecoverSelectedTransaction()
-	{
-		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
-			return;
-
-		if (_sfGrid.SelectedRecords.First().Status)
-			await ShowDeleteConfirmation();
-		else
-			await ShowRecoverConfirmation();
-	}
-
-	private async Task ToggleDeleted()
-	{
-		_showDeleted = !_showDeleted;
-		await LoadTransactionOverviews();
-		StateHasChanged();
 	}
 	#endregion
 
@@ -528,6 +523,13 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
+	}
+
+	private async Task ToggleDeleted()
+	{
+		_showDeleted = !_showDeleted;
+		await LoadTransactionOverviews();
+		StateHasChanged();
 	}
 
 	private void NavigateBack() =>
