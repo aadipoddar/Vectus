@@ -60,6 +60,6 @@ public static class AuthenticationService
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", route, "_blank");
 		else
-			NavigationManager.NavigateTo(route, true);
+			NavigationManager.NavigateTo(route);
 	}
 }

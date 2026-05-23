@@ -325,16 +325,12 @@ public partial class TripRequestReport : IAsyncDisposable
 
 			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _deleteTransactionId)
 				?? throw new Exception("Transaction not found.");
-			tripRequest.Status = false;
 			tripRequest.LastModifiedBy = _user.Id;
 			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 			await TripRequestData.DeleteTransaction(tripRequest);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", ToastType.Success);
-
-			_deleteTransactionId = 0;
-			_deleteTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
@@ -342,6 +338,8 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
+			_deleteTransactionId = 0;
+			_deleteTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
@@ -366,16 +364,12 @@ public partial class TripRequestReport : IAsyncDisposable
 
 			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _recoverTransactionId)
 				?? throw new Exception("Transaction not found.");
-			tripRequest.Status = true;
 			tripRequest.LastModifiedBy = _user.Id;
 			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 			await TripRequestData.RecoverTransaction(tripRequest);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", ToastType.Success);
-
-			_recoverTransactionId = 0;
-			_recoverTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
@@ -383,6 +377,8 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
+			_recoverTransactionId = 0;
+			_recoverTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
@@ -421,9 +417,6 @@ public partial class TripRequestReport : IAsyncDisposable
 			await TripRequestData.SaveTransaction(tripRequest);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_acceptTransactionNo} has been accepted successfully.", ToastType.Success);
-
-			_acceptTransactionId = 0;
-			_acceptTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
@@ -431,6 +424,8 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
+			_acceptTransactionId = 0;
+			_acceptTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
@@ -469,9 +464,6 @@ public partial class TripRequestReport : IAsyncDisposable
 			await TripRequestData.SaveTransaction(tripRequest);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_rejectTransactionNo} has been rejected successfully.", ToastType.Success);
-
-			_rejectTransactionId = 0;
-			_rejectTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
@@ -479,6 +471,8 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
+			_rejectTransactionId = 0;
+			_rejectTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();

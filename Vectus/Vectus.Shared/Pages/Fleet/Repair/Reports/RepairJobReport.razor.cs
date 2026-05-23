@@ -350,9 +350,6 @@ public partial class RepairJobReport : IAsyncDisposable
 			await RepairData.DeleteTransaction(repair);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", ToastType.Success);
-
-			_deleteTransactionId = 0;
-			_deleteTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
@@ -360,6 +357,8 @@ public partial class RepairJobReport : IAsyncDisposable
 		}
 		finally
 		{
+			_deleteTransactionId = 0;
+			_deleteTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadJobOverviews();
@@ -390,9 +389,6 @@ public partial class RepairJobReport : IAsyncDisposable
 			await RepairData.RecoverTransaction(repair);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", ToastType.Success);
-
-			_recoverTransactionId = 0;
-			_recoverTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
@@ -400,6 +396,8 @@ public partial class RepairJobReport : IAsyncDisposable
 		}
 		finally
 		{
+			_recoverTransactionId = 0;
+			_recoverTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadJobOverviews();

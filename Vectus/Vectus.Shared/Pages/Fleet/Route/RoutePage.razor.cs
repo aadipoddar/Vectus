@@ -38,7 +38,7 @@ public partial class RoutePage
 	];
 
 	private SfGrid<RouteModel> _sfGrid;
-	private CustomTextField _sfFirstFocus;
+	private CustomAutoComplete<LocationModel> _sfFirstFocus;
 	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
