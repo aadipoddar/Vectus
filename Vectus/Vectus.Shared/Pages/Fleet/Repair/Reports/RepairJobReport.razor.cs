@@ -54,14 +54,13 @@ public partial class RepairJobReport : IAsyncDisposable
 	private SfGrid<RepairJobOverviewModel> _sfGrid;
 	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private string _deleteTransactionNo = string.Empty;
 	private int _deleteTransactionId = 0;
 	private string _recoverTransactionNo = string.Empty;
 	private int _recoverTransactionId = 0;
-
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)

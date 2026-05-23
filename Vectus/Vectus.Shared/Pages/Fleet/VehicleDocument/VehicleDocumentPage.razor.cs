@@ -43,16 +43,15 @@ public partial class VehicleDocumentPage
 
 	private SfGrid<VehicleDocumentModel> _sfGrid;
 	private SfUploader _sfDocumentUploader;
+	private CustomTextField _sfFirstFocus;
+	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private CustomTextField _sfFirstFocus;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionNo = string.Empty;
-
 	private int _recoverTransactionId = 0;
 	private string _recoverTransactionNo = string.Empty;
-	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -1,6 +1,7 @@
 using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
 using VectusLibrary.Common;
@@ -29,16 +30,15 @@ public partial class UserPage
 	];
 
 	private SfGrid<UserModel> _sfGrid;
+	private CustomTextField _sfFirstFocus;
+	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionName = string.Empty;
-
 	private int _recoverTransactionId = 0;
 	private string _recoverTransactionName = string.Empty;
-
-	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -66,6 +66,9 @@ public partial class UserPage
 
 		_isLoading = false;
 		StateHasChanged();
+
+		if (_sfFirstFocus is not null)
+			await _sfFirstFocus.FocusAsync();
 	}
 	#endregion
 

@@ -36,13 +36,12 @@ public partial class VehicleDriverPage
 	];
 
 	private SfGrid<VehicleDriverModel> _sfGrid;
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private CustomAutoComplete<VehicleModel> _sfFirstFocus;
+	private ToastNotification _toastNotification;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionName = string.Empty;
-
-	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)

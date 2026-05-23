@@ -31,23 +31,21 @@ public partial class FinancialYearPage
 	];
 
 	private SfGrid<FinancialYearModel> _sfGrid;
+	private CustomDatePicker _sfFirstFocus;
+	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private CustomDatePicker _sfFirstFocus;
+
+	private int _deleteTransactionId = 0;
+	private string _deleteTransactionName = string.Empty;
+	private int _recoverTransactionId = 0;
+	private string _recoverTransactionName = string.Empty;
 
 	private DateTime StartDateTime => _financialYear.StartDate == default ? default : _financialYear.StartDate.ToDateTime(TimeOnly.MinValue);
 	private DateTime EndDateTime => _financialYear.EndDate == default ? default : _financialYear.EndDate.ToDateTime(TimeOnly.MinValue);
 
 	private void OnStartDateChanged(DateTime value) => _financialYear.StartDate = DateOnly.FromDateTime(value);
 	private void OnEndDateChanged(DateTime value) => _financialYear.EndDate = DateOnly.FromDateTime(value);
-
-	private int _deleteTransactionId = 0;
-	private string _deleteTransactionName = string.Empty;
-
-	private int _recoverTransactionId = 0;
-	private string _recoverTransactionName = string.Empty;
-
-	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)

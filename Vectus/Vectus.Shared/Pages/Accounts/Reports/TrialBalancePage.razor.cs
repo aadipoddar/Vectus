@@ -1,6 +1,7 @@
 using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
 using VectusLibrary.Accounts.FinancialAccounting.Data;
@@ -38,6 +39,7 @@ public partial class TrialBalancePage : IAsyncDisposable
 	private List<TrialBalanceModel> _trialBalance = [];
 
 	private SfGrid<TrialBalanceModel> _sfGrid;
+	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
 
 	#region Load Data
@@ -51,10 +53,7 @@ public partial class TrialBalancePage : IAsyncDisposable
 			await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
 			await InitializePage();
 		}
-		catch
-		{
-			NavigationManager.NavigateTo(NavigationManager.Uri, true);
-		}
+		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
 	}
 
 	private async Task InitializePage()
@@ -62,8 +61,12 @@ public partial class TrialBalancePage : IAsyncDisposable
 		await LoadData();
 		await LoadTrialBalance();
 		await StartAutoRefresh();
+
 		_isLoading = false;
 		StateHasChanged();
+
+		if (_sfFirstFocus is not null)
+			await _sfFirstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()

@@ -1,6 +1,7 @@
 using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
 using VectusLibrary.Accounts.FinancialAccounting.Data;
@@ -47,6 +48,7 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 	];
 
 	private SfGrid<FinancialAccountingOverviewModel> _sfGrid;
+	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
 
 	private string _deleteTransactionNo = string.Empty;
@@ -68,10 +70,7 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
 			await InitializePage();
 		}
-		catch
-		{
-			NavigationManager.NavigateTo(NavigationManager.Uri, true);
-		}
+		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
 	}
 
 	private async Task InitializePage()
@@ -82,6 +81,9 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 
 		_isLoading = false;
 		StateHasChanged();
+
+		if (_sfFirstFocus is not null)
+			await _sfFirstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()

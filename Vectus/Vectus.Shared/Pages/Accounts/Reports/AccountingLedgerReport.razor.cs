@@ -1,6 +1,7 @@
 using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
 using VectusLibrary.Accounts.FinancialAccounting.Data;
@@ -41,14 +42,6 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	private List<LedgerModel> _ledgers = [];
 	private List<FinancialAccountingLedgerOverviewModel> _transactionOverviews = [];
 
-	private string _deleteTransactionNo = string.Empty;
-	private int _deleteTransactionId = 0;
-	private string _recoverTransactionNo = string.Empty;
-	private int _recoverTransactionId = 0;
-
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private RecoverConfirmationDialog _recoverConfirmationDialog;
-
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "View (Alt + O)", Id = "View", IconCss = "e-icons e-eye", Target = ".e-content" },
@@ -58,7 +51,16 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	];
 
 	private SfGrid<FinancialAccountingLedgerOverviewModel> _sfGrid;
+	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
+
+	private string _deleteTransactionNo = string.Empty;
+	private int _deleteTransactionId = 0;
+	private string _recoverTransactionNo = string.Empty;
+	private int _recoverTransactionId = 0;
+
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -71,10 +73,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
 			await InitializePage();
 		}
-		catch
-		{
-			NavigationManager.NavigateTo(NavigationManager.Uri, true);
-		}
+		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
 	}
 
 	private async Task InitializePage()
@@ -82,8 +81,12 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		await LoadData();
 		await LoadTransactionOverviews();
 		await StartAutoRefresh();
+
 		_isLoading = false;
 		StateHasChanged();
+
+		if (_sfFirstFocus is not null)
+			await _sfFirstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()

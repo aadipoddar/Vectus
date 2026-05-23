@@ -37,17 +37,15 @@ public partial class LedgerPage
 	];
 
 	private SfGrid<LedgerModel> _sfGrid;
+	private CustomTextField _sfFirstFocus;
+	private ToastNotification _toastNotification;
 	private DeleteConfirmationDialog _deleteConfirmationDialog;
 	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private CustomTextField _sfFirstFocus;
 
 	private int _deleteTransactionId = 0;
 	private string _deleteTransactionName = string.Empty;
-
 	private int _recoverTransactionId = 0;
 	private string _recoverTransactionName = string.Empty;
-
-	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)

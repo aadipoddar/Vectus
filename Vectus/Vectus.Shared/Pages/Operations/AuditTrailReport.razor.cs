@@ -1,8 +1,9 @@
-﻿using System.Text;
+﻿using Syncfusion.Blazor.Grids;
 
-using Syncfusion.Blazor.Grids;
+using System.Text;
 
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
 using VectusLibrary.Accounts.Masters.Data;
@@ -38,6 +39,7 @@ public partial class AuditTrailReport : IAsyncDisposable
 	private List<AuditTrailModel> _auditTrails = [];
 
 	private SfGrid<AuditTrailModel> _sfGrid;
+	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
 
 	#region Load Data
@@ -46,8 +48,12 @@ public partial class AuditTrailReport : IAsyncDisposable
 		if (!firstRender)
 			return;
 
-		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Admin]);
-		await InitializePage();
+		try
+		{
+			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Admin]);
+			await InitializePage();
+		}
+		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
 	}
 
 	private async Task InitializePage()
@@ -60,6 +66,9 @@ public partial class AuditTrailReport : IAsyncDisposable
 
 		_isLoading = false;
 		StateHasChanged();
+
+		if (_sfFirstFocus is not null)
+			await _sfFirstFocus.FocusAsync();
 	}
 
 	private async Task LoadAuditTrails()

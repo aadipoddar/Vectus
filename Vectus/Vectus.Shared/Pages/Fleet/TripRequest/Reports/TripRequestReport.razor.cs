@@ -59,6 +59,10 @@ public partial class TripRequestReport : IAsyncDisposable
 	private SfGrid<TripRequestOverviewModel> _sfGrid;
 	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
+	private AcceptConfirmationDialog _acceptConfirmationDialog;
+	private RejectConfirmationDialog _rejectConfirmationDialog;
 
 	private string _deleteTransactionNo = string.Empty;
 	private int _deleteTransactionId = 0;
@@ -68,11 +72,6 @@ public partial class TripRequestReport : IAsyncDisposable
 	private int _acceptTransactionId = 0;
 	private string _rejectTransactionNo = string.Empty;
 	private int _rejectTransactionId = 0;
-
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private AcceptConfirmationDialog _acceptConfirmationDialog;
-	private RejectConfirmationDialog _rejectConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -85,10 +84,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Fleet, UserRoles.Reports]);
 			await InitializePage();
 		}
-		catch
-		{
-			NavigationManager.NavigateTo(NavigationManager.Uri, true);
-		}
+		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
 	}
 
 	private async Task InitializePage()

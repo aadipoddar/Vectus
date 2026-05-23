@@ -6,6 +6,7 @@
 
 <MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" />
 <MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" />
 <MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" />
 <MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" />
 <MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" />
@@ -63,9 +64,10 @@ else
 				<div class="section-body">
 					<div class="form-grid">
 						<div class="form-field">
-							<CustomTextField @bind-Value="_transactionUser.Name"
-											 Label="Name"
-											 Placeholder="Enter user name" />
+							<CustomTextField @ref="_sfFirstFocus"
+											 @bind-Value="_transactionUser.Name"
+											 Label="Name (Ctrl + F)"
+											 Placeholder="Enter User Name" />
 						</div>
 
 						<div class="form-field">
