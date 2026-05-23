@@ -236,13 +236,14 @@ public partial class TyreMountingPage
 
 		_tyreMounting = await CommonData.LoadTableDataById<TyreMountingModel>(FleetNames.TyreMounting, selectedRecords[0].Id);
 		if (_tyreMounting is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedTyreCompany = _tyreCompanies.FirstOrDefault(tc => tc.Id == _tyreMounting.TyreCompanyId);
 		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _tyreMounting.VehicleId);
-
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

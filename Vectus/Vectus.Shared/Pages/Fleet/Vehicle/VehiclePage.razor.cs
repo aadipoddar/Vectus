@@ -277,18 +277,15 @@ public partial class VehiclePage
 
 		_vehicle = await CommonData.LoadTableDataById<VehicleModel>(FleetNames.Vehicle, selectedRecords[0].Id);
 		if (_vehicle is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedVehicleType = _vehicleTypes.FirstOrDefault(vt => vt.Id == _vehicle.VehicleTypeId);
 		_selectedCompany = _companies.FirstOrDefault(c => c.Id == _vehicle.CompanyId);
-
-		if (_vehicle.SDRId.HasValue)
-			_selectedSDR = _sdrs.FirstOrDefault(o => o.Id == _vehicle.SDRId);
-		else
-			_selectedSDR = null;
-
+		_selectedSDR = _vehicle.SDRId.HasValue ? _sdrs.FirstOrDefault(o => o.Id == _vehicle.SDRId) : null;
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

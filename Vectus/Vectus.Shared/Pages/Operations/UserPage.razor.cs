@@ -254,9 +254,13 @@ public partial class UserPage
 
 		_transactionUser = await CommonData.LoadTableDataById<UserModel>(OperationNames.User, selectedRecords[0].Id);
 		if (_transactionUser is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
+		await _sfFirstFocus.FocusAsync();
 	}
 
 	private async Task DeleteRecoverSelectedItem()

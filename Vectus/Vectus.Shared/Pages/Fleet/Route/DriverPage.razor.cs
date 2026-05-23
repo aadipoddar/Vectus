@@ -374,12 +374,13 @@ public partial class DriverPage
 
 		_driver = await CommonData.LoadTableDataById<DriverModel>(FleetNames.Driver, selectedRecords[0].Id);
 		if (_driver is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_isUploadDialogVisible = false;
-
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

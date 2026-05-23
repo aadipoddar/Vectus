@@ -269,11 +269,13 @@ public partial class CompanyPage
 
 		_company = await CommonData.LoadTableDataById<CompanyModel>(AccountNames.Company, selectedRecords[0].Id);
 		if (_company is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _company.StateUTId);
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

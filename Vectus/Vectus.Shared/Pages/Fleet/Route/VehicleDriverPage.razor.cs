@@ -232,14 +232,15 @@ public partial class VehicleDriverPage
 
 		_vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, selectedRecords[0].Id);
 		if (_vehicleDriver is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDriver.VehicleId);
 		_selectedDriver = _drivers.FirstOrDefault(d => d.Id == _vehicleDriver.DriverId);
 		_endDateTime = _vehicleDriver.EndDateTime ?? default;
-
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

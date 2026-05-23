@@ -304,7 +304,8 @@ public partial class TripRequestReport : IAsyncDisposable
 			return;
 		}
 
-		await AuthenticationService.NavigateToRoute($"{PageRouteNames.TripRequest}/{selected.Id}", FormFactor, JSRuntime, NavigationManager);
+		var decodedTransactionNo = await DecodeCode.DecodeTransactionNo(_sfGrid.SelectedRecords.First().TransactionNo, false, false);
+		await AuthenticationService.NavigateToRoute(decodedTransactionNo.PageRouteName, FormFactor, JSRuntime, NavigationManager);
 	}
 
 	private async Task ConfirmDelete()

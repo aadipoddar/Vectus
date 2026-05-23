@@ -278,12 +278,13 @@ public partial class GaragePage
 
 		_garage = await CommonData.LoadTableDataById<GarageModel>(FleetNames.Garage, selectedRecords[0].Id);
 		if (_garage is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedLocation = _locations.FirstOrDefault(rl => rl.Id == _garage.LocationId);
-
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

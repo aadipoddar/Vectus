@@ -255,10 +255,12 @@ public partial class VehicleDocumentTypePage
 
 		_vehicleDocumentType = await CommonData.LoadTableDataById<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, selectedRecords[0].Id);
 		if (_vehicleDocumentType is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

@@ -297,11 +297,13 @@ public partial class LedgerPage
 
 		_ledger = await CommonData.LoadTableDataById<LedgerModel>(AccountNames.Ledger, selectedRecords[0].Id);
 		if (_ledger is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		SyncSelections();
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

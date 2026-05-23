@@ -298,10 +298,12 @@ public partial class LocationPage
 
 		_location = await CommonData.LoadTableDataById<LocationModel>(FleetNames.Location, selectedRecords[0].Id);
 		if (_location is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

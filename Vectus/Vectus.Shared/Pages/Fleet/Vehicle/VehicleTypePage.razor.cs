@@ -255,10 +255,12 @@ public partial class VehicleTypePage
 
 		_vehicleType = await CommonData.LoadTableDataById<VehicleTypeModel>(FleetNames.VehicleType, selectedRecords[0].Id);
 		if (_vehicleType is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

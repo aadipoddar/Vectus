@@ -323,7 +323,8 @@ public partial class RepairReport : IAsyncDisposable
 			return;
 		}
 
-		await AuthenticationService.NavigateToRoute($"{PageRouteNames.Repair}/{selected.Id}", FormFactor, JSRuntime, NavigationManager);
+		var decodedTransactionNo = await DecodeCode.DecodeTransactionNo(_sfGrid.SelectedRecords.First().TransactionNo, false, false);
+		await AuthenticationService.NavigateToRoute(decodedTransactionNo.PageRouteName, FormFactor, JSRuntime, NavigationManager);
 	}
 
 	private async Task ConfirmDelete()

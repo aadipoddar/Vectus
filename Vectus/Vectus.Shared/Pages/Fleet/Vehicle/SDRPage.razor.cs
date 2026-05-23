@@ -255,10 +255,12 @@ public partial class SDRPage
 
 		_sdr = await CommonData.LoadTableDataById<SDRModel>(FleetNames.SDR, selectedRecords[0].Id);
 		if (_sdr is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

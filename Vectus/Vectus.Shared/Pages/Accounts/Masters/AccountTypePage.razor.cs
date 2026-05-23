@@ -255,10 +255,12 @@ public partial class AccountTypePage
 
 		_accountType = await CommonData.LoadTableDataById<AccountTypeModel>(AccountNames.AccountType, selectedRecords[0].Id);
 		if (_accountType is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

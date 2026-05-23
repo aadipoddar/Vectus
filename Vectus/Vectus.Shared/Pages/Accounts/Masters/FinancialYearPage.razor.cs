@@ -41,12 +41,6 @@ public partial class FinancialYearPage
 	private int _recoverTransactionId = 0;
 	private string _recoverTransactionName = string.Empty;
 
-	private DateTime StartDateTime => _financialYear.StartDate == default ? default : _financialYear.StartDate.ToDateTime(TimeOnly.MinValue);
-	private DateTime EndDateTime => _financialYear.EndDate == default ? default : _financialYear.EndDate.ToDateTime(TimeOnly.MinValue);
-
-	private void OnStartDateChanged(DateTime value) => _financialYear.StartDate = DateOnly.FromDateTime(value);
-	private void OnEndDateChanged(DateTime value) => _financialYear.EndDate = DateOnly.FromDateTime(value);
-
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -77,6 +71,14 @@ public partial class FinancialYearPage
 		if (_sfFirstFocus is not null)
 			await _sfFirstFocus.FocusAsync();
 	}
+	#endregion
+
+	#region Change Events
+	private DateTime StartDateTime => _financialYear.StartDate == default ? default : _financialYear.StartDate.ToDateTime(TimeOnly.MinValue);
+	private DateTime EndDateTime => _financialYear.EndDate == default ? default : _financialYear.EndDate.ToDateTime(TimeOnly.MinValue);
+
+	private void OnStartDateChanged(DateTime value) => _financialYear.StartDate = DateOnly.FromDateTime(value);
+	private void OnEndDateChanged(DateTime value) => _financialYear.EndDate = DateOnly.FromDateTime(value);
 	#endregion
 
 	#region Saving
@@ -298,10 +300,12 @@ public partial class FinancialYearPage
 
 		_financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(AccountNames.FinancialYear, selectedRecords[0].Id);
 		if (_financialYear is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

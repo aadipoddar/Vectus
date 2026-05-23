@@ -440,13 +440,14 @@ public partial class VehicleDocumentPage
 
 		_vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, selectedRecords[0].Id);
 		if (_vehicleDocument is null)
+		{
 			await _toastNotification.ShowAsync("Error", "Selected Vehicle Document transaction not found for editing.", ToastType.Error);
+			return;
+		}
 
 		_selectedVehicleDocumentType = _vehicleDocumentTypes.FirstOrDefault(vdt => vdt.Id == _vehicleDocument.VehicleDocumentTypeId);
 		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDocument.VehicleId);
-
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

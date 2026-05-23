@@ -269,11 +269,13 @@ public partial class GroupPage
 
 		_group = await CommonData.LoadTableDataById<GroupModel>(AccountNames.Group, selectedRecords[0].Id);
 		if (_group is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedNature = _natures.FirstOrDefault(n => n.Id == _group.NatureId);
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 

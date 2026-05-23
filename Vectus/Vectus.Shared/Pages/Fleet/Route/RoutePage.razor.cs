@@ -338,13 +338,14 @@ public partial class RoutePage
 
 		_route = await CommonData.LoadTableDataById<RouteModel>(FleetNames.Route, selectedRecords[0].Id);
 		if (_route is null)
+		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
 
 		_selectedFromLocation = _locations.FirstOrDefault(rl => rl.Id == _route.FromLocationId);
 		_selectedToLocation = _locations.FirstOrDefault(rl => rl.Id == _route.ToLocationId);
-
 		StateHasChanged();
-
 		await _sfFirstFocus.FocusAsync();
 	}
 
