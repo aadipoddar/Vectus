@@ -140,7 +140,7 @@ public partial class VehicleDocumentPage
 			await VehicleDocumentData.SaveTransaction(_vehicleDocument);
 
 			await _toastNotification.ShowAsync("Success", $"Vehicle Document transaction '{_vehicleDocument.TransactionNo}' has been saved successfully.", ToastType.Success);
-			NavigationManager.NavigateTo(PageRouteNames.VehicleDocument, true);
+			ResetPage();
 		}
 		catch (Exception ex)
 		{

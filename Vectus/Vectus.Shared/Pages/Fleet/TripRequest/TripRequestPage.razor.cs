@@ -244,7 +244,7 @@ public partial class TripRequestPage
 			await TripRequestData.SaveTransaction(_tripRequest);
 
 			await _toastNotification.ShowAsync("Success", $"Trip Request transaction '{_tripRequest.TransactionNo}' has been saved successfully.", ToastType.Success);
-			NavigationManager.NavigateTo(PageRouteNames.TripRequest, true);
+			ResetPage();
 		}
 		catch (Exception ex)
 		{

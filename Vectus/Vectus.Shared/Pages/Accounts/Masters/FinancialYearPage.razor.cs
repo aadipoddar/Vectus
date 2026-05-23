@@ -73,7 +73,7 @@ public partial class FinancialYearPage
 	}
 	#endregion
 
-	#region Change Events
+	#region Changed Events
 	private DateTime StartDateTime => _financialYear.StartDate == default ? default : _financialYear.StartDate.ToDateTime(TimeOnly.MinValue);
 	private DateTime EndDateTime => _financialYear.EndDate == default ? default : _financialYear.EndDate.ToDateTime(TimeOnly.MinValue);
 

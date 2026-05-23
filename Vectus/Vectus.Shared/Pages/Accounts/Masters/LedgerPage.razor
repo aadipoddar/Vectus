@@ -88,11 +88,10 @@ else
 						<!-- Group -->
 						<div class="form-field">
 							<CustomAutoComplete T="GroupModel"
-												Value="_selectedGroup"
+												@bind-Value="_selectedGroup"
 												DataSource="@_groups"
 												Placeholder="Select Group"
 												Label="Group"
-												ValueChanged="OnGroupChanged"
 												FieldValue="@nameof(GroupModel.Name)"
 												AddNewRoute="@PageRouteNames.GroupMaster" />
 						</div>
@@ -100,11 +99,10 @@ else
 						<!-- Account Type -->
 						<div class="form-field">
 							<CustomAutoComplete T="AccountTypeModel"
-												Value="_selectedAccountType"
+												@bind-Value="_selectedAccountType"
 												DataSource="@_accountTypes"
 												Placeholder="Select Account Type"
 												Label="Account Type"
-												ValueChanged="OnAccountTypeChanged"
 												FieldValue="@nameof(AccountTypeModel.Name)"
 												AddNewRoute="@PageRouteNames.AccountTypeMaster" />
 						</div>
@@ -112,11 +110,10 @@ else
 						<!-- State/UT -->
 						<div class="form-field">
 							<CustomAutoComplete T="StateUTModel"
-												Value="_selectedStateUT"
+												@bind-Value="_selectedStateUT"
 												DataSource="@_stateUTs"
 												Placeholder="Select State/UT"
 												Label="State/UT"
-												ValueChanged="OnStateUTChanged"
 												FieldValue="@nameof(StateUTModel.Name)"
 												AddNewRoute="@PageRouteNames.StateUTMaster" />
 						</div>

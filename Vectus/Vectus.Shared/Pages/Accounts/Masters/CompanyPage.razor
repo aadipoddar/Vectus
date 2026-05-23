@@ -86,11 +86,10 @@ else
 						<!-- State/UT -->
 						<div class="form-field">
 							<CustomAutoComplete T="StateUTModel"
-												Value="_selectedStateUT"
+												@bind-Value="_selectedStateUT"
 												DataSource="@_stateUTs"
 												Placeholder="Select State/UT"
-												Label="State/UT" Required="true"
-												ValueChanged="OnStateUTChanged"
+												Label="State/UT"
 												FieldValue="@nameof(StateUTModel.Name)"
 												AddNewRoute="@PageRouteNames.StateUTMaster" />
 						</div>

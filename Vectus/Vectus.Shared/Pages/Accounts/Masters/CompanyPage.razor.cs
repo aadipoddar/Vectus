@@ -79,14 +79,6 @@ public partial class CompanyPage
 	}
 	#endregion
 
-	#region Changed Events
-	private void OnStateUTChanged(StateUTModel value)
-	{
-		_selectedStateUT = value;
-		_company.StateUTId = value?.Id ?? 0;
-	}
-	#endregion
-
 	#region Saving
 	private async Task SaveTransaction()
 	{
@@ -103,6 +95,7 @@ public partial class CompanyPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
+			_company.StateUTId = _selectedStateUT?.Id ?? 0;
 			await CompanyData.SaveTransaction(_company, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);

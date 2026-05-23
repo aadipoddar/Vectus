@@ -72,7 +72,9 @@ public partial class LedgerPage
 		_accountTypes = [.. _accountTypes.OrderBy(a => a.Name)];
 		_stateUTs = [.. _stateUTs.OrderBy(s => s.Name)];
 
-		SyncSelections();
+		_selectedGroup = _groups.FirstOrDefault(g => g.Id == _ledger.GroupId);
+		_selectedAccountType = _accountTypes.FirstOrDefault(a => a.Id == _ledger.AccountTypeId);
+		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _ledger.StateUTId);
 
 		if (!_showDeleted)
 			_ledgers = [.. _ledgers.Where(l => l.Status)];
@@ -85,33 +87,6 @@ public partial class LedgerPage
 
 		if (_sfFirstFocus is not null)
 			await _sfFirstFocus.FocusAsync();
-	}
-	#endregion
-
-	#region Changed Events
-	private void SyncSelections()
-	{
-		_selectedGroup = _groups.FirstOrDefault(g => g.Id == _ledger.GroupId);
-		_selectedAccountType = _accountTypes.FirstOrDefault(a => a.Id == _ledger.AccountTypeId);
-		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _ledger.StateUTId);
-	}
-
-	private void OnGroupChanged(GroupModel value)
-	{
-		_selectedGroup = value;
-		_ledger.GroupId = value?.Id ?? 0;
-	}
-
-	private void OnAccountTypeChanged(AccountTypeModel value)
-	{
-		_selectedAccountType = value;
-		_ledger.AccountTypeId = value?.Id ?? 0;
-	}
-
-	private void OnStateUTChanged(StateUTModel value)
-	{
-		_selectedStateUT = value;
-		_ledger.StateUTId = value?.Id ?? 0;
 	}
 	#endregion
 
@@ -131,6 +106,9 @@ public partial class LedgerPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
+			_ledger.GroupId = _selectedGroup?.Id ?? 0;
+			_ledger.AccountTypeId = _selectedAccountType?.Id ?? 0;
+			_ledger.StateUTId = _selectedStateUT?.Id ?? 0;
 			await LedgerData.SaveTransaction(_ledger, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
@@ -302,7 +280,9 @@ public partial class LedgerPage
 			return;
 		}
 
-		SyncSelections();
+		_selectedGroup = _groups.FirstOrDefault(g => g.Id == _ledger.GroupId);
+		_selectedAccountType = _accountTypes.FirstOrDefault(a => a.Id == _ledger.AccountTypeId);
+		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _ledger.StateUTId);
 		StateHasChanged();
 		await _sfFirstFocus.FocusAsync();
 	}
