@@ -270,9 +270,9 @@ public partial class TyreMountingPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.TyreMounting, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);
+		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
 	#endregion
 }

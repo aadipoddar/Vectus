@@ -309,7 +309,7 @@ public partial class AccountTypePage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountTypeMaster, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);

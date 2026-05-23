@@ -35,6 +35,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IVibrationService, VibrationService>();
 		builder.Services.AddSingleton<ISoundService, SoundService>();
 		builder.Services.AddScoped<INotificationService, NotificationService>();
+		builder.Services.AddScoped<PageRefreshState>();
 
 		builder.Services
 			.AddSyncfusionBlazor()

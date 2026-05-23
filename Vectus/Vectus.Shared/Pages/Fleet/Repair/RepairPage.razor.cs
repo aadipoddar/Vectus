@@ -639,7 +639,7 @@ public partial class RepairPage
 	private async Task ResetPage()
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo(PageRouteNames.Repair, true);
+		PageRefresh.Request();
 	}
 
 	private void NavigateBack() =>

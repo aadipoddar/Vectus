@@ -309,7 +309,7 @@ public partial class StateUTPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.StateUTMaster, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);

@@ -73,7 +73,7 @@ public partial class RepairReport : IAsyncDisposable
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Fleet, UserRoles.Reports]);
 			await InitializePage();
 		}
-		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
+		catch { NavigateBack(); }
 	}
 
 	private async Task InitializePage()

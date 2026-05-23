@@ -70,7 +70,7 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts, UserRoles.Reports]);
 			await InitializePage();
 		}
-		catch { NavigationManager.NavigateTo(NavigationManager.Uri, true); }
+		catch { NavigateBack(); }
 	}
 
 	private async Task InitializePage()

@@ -309,9 +309,9 @@ public partial class TyreCompanyPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.TyreCompanyMaster, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);
+		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
 	#endregion
 }

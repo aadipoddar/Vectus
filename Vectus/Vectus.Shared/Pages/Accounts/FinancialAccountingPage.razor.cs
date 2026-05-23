@@ -856,7 +856,7 @@ public partial class FinancialAccountingPage
 	private async Task ResetPage()
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting, true);
+		PageRefresh.Request();
 	}
 
 	private void NavigateBack() =>

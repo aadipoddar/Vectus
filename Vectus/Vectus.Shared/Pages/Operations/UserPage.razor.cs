@@ -306,7 +306,7 @@ public partial class UserPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.User, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard);

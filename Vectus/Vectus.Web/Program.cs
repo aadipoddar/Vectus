@@ -28,6 +28,7 @@ builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISaveAndViewService, SaveAndViewService>();
 builder.Services.AddScoped<ISoundService, SoundService>();
 builder.Services.AddScoped<IDataStorageService, DataStorageService>();
+builder.Services.AddScoped<PageRefreshState>();
 
 var app = builder.Build();
 

@@ -324,7 +324,7 @@ public partial class GroupPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.GroupMaster, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);

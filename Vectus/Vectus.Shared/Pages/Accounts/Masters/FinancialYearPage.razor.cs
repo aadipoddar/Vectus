@@ -353,7 +353,7 @@ public partial class FinancialYearPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.FinancialYearMaster, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);

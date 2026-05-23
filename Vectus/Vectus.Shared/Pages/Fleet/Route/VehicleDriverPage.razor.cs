@@ -270,9 +270,9 @@ public partial class VehicleDriverPage
 	}
 
 	private void ResetPage() =>
-		NavigationManager.NavigateTo(PageRouteNames.VehicleDriverMaster, true);
+		PageRefresh.Request();
 
 	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard, true);
+		NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
 	#endregion
 }
