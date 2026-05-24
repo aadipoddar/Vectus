@@ -30,42 +30,42 @@ public static class VehicleData
 			vehicle.SDR = sdr.FirstOrDefault(s => s.Id == vehicle.SDRId)?.Name;
 			vehicle.InGarage = garageVehicles.Any(g => g.VehicleId == vehicle.Id);
 
-			var gps = vamosysVehicles.FirstOrDefault(v => string.Equals(v.VehicleId, vehicle.Code, StringComparison.OrdinalIgnoreCase));
-			if (gps is null)
+			var vamosysVehicle = vamosysVehicles.FirstOrDefault(v => string.Equals(v.VehicleId, vehicle.Code.RemoveSpace().Replace("-", ""), StringComparison.OrdinalIgnoreCase));
+			if (vamosysVehicle is null)
 				continue;
 
-			vehicle.VehicleId = gps.VehicleId;
-			vehicle.RegNo = gps.RegNo;
-			vehicle.ShortName = gps.ShortName;
-			vehicle.VehicleType = gps.VehicleType;
+			vehicle.VehicleId = vamosysVehicle.VehicleId;
+			vehicle.RegNo = vamosysVehicle.RegNo;
+			vehicle.ShortName = vamosysVehicle.ShortName;
+			vehicle.VehicleType = vamosysVehicle.VehicleType;
 
-			vehicle.Latitude = gps.Latitude;
-			vehicle.Longitude = gps.Longitude;
-			vehicle.Address = gps.Address;
+			vehicle.Latitude = vamosysVehicle.Latitude;
+			vehicle.Longitude = vamosysVehicle.Longitude;
+			vehicle.Address = vamosysVehicle.Address;
 
 			vehicle.HaversineDistance = HaversineDistance(vehicle, route);
 
-			vehicle.Speed = gps.Speed;
-			vehicle.TopSpeed = gps.TopSpeed;
-			vehicle.AverageSpeed = gps.AverageSpeed;
-			vehicle.VehicleMode = gps.VehicleMode;
-			vehicle.IgnitionOn = gps.IgnitionOn;
+			vehicle.Speed = vamosysVehicle.Speed;
+			vehicle.TopSpeed = vamosysVehicle.TopSpeed;
+			vehicle.AverageSpeed = vamosysVehicle.AverageSpeed;
+			vehicle.VehicleMode = vamosysVehicle.VehicleMode;
+			vehicle.IgnitionOn = vamosysVehicle.IgnitionOn;
 
-			vehicle.LastUpdate = gps.LastUpdate;
+			vehicle.LastUpdate = vamosysVehicle.LastUpdate;
 
-			vehicle.FuelLitre = gps.FuelLitre;
-			vehicle.TankSize = gps.TankSize;
-			vehicle.ExpectedFuelMileage = gps.ExpectedFuelMileage;
+			vehicle.FuelLitre = vamosysVehicle.FuelLitre;
+			vehicle.TankSize = vamosysVehicle.TankSize;
+			vehicle.ExpectedFuelMileage = vamosysVehicle.ExpectedFuelMileage;
 
-			vehicle.OdometerKM = gps.OdometerKM;
-			vehicle.DistanceCovered = gps.DistanceCovered;
+			vehicle.OdometerKM = vamosysVehicle.OdometerKM;
+			vehicle.DistanceCovered = vamosysVehicle.DistanceCovered;
 
-			vehicle.IsOverSpeed = gps.IsOverSpeed;
-			vehicle.InsideGeoFence = gps.InsideGeoFence;
-			vehicle.HasAlert = gps.HasAlert;
+			vehicle.IsOverSpeed = vamosysVehicle.IsOverSpeed;
+			vehicle.InsideGeoFence = vamosysVehicle.InsideGeoFence;
+			vehicle.HasAlert = vamosysVehicle.HasAlert;
 
-			vehicle.GpsExpiryDate = gps.GpsExpiryDate;
-			vehicle.GpsExpiryDays = gps.GpsExpiryDays;
+			vehicle.GpsExpiryDate = vamosysVehicle.GpsExpiryDate;
+			vehicle.GpsExpiryDays = vamosysVehicle.GpsExpiryDays;
 		}
 
 		if (onlyActive)
