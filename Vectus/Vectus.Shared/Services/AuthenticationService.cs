@@ -55,10 +55,13 @@ public static class AuthenticationService
 		navigationManager.NavigateTo(PageRouteNames.Login, true);
 	}
 
+	public static Func<string, bool> OpenRouteInNewWindow { get; set; }
 	public static async Task NavigateToRoute(string route, IFormFactor FormFactor, IJSRuntime JSRuntime, NavigationManager NavigationManager)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", route, "_blank");
+		else if (OpenRouteInNewWindow is not null && OpenRouteInNewWindow(route))
+			return;
 		else
 			NavigationManager.NavigateTo(route);
 	}
