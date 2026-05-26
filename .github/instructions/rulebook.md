@@ -307,8 +307,7 @@ Reach for the repo's wrappers before raw Syncfusion/MudBlazor/HTML. The standard
 | `FileCard` / `FolderCard` | Dashboard navigation tiles |
 | `BalanceInfoCard` (or similar) | Summary tiles |
 | `CustomTextField`, `CustomNumericField<T>`, `CustomAutoComplete<T>`, `CustomDatePicker`, `CustomDateRangePicker`, `CustomCheckBox` | Form inputs |
-| `ConfirmationDialog` | All confirmations (delete, recover, reset, discard) — set `Title`/`Message` + `OnConfirm`/`OnCancel` per action |
-| `AcceptConfirmationDialog` / `RejectConfirmationDialog` | Approval workflows |
+| `ConfirmationDialog` | All confirmations (delete, recover, accept, reject, reset, discard) — set `Title`/`Message` + `OnConfirm`/`OnCancel` per action |
 | `DocumentUploadDialog` | Blob/file upload-download-remove |
 | `ToastNotification` | All feedback |
  
