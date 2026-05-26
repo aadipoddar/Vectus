@@ -83,54 +83,52 @@ else
 					</div>
 				</div>
 				<div class="section-body">
-					<div class="filters-container">
-						<div class="filters-grid">
-							<!-- Date Range -->
-							<div class="form-field">
-								<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
-													   ValueChanged="OnDateRangeChanged"
-													   Label="Date Range (Ctrl + F)"
-													   Required="false" />
-							</div>
-
-							<!-- Company -->
-							<div class="form-field">
-								<CustomAutoComplete T="CompanyModel"
-													Value="_selectedCompany"
-													DataSource="@_companies"
-													Placeholder="All Companies"
-													Label="Company" Required="false"
-													ValueChanged="OnCompanyChanged"
-													FieldValue="@nameof(CompanyModel.Name)"
-													AddNewRoute="@PageRouteNames.CompanyMaster" />
-							</div>
-
-							<!-- Group -->
-							<div class="form-field">
-								<CustomAutoComplete T="GroupModel"
-													Value="_selectedGroup"
-													DataSource="@_groups"
-													Placeholder="All Groups"
-													Label="Group" Required="false"
-													ValueChanged="OnGroupChanged"
-													FieldValue="@nameof(GroupModel.Name)"
-													AddNewRoute="@PageRouteNames.GroupMaster" />
-							</div>
-
-							<!-- Account Type -->
-							<div class="form-field">
-								<CustomAutoComplete T="AccountTypeModel"
-													Value="_selectedAccountType"
-													DataSource="@_accountTypes"
-													Placeholder="All Account Types"
-													Label="Account Type" Required="false"
-													ValueChanged="OnAccountTypeChanged"
-													FieldValue="@nameof(AccountTypeModel.Name)"
-													AddNewRoute="@PageRouteNames.AccountTypeMaster" />
-							</div>
+					<div class="filters-grid">
+						<!-- Date Range -->
+						<div class="form-field">
+							<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
+												   ValueChanged="OnDateRangeChanged"
+												   Label="Date Range (Ctrl + F)"
+												   Required="false" />
 						</div>
 
+						<!-- Company -->
+						<div class="form-field">
+							<CustomAutoComplete T="CompanyModel"
+												Value="_selectedCompany"
+												DataSource="@_companies"
+												Placeholder="All Companies"
+												Label="Company" Required="false"
+												ValueChanged="OnCompanyChanged"
+												FieldValue="@nameof(CompanyModel.Name)"
+												AddNewRoute="@PageRouteNames.CompanyMaster" />
+						</div>
+
+						<!-- Group -->
+						<div class="form-field">
+							<CustomAutoComplete T="GroupModel"
+												Value="_selectedGroup"
+												DataSource="@_groups"
+												Placeholder="All Groups"
+												Label="Group" Required="false"
+												ValueChanged="OnGroupChanged"
+												FieldValue="@nameof(GroupModel.Name)"
+												AddNewRoute="@PageRouteNames.GroupMaster" />
+						</div>
+
+						<!-- Account Type -->
+						<div class="form-field">
+							<CustomAutoComplete T="AccountTypeModel"
+												Value="_selectedAccountType"
+												DataSource="@_accountTypes"
+												Placeholder="All Account Types"
+												Label="Account Type" Required="false"
+												ValueChanged="OnAccountTypeChanged"
+												FieldValue="@nameof(AccountTypeModel.Name)"
+												AddNewRoute="@PageRouteNames.AccountTypeMaster" />
+						</div>
 					</div>
+
 				</div>
 			</div>
 

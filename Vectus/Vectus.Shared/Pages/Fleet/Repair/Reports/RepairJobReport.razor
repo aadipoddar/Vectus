@@ -98,51 +98,49 @@ else
 					</div>
 				</div>
 				<div class="section-body">
-					<div class="filters-container">
-						<div class="filters-grid">
-							<!-- Date Range -->
-							<div class="form-field">
-								<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
-													   ValueChanged="OnDateRangeChanged"
-													   Label="Date Range (Ctrl + F)"
-													   Required="false" />
-							</div>
+					<div class="filters-grid">
+						<!-- Date Range -->
+						<div class="form-field">
+							<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
+												   ValueChanged="OnDateRangeChanged"
+												   Label="Date Range (Ctrl + F)"
+												   Required="false" />
+						</div>
 
-							<!-- Company -->
-							<div class="form-field">
-								<CustomAutoComplete T="CompanyModel"
-													Value="_selectedCompany"
-													DataSource="@_companies"
-													Placeholder="All Companies"
-													Label="Company" Required="false"
-													ValueChanged="OnCompanyChanged"
-													FieldValue="@nameof(CompanyModel.Name)"
-													AddNewRoute="@PageRouteNames.CompanyMaster" />
-							</div>
+						<!-- Company -->
+						<div class="form-field">
+							<CustomAutoComplete T="CompanyModel"
+												Value="_selectedCompany"
+												DataSource="@_companies"
+												Placeholder="All Companies"
+												Label="Company" Required="false"
+												ValueChanged="OnCompanyChanged"
+												FieldValue="@nameof(CompanyModel.Name)"
+												AddNewRoute="@PageRouteNames.CompanyMaster" />
+						</div>
 
-							<!-- Vehicle -->
-							<div class="form-field">
-								<CustomAutoComplete T="VehicleModel"
-													Value="_selectedVehicle"
-													DataSource="@_vehicles"
-													Placeholder="All Vehicles"
-													Label="Vehicle" Required="false"
-													ValueChanged="OnVehicleChanged"
-													FieldValue="@nameof(VehicleModel.Code)"
-													AddNewRoute="@PageRouteNames.VehicleMaster" />
-							</div>
+						<!-- Vehicle -->
+						<div class="form-field">
+							<CustomAutoComplete T="VehicleModel"
+												Value="_selectedVehicle"
+												DataSource="@_vehicles"
+												Placeholder="All Vehicles"
+												Label="Vehicle" Required="false"
+												ValueChanged="OnVehicleChanged"
+												FieldValue="@nameof(VehicleModel.Code)"
+												AddNewRoute="@PageRouteNames.VehicleMaster" />
+						</div>
 
-							<!-- Garage -->
-							<div class="form-field">
-								<CustomAutoComplete T="GarageModel"
-													Value="_selectedGarage"
-													DataSource="@_garages"
-													Placeholder="All Garages"
-													Label="Garage" Required="false"
-													ValueChanged="OnGarageChanged"
-													FieldValue="@nameof(GarageModel.Name)"
-													AddNewRoute="@PageRouteNames.GarageMaster" />
-							</div>
+						<!-- Garage -->
+						<div class="form-field">
+							<CustomAutoComplete T="GarageModel"
+												Value="_selectedGarage"
+												DataSource="@_garages"
+												Placeholder="All Garages"
+												Label="Garage" Required="false"
+												ValueChanged="OnGarageChanged"
+												FieldValue="@nameof(GarageModel.Name)"
+												AddNewRoute="@PageRouteNames.GarageMaster" />
 						</div>
 					</div>
 				</div>

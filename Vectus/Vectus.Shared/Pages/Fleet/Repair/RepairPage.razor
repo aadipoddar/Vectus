@@ -184,35 +184,37 @@ else
 						</div>
 					</div>
 					<div class="section-body">
-						<div class="financial-grid">
+						<div class="form-grid">
 							<!-- Total Items -->
-							<div class="financial-row">
-								<label class="financial-label">Total Items:</label>
+							<div class="form-field">
 								<CustomNumericField T="int"
 													Value="_repair.TotalItems"
 													Placeholder="0"
+													Label="Total Items"
 													ReadOnly="true"
 													Required="false"
 													TabIndex="-1" />
 							</div>
 
 							<!-- Total Quantity -->
-							<div class="financial-row">
-								<label class="financial-label">Total Quantity:</label>
+							<div class="form-field">
 								<CustomNumericField T="decimal"
 													Value="_repair.TotalQuantity"
 													Placeholder="0.00"
+													Label="Total Quantity"
 													ReadOnly="true"
 													Required="false"
 													TabIndex="-1" />
 							</div>
 
+							<hr class="form-divider" />
+
 							<!-- Total Amount -->
-							<div class="financial-row total-row">
-								<label class="financial-label-total">Total Amount:</label>
+							<div class="form-field">
 								<CustomNumericField T="decimal"
 													Value="_repair.TotalAmount"
 													Placeholder="0.00"
+													Label="Total Amount"
 													ReadOnly="true"
 													Required="false"
 													TabIndex="-1" />

@@ -85,30 +85,28 @@ else
 					</div>
 				</div>
 				<div class="section-body">
-					<div class="filters-container">
-						<div class="filters-grid">
-							<!-- Date Range -->
-							<div class="form-field">
-								<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
-													   ValueChanged="OnDateRangeChanged"
-													   Label="Date Range (Ctrl + F)"
-													   Required="false" />
-							</div>
-
-							<!-- Company -->
-							<div class="form-field">
-								<CustomAutoComplete T="CompanyModel"
-													Value="_selectedCompany"
-													DataSource="@_companies"
-													Placeholder="All Companies"
-													Label="Company" Required="false"
-													FieldValue="@nameof(CompanyModel.Name)"
-													ValueChanged="OnCompanyChanged"
-													AddNewRoute="@PageRouteNames.CompanyMaster" />
-							</div>
+					<div class="filters-grid">
+						<!-- Date Range -->
+						<div class="form-field">
+							<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
+												   ValueChanged="OnDateRangeChanged"
+												   Label="Date Range (Ctrl + F)"
+												   Required="false" />
 						</div>
 
+						<!-- Company -->
+						<div class="form-field">
+							<CustomAutoComplete T="CompanyModel"
+												Value="_selectedCompany"
+												DataSource="@_companies"
+												Placeholder="All Companies"
+												Label="Company" Required="false"
+												FieldValue="@nameof(CompanyModel.Name)"
+												ValueChanged="OnCompanyChanged"
+												AddNewRoute="@PageRouteNames.CompanyMaster" />
+						</div>
 					</div>
+
 				</div>
 			</div>
 

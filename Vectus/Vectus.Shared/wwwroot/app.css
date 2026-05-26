@@ -177,9 +177,9 @@ h1:focus {
 	letter-spacing: 0.3px;
 }
 
-/* Full-width separator — drop inside a form-grid or financial-grid
-   (e.g. above a total field). Spans all columns in a grid layout
-   and stretches the full width in a flex column. */
+/* Full-width separator — drop inside a form-grid (e.g. above a total
+   field). Spans all columns in a grid layout and stretches the full
+   width in a flex column. */
 .form-divider {
 	grid-column: 1 / -1;
 	width: 100%;
@@ -351,12 +351,6 @@ h1:focus {
 /* ================================================================
    9. FILTERS & REPORT LAYOUTS
    ================================================================ */
-.filters-container {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
-}
-
 .filters-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 250px));

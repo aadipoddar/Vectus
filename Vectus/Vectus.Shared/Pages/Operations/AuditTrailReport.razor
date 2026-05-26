@@ -77,14 +77,12 @@ else
 					</div>
 				</div>
 				<div class="section-body">
-					<div class="filters-container">
-						<div class="filters-grid">
-							<div class="form-field">
-								<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
-													   ValueChanged="OnDateRangeChanged"
-													   Label="Date Range (Ctrl + F)"
-													   Required="false" />
-							</div>
+					<div class="filters-grid">
+						<div class="form-field">
+							<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
+												   ValueChanged="OnDateRangeChanged"
+												   Label="Date Range (Ctrl + F)"
+												   Required="false" />
 						</div>
 					</div>
 				</div>

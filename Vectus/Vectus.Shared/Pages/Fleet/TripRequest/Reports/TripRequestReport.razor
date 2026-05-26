@@ -93,73 +93,71 @@ else
 					</div>
 				</div>
 				<div class="section-body">
-					<div class="filters-container">
-						<div class="filters-grid">
-							<!-- Date Range -->
-							<div class="form-field">
-								<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
-													   ValueChanged="OnDateRangeChanged"
-													   Label="Date Range (Ctrl + F)"
-													   Required="false" />
-							</div>
+					<div class="filters-grid">
+						<!-- Date Range -->
+						<div class="form-field">
+							<CustomDateRangePicker @ref="_sfFirstFocus" Value="@(new MudBlazor.DateRange(_fromDate, _toDate))"
+												   ValueChanged="OnDateRangeChanged"
+												   Label="Date Range (Ctrl + F)"
+												   Required="false" />
+						</div>
 
-							<!-- Company -->
-							<div class="form-field">
-								<CustomAutoComplete T="CompanyModel"
-													Value="_selectedCompany"
-													DataSource="@_companies"
-													Placeholder="All Companies"
-													Label="Company" Required="false"
-													ValueChanged="OnCompanyChanged"
-													FieldValue="@nameof(CompanyModel.Name)"
-													AddNewRoute="@PageRouteNames.CompanyMaster" />
-							</div>
+						<!-- Company -->
+						<div class="form-field">
+							<CustomAutoComplete T="CompanyModel"
+												Value="_selectedCompany"
+												DataSource="@_companies"
+												Placeholder="All Companies"
+												Label="Company" Required="false"
+												ValueChanged="OnCompanyChanged"
+												FieldValue="@nameof(CompanyModel.Name)"
+												AddNewRoute="@PageRouteNames.CompanyMaster" />
+						</div>
 
-							<!-- Vehicle -->
-							<div class="form-field">
-								<CustomAutoComplete T="VehicleModel"
-													Value="_selectedVehicle"
-													DataSource="@_vehicles"
-													Placeholder="All Vehicles"
-													Label="Vehicle" Required="false"
-													ValueChanged="OnVehicleChanged"
-													FieldValue="@nameof(VehicleModel.Code)"
-													AddNewRoute="@PageRouteNames.VehicleMaster" />
-							</div>
+						<!-- Vehicle -->
+						<div class="form-field">
+							<CustomAutoComplete T="VehicleModel"
+												Value="_selectedVehicle"
+												DataSource="@_vehicles"
+												Placeholder="All Vehicles"
+												Label="Vehicle" Required="false"
+												ValueChanged="OnVehicleChanged"
+												FieldValue="@nameof(VehicleModel.Code)"
+												AddNewRoute="@PageRouteNames.VehicleMaster" />
+						</div>
 
-							<!-- Route -->
-							<div class="form-field">
-								<CustomAutoComplete T="RouteOverviewModel"
-													Value="_selectedRoute"
-													DataSource="@_routes"
-													Placeholder="All Routes"
-													Label="Route" Required="false"
-													ValueChanged="OnRouteChanged"
-													FieldValue="@nameof(RouteOverviewModel.RouteDisplay)"
-													AddNewRoute="@PageRouteNames.RouteMaster" />
-							</div>
+						<!-- Route -->
+						<div class="form-field">
+							<CustomAutoComplete T="RouteOverviewModel"
+												Value="_selectedRoute"
+												DataSource="@_routes"
+												Placeholder="All Routes"
+												Label="Route" Required="false"
+												ValueChanged="OnRouteChanged"
+												FieldValue="@nameof(RouteOverviewModel.RouteDisplay)"
+												AddNewRoute="@PageRouteNames.RouteMaster" />
+						</div>
 
-							<!-- SDR -->
-							<div class="form-field">
-								<CustomAutoComplete T="SDRModel"
-													Value="_selectedSDR"
-													DataSource="@_sdrs"
-													Placeholder="All SDRs"
-													Label="SDR" Required="false"
-													ValueChanged="OnSDRChanged"
-													FieldValue="@nameof(SDRModel.Name)"
-													AddNewRoute="@PageRouteNames.SDRMaster" />
-							</div>
+						<!-- SDR -->
+						<div class="form-field">
+							<CustomAutoComplete T="SDRModel"
+												Value="_selectedSDR"
+												DataSource="@_sdrs"
+												Placeholder="All SDRs"
+												Label="SDR" Required="false"
+												ValueChanged="OnSDRChanged"
+												FieldValue="@nameof(SDRModel.Name)"
+												AddNewRoute="@PageRouteNames.SDRMaster" />
+						</div>
 
-							<!-- Request Status -->
-							<div class="form-field">
-								<CustomAutoComplete T="string"
-													Value="_selectedRequestStatus"
-													DataSource="@_requestStatuses"
-													Placeholder="All Statuses"
-													Label="Request Status" Required="false"
-													ValueChanged="OnRequestStatusChanged" />
-							</div>
+						<!-- Request Status -->
+						<div class="form-field">
+							<CustomAutoComplete T="string"
+												Value="_selectedRequestStatus"
+												DataSource="@_requestStatuses"
+												Placeholder="All Statuses"
+												Label="Request Status" Required="false"
+												ValueChanged="OnRequestStatusChanged" />
 						</div>
 					</div>
 				</div>
