@@ -307,9 +307,8 @@ Reach for the repo's wrappers before raw Syncfusion/MudBlazor/HTML. The standard
 | `FileCard` / `FolderCard` | Dashboard navigation tiles |
 | `BalanceInfoCard` (or similar) | Summary tiles |
 | `CustomTextField`, `CustomNumericField<T>`, `CustomAutoComplete<T>`, `CustomDatePicker`, `CustomDateRangePicker`, `CustomCheckBox` | Form inputs |
-| `DeleteConfirmationDialog` / `RecoverConfirmationDialog` | Soft delete / recover |
+| `ConfirmationDialog` | All confirmations (delete, recover, reset, discard) — set `Title`/`Message` + `OnConfirm`/`OnCancel` per action |
 | `AcceptConfirmationDialog` / `RejectConfirmationDialog` | Approval workflows |
-| `ResetConfirmationDialog` | Confirm discard of a draft |
 | `DocumentUploadDialog` | Blob/file upload-download-remove |
 | `ToastNotification` | All feedback |
  
@@ -350,10 +349,10 @@ private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 ];
 private <FirstInput> _sfFirstFocus;
-private DeleteConfirmationDialog _deleteConfirmationDialog;
-private RecoverConfirmationDialog _recoverConfirmationDialog;
-private int _deleteTransactionId = 0;     private string _deleteTransactionName = string.Empty;
-private int _recoverTransactionId = 0;     private string _recoverTransactionName = string.Empty;
+private ConfirmationDialog _confirmationDialog;
+private string _confirmTitle = string.Empty;
+private string _confirmMessage = string.Empty;
+private Func<Task> _confirmAction;   // the pending operation to run on confirm
 ```
  
 ### 6.2 Methods by region
@@ -365,10 +364,11 @@ private int _recoverTransactionId = 0;     private string _recoverTransactionNam
 - **Saving:** `SaveTransaction()` — guard `_isProcessing`; admin check; map
   `_selectedXxx?.Id ?? 0` onto the model; call
   `XxxData.SaveTransaction(_model, _user.Id, platform)`; toast; `ResetPage()`.
-- **Actions:** `ConfirmDelete()`/`ConfirmRecover()` (load fresh by id, set audit
-  fields, call `XxxData.Delete/RecoverTransaction`), `EditSelectedItem()`,
-  `DeleteRecoverSelectedItem()` (branch on `Status`), `Show*Confirmation(id, name)`,
-  `Cancel*`.
+- **Actions:** `DeleteTransaction(id)`/`RecoverTransaction(id)` (load fresh by id, set
+  audit fields, call `XxxData.Delete/RecoverTransaction`), `EditSelectedItem()`,
+  `DeleteRecoverSelectedItem()` (branch on `Status`, calls
+  `ShowConfirmation(title, message, action)`), and the shared confirm trio
+  `ShowConfirmation` / `OnConfirmed` (hide → invoke `_confirmAction`) / `OnCancelled`.
 - **Exporting:** `ExportExcel()`/`ExportPdf()` → `XxxExport.ExportMaster(_items, type)`
   → `SaveAndViewService.SaveAndView`.
 - **Utilities:** `OnMenuSelected`/`OnGridContextMenuItemClicked` switches,

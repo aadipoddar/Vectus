@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[Insert_Driver]
 	@Mobile VARCHAR(10),
 	@Code VARCHAR(10),
 	@LicenseUrl VARCHAR(MAX),
-	@LicenseNo VARCHAR(100),
+	@LicenseNo VARCHAR(MAX),
 	@LicenseExpiryDateTime DATETIME,
 	@Remarks VARCHAR(MAX),
 	@Status BIT

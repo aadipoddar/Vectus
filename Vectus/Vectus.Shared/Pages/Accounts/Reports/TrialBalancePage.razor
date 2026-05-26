@@ -5,14 +5,14 @@
 
 <PageTitle>Trial Balance - Vectus</PageTitle>
 
-<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager)" />
-<MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" />
-<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" />
-<MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadTrialBalance" />
-<MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadTrialBalance" />
-<MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" />
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyB KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="NavigateBack" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadTrialBalance" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadTrialBalance" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" Disabled="@_isProcessing" />
 
 @if (_isLoading)
 {
@@ -161,8 +161,7 @@ else
 						<GridAggregates>
 							<GridAggregate>
 								<GridAggregateColumns>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.LedgerName)"
-														 Type="AggregateType.Count">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.LedgerName)" Type="AggregateType.Count">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -188,8 +187,7 @@ else
 											</div>
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningDebit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningDebit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -215,8 +213,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningCredit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningCredit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -242,8 +239,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Debit)" Type="AggregateType.Sum"
-														 Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Debit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -269,8 +265,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Credit)" Type="AggregateType.Sum"
-														 Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Credit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -296,8 +291,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingDebit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingDebit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -323,8 +317,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingCredit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingCredit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -355,15 +348,11 @@ else
 						</GridAggregates>
 
 						<GridColumns>
-							<GridColumn Field="@nameof(TrialBalanceModel.LedgerCode)" HeaderText="Code" Width="120"
-										Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(TrialBalanceModel.LedgerName)" HeaderText="Ledger Name"
-										Width="250" />
+							<GridColumn Field="@nameof(TrialBalanceModel.LedgerCode)" HeaderText="Code" Width="120" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(TrialBalanceModel.LedgerName)" HeaderText="Ledger Name" Width="250" />
 							<GridColumn Field="@nameof(TrialBalanceModel.GroupName)" HeaderText="Group" Width="180" />
-							<GridColumn Field="@nameof(TrialBalanceModel.AccountTypeName)" HeaderText="Account Type"
-										Width="150" />
-							<GridColumn Field="@nameof(TrialBalanceModel.OpeningBalance)" HeaderText="Opening Balance"
-										Width="150" TextAlign="TextAlign.Right">
+							<GridColumn Field="@nameof(TrialBalanceModel.AccountTypeName)" HeaderText="Account Type" Width="150" />
+							<GridColumn Field="@nameof(TrialBalanceModel.OpeningBalance)" HeaderText="Opening Balance" Width="150" TextAlign="TextAlign.Right">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -372,8 +361,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.OpeningDebit)" HeaderText="Opening Debit"
-										Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+							<GridColumn Field="@nameof(TrialBalanceModel.OpeningDebit)" HeaderText="Opening Debit" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -381,8 +369,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.OpeningCredit)" HeaderText="Opening Credit"
-										Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+							<GridColumn Field="@nameof(TrialBalanceModel.OpeningCredit)" HeaderText="Opening Credit" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -390,8 +377,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.Debit)" HeaderText="Period Debit" Width="150"
-										TextAlign="TextAlign.Right">
+							<GridColumn Field="@nameof(TrialBalanceModel.Debit)" HeaderText="Period Debit" Width="150" TextAlign="TextAlign.Right">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -399,8 +385,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.Credit)" HeaderText="Period Credit" Width="150"
-										TextAlign="TextAlign.Right">
+							<GridColumn Field="@nameof(TrialBalanceModel.Credit)" HeaderText="Period Credit" Width="150" TextAlign="TextAlign.Right">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -408,8 +393,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.ClosingBalance)" HeaderText="Closing Balance"
-										Width="150" TextAlign="TextAlign.Right">
+							<GridColumn Field="@nameof(TrialBalanceModel.ClosingBalance)" HeaderText="Closing Balance" Width="150" TextAlign="TextAlign.Right">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -418,8 +402,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.ClosingDebit)" HeaderText="Closing Debit"
-										Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+							<GridColumn Field="@nameof(TrialBalanceModel.ClosingDebit)" HeaderText="Closing Debit" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -427,8 +410,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.ClosingCredit)" HeaderText="Closing Credit"
-										Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+							<GridColumn Field="@nameof(TrialBalanceModel.ClosingCredit)" HeaderText="Closing Credit" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);
@@ -447,3 +429,5 @@ else
 }
 
 <ToastNotification @ref="_toastNotification" />
+
+<NavigationLock ConfirmExternalNavigation="@_isProcessing" />

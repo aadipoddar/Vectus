@@ -4,12 +4,15 @@ using Syncfusion.Blazor.Popups;
 
 namespace Vectus.Shared.Components.Dialog;
 
-public partial class AcceptConfirmationDialog
+public partial class ConfirmationDialog
 {
 	private SfDialog _dialog;
 	private bool _isVisible;
 
-	[Parameter] public string IdentifierValue { get; set; } = "";
+	[Parameter] public string Title { get; set; } = "Confirm";
+	[Parameter] public string Message { get; set; } = "Are you sure you want to proceed?";
+	[Parameter] public string ConfirmText { get; set; } = "";
+
 	[Parameter] public EventCallback OnConfirm { get; set; }
 	[Parameter] public EventCallback OnCancel { get; set; }
 

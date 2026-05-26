@@ -59,19 +59,11 @@ public partial class TripRequestReport : IAsyncDisposable
 	private SfGrid<TripRequestOverviewModel> _sfGrid;
 	private CustomDateRangePicker _sfFirstFocus;
 	private ToastNotification _toastNotification;
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private RecoverConfirmationDialog _recoverConfirmationDialog;
-	private AcceptConfirmationDialog _acceptConfirmationDialog;
-	private RejectConfirmationDialog _rejectConfirmationDialog;
+	private ConfirmationDialog _confirmationDialog;
 
-	private string _deleteTransactionNo = string.Empty;
-	private int _deleteTransactionId = 0;
-	private string _recoverTransactionNo = string.Empty;
-	private int _recoverTransactionId = 0;
-	private string _acceptTransactionNo = string.Empty;
-	private int _acceptTransactionId = 0;
-	private string _rejectTransactionNo = string.Empty;
-	private int _rejectTransactionId = 0;
+	private string _confirmTitle = string.Empty;
+	private string _confirmMessage = string.Empty;
+	private Func<Task> _confirmAction;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -308,9 +300,9 @@ public partial class TripRequestReport : IAsyncDisposable
 		await AuthenticationService.NavigateToRoute(decodedTransactionNo.PageRouteName, FormFactor, JSRuntime, NavigationManager);
 	}
 
-	private async Task ConfirmDelete()
+	private async Task DeleteTransaction(int id, string transactionNo)
 	{
-		if (_isProcessing || _deleteTransactionId == 0)
+		if (_isProcessing || id == 0)
 			return;
 
 		try
@@ -318,20 +310,19 @@ public partial class TripRequestReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-			await _deleteConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
 			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
 
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _deleteTransactionId)
+			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, id)
 				?? throw new Exception("Transaction not found.");
 			tripRequest.LastModifiedBy = _user.Id;
 			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 			await TripRequestData.DeleteTransaction(tripRequest);
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been deleted successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
@@ -339,17 +330,15 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
-			_deleteTransactionId = 0;
-			_deleteTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
 		}
 	}
 
-	private async Task ConfirmRecover()
+	private async Task RecoverTransaction(int id, string transactionNo)
 	{
-		if (_isProcessing || _recoverTransactionId == 0)
+		if (_isProcessing || id == 0)
 			return;
 
 		try
@@ -357,20 +346,19 @@ public partial class TripRequestReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
 
-			await _recoverConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
 			await _toastNotification.ShowAsync("Processing", "Recovering transaction...", ToastType.Info);
 
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _recoverTransactionId)
+			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, id)
 				?? throw new Exception("Transaction not found.");
 			tripRequest.LastModifiedBy = _user.Id;
 			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 			await TripRequestData.RecoverTransaction(tripRequest);
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been recovered successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
@@ -378,17 +366,15 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
-			_recoverTransactionId = 0;
-			_recoverTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
 		}
 	}
 
-	private async Task ConfirmAccept()
+	private async Task AcceptTransaction(int id, string transactionNo)
 	{
-		if (_isProcessing || _acceptTransactionId == 0)
+		if (_isProcessing || id == 0)
 			return;
 
 		try
@@ -396,13 +382,12 @@ public partial class TripRequestReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to accept this transaction.");
 
-			await _acceptConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
 			await _toastNotification.ShowAsync("Processing", "Accepting transaction...", ToastType.Info);
 
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _acceptTransactionId)
+			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, id)
 				?? throw new Exception("Transaction not found.");
 
 			if (!tripRequest.Status)
@@ -417,7 +402,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 			await TripRequestData.SaveTransaction(tripRequest);
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {_acceptTransactionNo} has been accepted successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been accepted successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
@@ -425,17 +410,15 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
-			_acceptTransactionId = 0;
-			_acceptTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
 		}
 	}
 
-	private async Task ConfirmReject()
+	private async Task RejectTransaction(int id, string transactionNo)
 	{
-		if (_isProcessing || _rejectTransactionId == 0)
+		if (_isProcessing || id == 0)
 			return;
 
 		try
@@ -443,13 +426,12 @@ public partial class TripRequestReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to reject this transaction.");
 
-			await _rejectConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
 			await _toastNotification.ShowAsync("Processing", "Rejecting transaction...", ToastType.Info);
 
-			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, _rejectTransactionId)
+			var tripRequest = await CommonData.LoadTableDataById<TripRequestModel>(FleetNames.TripRequest, id)
 				?? throw new Exception("Transaction not found.");
 
 			if (!tripRequest.Status)
@@ -464,7 +446,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 			await TripRequestData.SaveTransaction(tripRequest);
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {_rejectTransactionNo} has been rejected successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been rejected successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
@@ -472,8 +454,6 @@ public partial class TripRequestReport : IAsyncDisposable
 		}
 		finally
 		{
-			_rejectTransactionId = 0;
-			_rejectTransactionNo = string.Empty;
 			_isProcessing = false;
 			StateHasChanged();
 			await LoadTransactionOverviews();
@@ -485,40 +465,12 @@ public partial class TripRequestReport : IAsyncDisposable
 		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
 
-		if (_sfGrid.SelectedRecords.First().Status)
-			await ShowDeleteConfirmation();
+		var record = _sfGrid.SelectedRecords.First();
+
+		if (record.Status)
+			await ShowConfirmation("Delete", $"Are you sure you want to delete transaction {record.TransactionNo}", () => DeleteTransaction(record.Id, record.TransactionNo));
 		else
-			await ShowRecoverConfirmation();
-	}
-
-	private async Task ShowDeleteConfirmation()
-	{
-		_deleteTransactionId = _sfGrid.SelectedRecords.First().Id;
-		_deleteTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _deleteConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelDelete()
-	{
-		_deleteTransactionId = 0;
-		_deleteTransactionNo = string.Empty;
-		await _deleteConfirmationDialog.HideAsync();
-	}
-
-	private async Task ShowRecoverConfirmation()
-	{
-		_recoverTransactionId = _sfGrid.SelectedRecords.First().Id;
-		_recoverTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _recoverConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelRecover()
-	{
-		_recoverTransactionId = 0;
-		_recoverTransactionNo = string.Empty;
-		await _recoverConfirmationDialog.HideAsync();
+			await ShowConfirmation("Recover", $"Are you sure you want to recover transaction {record.TransactionNo}", () => RecoverTransaction(record.Id, record.TransactionNo));
 	}
 
 	private async Task AcceptSelectedTransaction()
@@ -526,17 +478,8 @@ public partial class TripRequestReport : IAsyncDisposable
 		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
 
-		_acceptTransactionId = _sfGrid.SelectedRecords.First().Id;
-		_acceptTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _acceptConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelAccept()
-	{
-		_acceptTransactionId = 0;
-		_acceptTransactionNo = string.Empty;
-		await _acceptConfirmationDialog.HideAsync();
+		var record = _sfGrid.SelectedRecords.First();
+		await ShowConfirmation("Accept", $"Are you sure you want to accept transaction {record.TransactionNo}", () => AcceptTransaction(record.Id, record.TransactionNo));
 	}
 
 	private async Task RejectSelectedTransaction()
@@ -544,17 +487,31 @@ public partial class TripRequestReport : IAsyncDisposable
 		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
 
-		_rejectTransactionId = _sfGrid.SelectedRecords.First().Id;
-		_rejectTransactionNo = _sfGrid.SelectedRecords.First().TransactionNo;
-		StateHasChanged();
-		await _rejectConfirmationDialog.ShowAsync();
+		var record = _sfGrid.SelectedRecords.First();
+		await ShowConfirmation("Reject", $"Are you sure you want to reject transaction {record.TransactionNo}", () => RejectTransaction(record.Id, record.TransactionNo));
 	}
 
-	private async Task CancelReject()
+	private async Task ShowConfirmation(string title, string message, Func<Task> action)
 	{
-		_rejectTransactionId = 0;
-		_rejectTransactionNo = string.Empty;
-		await _rejectConfirmationDialog.HideAsync();
+		_confirmTitle = title;
+		_confirmMessage = message;
+		_confirmAction = action;
+		StateHasChanged();
+		await _confirmationDialog.ShowAsync();
+	}
+
+	private async Task OnConfirmed()
+	{
+		await _confirmationDialog.HideAsync();
+		if (_confirmAction is not null)
+			await _confirmAction();
+		_confirmAction = null;
+	}
+
+	private async Task OnCancelled()
+	{
+		_confirmAction = null;
+		await _confirmationDialog.HideAsync();
 	}
 	#endregion
 

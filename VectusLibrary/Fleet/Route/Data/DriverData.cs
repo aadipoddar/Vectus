@@ -63,7 +63,7 @@ public static class DriverData
 		item.Name = item.Name?.Trim().ToUpper() ?? string.Empty;
 		item.Mobile = item.Mobile?.Trim() ?? string.Empty;
 		item.Code = item.Code?.Trim().ToUpper() ?? string.Empty;
-		item.LicenseNo = item.LicenseNo?.Trim().ToUpper() ?? string.Empty;
+		item.LicenseNo = string.IsNullOrWhiteSpace(item.LicenseNo) ? null : item.LicenseNo.Trim();
 		item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? null : item.Remarks.Trim();
 		item.LicenseExpiryDateTime = item.LicenseExpiryDateTime == default ? null : item.LicenseExpiryDateTime;
 		item.Status = true;
@@ -76,9 +76,6 @@ public static class DriverData
 
 		if (!item.Mobile.ValidatePhoneNumber())
 			throw new Exception("Mobile must be exactly 10 numeric digits.");
-
-		if (string.IsNullOrWhiteSpace(item.LicenseNo))
-			throw new Exception("License number is required. Please enter a valid license number.");
 
 		if (item.Id == 0)
 			item.Code = await GenerateCodes.GenerateDriverCode();
@@ -95,10 +92,6 @@ public static class DriverData
 		var existingByCode = allDrivers.FirstOrDefault(vd => vd.Id != item.Id && vd.Code.Equals(item.Code, StringComparison.OrdinalIgnoreCase));
 		if (existingByCode is not null)
 			throw new Exception($"Driver code '{item.Code}' already exists. Please choose a different code.");
-
-		var existingByLicenseNo = allDrivers.FirstOrDefault(vd => vd.Id != item.Id && vd.LicenseNo.Equals(item.LicenseNo, StringComparison.OrdinalIgnoreCase));
-		if (existingByLicenseNo is not null)
-			throw new Exception($"License number '{item.LicenseNo}' already exists. Please choose a different license number.");
 	}
 
 	public static async Task<int> SaveTransaction(DriverModel driver, int userId, string platform)

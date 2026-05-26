@@ -44,13 +44,11 @@ public partial class VehicleDocumentPage
 	private SfGrid<VehicleDocumentModel> _sfGrid;
 	private CustomTextField _sfFirstFocus;
 	private ToastNotification _toastNotification;
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
-	private RecoverConfirmationDialog _recoverConfirmationDialog;
+	private ConfirmationDialog _confirmationDialog;
 
-	private int _deleteTransactionId = 0;
-	private string _deleteTransactionNo = string.Empty;
-	private int _recoverTransactionId = 0;
-	private string _recoverTransactionNo = string.Empty;
+	private string _confirmTitle = string.Empty;
+	private string _confirmMessage = string.Empty;
+	private Func<Task> _confirmAction;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -153,17 +151,16 @@ public partial class VehicleDocumentPage
 	#endregion
 
 	#region Actions
-	private async Task ConfirmDelete()
+	private async Task DeleteTransaction(int id)
 	{
 		try
 		{
 			_isProcessing = true;
-			await _deleteConfirmationDialog.HideAsync();
 
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, _deleteTransactionId)
+			var vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, id)
 				?? throw new Exception("Transaction not found.");
 
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -185,22 +182,19 @@ public partial class VehicleDocumentPage
 		finally
 		{
 			_isProcessing = false;
-			_deleteTransactionId = 0;
-			_deleteTransactionNo = string.Empty;
 		}
 	}
 
-	private async Task ConfirmRecover()
+	private async Task RecoverTransaction(int id)
 	{
 		try
 		{
 			_isProcessing = true;
-			await _recoverConfirmationDialog.HideAsync();
 
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, _recoverTransactionId)
+			var vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, id)
 				?? throw new Exception("Transaction not found.");
 
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -222,8 +216,6 @@ public partial class VehicleDocumentPage
 		finally
 		{
 			_isProcessing = false;
-			_recoverTransactionId = 0;
-			_recoverTransactionNo = string.Empty;
 		}
 	}
 	#endregion
@@ -442,41 +434,38 @@ public partial class VehicleDocumentPage
 	private async Task DeleteRecoverSelectedItem()
 	{
 		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
-		if (selectedRecords.Count > 0)
-		{
-			if (selectedRecords[0].Status)
-				await ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].TransactionNo);
-			else
-				await ShowRecoverConfirmation(selectedRecords[0].Id, selectedRecords[0].TransactionNo);
-		}
+		if (selectedRecords.Count == 0)
+			return;
+
+		var record = selectedRecords[0];
+
+		if (record.Status)
+			await ShowConfirmation("Delete", $"Are you sure you want to delete {record.TransactionNo}", () => DeleteTransaction(record.Id));
+		else
+			await ShowConfirmation("Recover", $"Are you sure you want to recover {record.TransactionNo}", () => RecoverTransaction(record.Id));
 	}
 
-	private async Task ShowDeleteConfirmation(int id, string transactionNo)
+	private async Task ShowConfirmation(string title, string message, Func<Task> action)
 	{
-		_deleteTransactionId = id;
-		_deleteTransactionNo = transactionNo;
-		await _deleteConfirmationDialog.ShowAsync();
+		_confirmTitle = title;
+		_confirmMessage = message;
+		_confirmAction = action;
+		StateHasChanged();
+		await _confirmationDialog.ShowAsync();
 	}
 
-	private async Task CancelDelete()
+	private async Task OnConfirmed()
 	{
-		_deleteTransactionId = 0;
-		_deleteTransactionNo = string.Empty;
-		await _deleteConfirmationDialog.HideAsync();
+		await _confirmationDialog.HideAsync();
+		if (_confirmAction is not null)
+			await _confirmAction();
+		_confirmAction = null;
 	}
 
-	private async Task ShowRecoverConfirmation(int id, string transactionNo)
+	private async Task OnCancelled()
 	{
-		_recoverTransactionId = id;
-		_recoverTransactionNo = transactionNo;
-		await _recoverConfirmationDialog.ShowAsync();
-	}
-
-	private async Task CancelRecover()
-	{
-		_recoverTransactionId = 0;
-		_recoverTransactionNo = string.Empty;
-		await _recoverConfirmationDialog.HideAsync();
+		_confirmAction = null;
+		await _confirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()

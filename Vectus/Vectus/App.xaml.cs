@@ -1,4 +1,6 @@
-﻿using Vectus.Shared.Services;
+﻿#if WINDOWS
+using Vectus.Shared.Services;
+#endif
 
 namespace Vectus;
 

@@ -263,6 +263,7 @@ public partial class RepairPage
 		{
 			await _toastNotification.ShowAsync("An Error Occurred While Loading Existing Cart", ex.Message, ToastType.Error);
 			await DeleteLocalFiles();
+			await ResetPage();
 		}
 	}
 	#endregion
@@ -509,6 +510,7 @@ public partial class RepairPage
 		{
 			await SaveTransactionFile();
 			_isProcessing = true;
+			StateHasChanged();
 
 			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 

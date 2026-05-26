@@ -11,14 +11,9 @@ namespace Vectus.Shared.Pages;
 public partial class Dashboard
 {
 	#region Device Info
-	private string Factor =>
-		FormFactor.GetFormFactor();
-
-	private string Platform =>
-		FormFactor.GetPlatform();
-
-	private static string AppVersion =>
-		Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
+	private string Factor => FormFactor.GetFormFactor();
+	private string Platform => FormFactor.GetPlatform();
+	private static string AppVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
 	#endregion
 
 	#region Updating
@@ -103,7 +98,7 @@ public partial class Dashboard
 
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService);
 		}
-		catch (Exception)
+		catch
 		{
 			await AuthenticationService.Logout(DataStorageService, NavigationManager, VibrationService);
 		}

@@ -38,10 +38,11 @@ public partial class TyreMountingPage
 	private SfGrid<TyreMountingModel> _sfGrid;
 	private CustomTextField _sfFirstFocus;
 	private ToastNotification _toastNotification;
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private ConfirmationDialog _confirmationDialog;
 
-	private int _deleteTransactionId = 0;
-	private string _deleteTransactionName = string.Empty;
+	private string _confirmTitle = string.Empty;
+	private string _confirmMessage = string.Empty;
+	private Func<Task> _confirmAction;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -118,17 +119,16 @@ public partial class TyreMountingPage
 	#endregion
 
 	#region Actions
-	private async Task ConfirmDelete()
+	private async Task DeleteTransaction(int id)
 	{
 		try
 		{
 			_isProcessing = true;
-			await _deleteConfirmationDialog.HideAsync();
 
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var tyreMounting = await CommonData.LoadTableDataById<TyreMountingModel>(FleetNames.TyreMounting, _deleteTransactionId)
+			var tyreMounting = await CommonData.LoadTableDataById<TyreMountingModel>(FleetNames.TyreMounting, id)
 				?? throw new Exception("Transaction not found.");
 
 			await TyreMountingData.DeleteTransaction(tyreMounting, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
@@ -143,8 +143,6 @@ public partial class TyreMountingPage
 		finally
 		{
 			_isProcessing = false;
-			_deleteTransactionId = 0;
-			_deleteTransactionName = string.Empty;
 		}
 	}
 	#endregion
@@ -253,21 +251,31 @@ public partial class TyreMountingPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		await ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].TyreNo);
+		var record = selectedRecords[0];
+		await ShowConfirmation("Delete", $"Are you sure you want to delete {record.TyreNo}", () => DeleteTransaction(record.Id));
 	}
 
-	private async Task ShowDeleteConfirmation(int id, string name)
+	private async Task ShowConfirmation(string title, string message, Func<Task> action)
 	{
-		_deleteTransactionId = id;
-		_deleteTransactionName = name;
-		await _deleteConfirmationDialog.ShowAsync();
+		_confirmTitle = title;
+		_confirmMessage = message;
+		_confirmAction = action;
+		StateHasChanged();
+		await _confirmationDialog.ShowAsync();
 	}
 
-	private async Task CancelDelete()
+	private async Task OnConfirmed()
 	{
-		_deleteTransactionId = 0;
-		_deleteTransactionName = string.Empty;
-		await _deleteConfirmationDialog.HideAsync();
+		await _confirmationDialog.HideAsync();
+		if (_confirmAction is not null)
+			await _confirmAction();
+		_confirmAction = null;
+	}
+
+	private async Task OnCancelled()
+	{
+		_confirmAction = null;
+		await _confirmationDialog.HideAsync();
 	}
 
 	private void ResetPage() => PageRefresh.Request();

@@ -38,10 +38,11 @@ public partial class VehicleDriverPage
 	private SfGrid<VehicleDriverModel> _sfGrid;
 	private CustomAutoComplete<VehicleModel> _sfFirstFocus;
 	private ToastNotification _toastNotification;
-	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private ConfirmationDialog _confirmationDialog;
 
-	private int _deleteTransactionId = 0;
-	private string _deleteTransactionName = string.Empty;
+	private string _confirmTitle = string.Empty;
+	private string _confirmMessage = string.Empty;
+	private Func<Task> _confirmAction;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -114,17 +115,16 @@ public partial class VehicleDriverPage
 	#endregion
 
 	#region Actions
-	private async Task ConfirmDelete()
+	private async Task DeleteTransaction(int id)
 	{
 		try
 		{
 			_isProcessing = true;
-			await _deleteConfirmationDialog.HideAsync();
 
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
 
-			var vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, _deleteTransactionId)
+			var vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, id)
 				?? throw new Exception("Transaction not found.");
 
 			await VehicleDriverData.DeleteTransaction(vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
@@ -139,8 +139,6 @@ public partial class VehicleDriverPage
 		finally
 		{
 			_isProcessing = false;
-			_deleteTransactionId = 0;
-			_deleteTransactionName = string.Empty;
 		}
 	}
 	#endregion
@@ -250,24 +248,35 @@ public partial class VehicleDriverPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		var vehicleDriver = selectedRecords[0];
-		var vehicle = _vehicles.FirstOrDefault(v => v.Id == vehicleDriver.VehicleId)?.Code ?? vehicleDriver.VehicleId.ToString();
-		var driver = _drivers.FirstOrDefault(d => d.Id == vehicleDriver.DriverId)?.Name ?? vehicleDriver.DriverId.ToString();
-		await ShowDeleteConfirmation(vehicleDriver.Id, $"{vehicle} - {driver}");
+		var record = selectedRecords[0];
+		var vehicle = _vehicles.FirstOrDefault(v => v.Id == record.VehicleId)?.Code ?? record.VehicleId.ToString();
+		var driver = _drivers.FirstOrDefault(d => d.Id == record.DriverId)?.Name ?? record.DriverId.ToString();
+		var identifier = $"{vehicle} - {driver}";
+
+		await ShowConfirmation("Delete", $"Are you sure you want to delete {identifier}", () => DeleteTransaction(record.Id));
 	}
 
-	private async Task ShowDeleteConfirmation(int id, string name)
+	private async Task ShowConfirmation(string title, string message, Func<Task> action)
 	{
-		_deleteTransactionId = id;
-		_deleteTransactionName = name;
-		await _deleteConfirmationDialog.ShowAsync();
+		_confirmTitle = title;
+		_confirmMessage = message;
+		_confirmAction = action;
+		StateHasChanged();
+		await _confirmationDialog.ShowAsync();
 	}
 
-	private async Task CancelDelete()
+	private async Task OnConfirmed()
 	{
-		_deleteTransactionId = 0;
-		_deleteTransactionName = string.Empty;
-		await _deleteConfirmationDialog.HideAsync();
+		await _confirmationDialog.HideAsync();
+		if (_confirmAction is not null)
+			await _confirmAction();
+		_confirmAction = null;
+	}
+
+	private async Task OnCancelled()
+	{
+		_confirmAction = null;
+		await _confirmationDialog.HideAsync();
 	}
 
 	private void ResetPage() => PageRefresh.Request();

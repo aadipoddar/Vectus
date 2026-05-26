@@ -244,6 +244,7 @@ public partial class FinancialAccountingPage
 		{
 			await _toastNotification.ShowAsync("An Error Occurred While Loading Existing Cart", ex.Message, ToastType.Error);
 			await DeleteLocalFiles();
+			await ResetPage();
 		}
 	}
 
@@ -611,6 +612,7 @@ public partial class FinancialAccountingPage
 		{
 			await SaveTransactionFile();
 			_isProcessing = true;
+			StateHasChanged();
 
 			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 

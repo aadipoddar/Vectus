@@ -5,7 +5,7 @@
     [Mobile] VARCHAR(10) NOT NULL UNIQUE,
     [Code] VARCHAR(10) NOT NULL UNIQUE, 
     [LicenseUrl] VARCHAR(MAX) NULL,
-    [LicenseNo] VARCHAR(100) NOT NULL UNIQUE,
+    [LicenseNo] VARCHAR(MAX) NULL,
     [LicenseExpiryDateTime] DATETIME NULL,
     [Remarks] VARCHAR(MAX) NULL,
     [Status] BIT NOT NULL DEFAULT 1
