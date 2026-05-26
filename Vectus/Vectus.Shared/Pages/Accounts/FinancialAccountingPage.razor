@@ -167,35 +167,37 @@ else
 						</div>
 					</div>
 					<div class="section-body">
-						<div class="financial-grid">
+						<div class="form-grid">
 							<!-- Total Credit -->
-							<div class="financial-row">
-								<label class="financial-label">Total Credit:</label>
+							<div class="form-field">
 								<CustomNumericField T="decimal"
 													Value="_accounting.TotalCreditAmount"
 													Placeholder="0.00"
+													Label="Total Credit"
 													ReadOnly="true"
 													Required="false"
 													TabIndex="-1" />
 							</div>
 
 							<!-- Total Debit -->
-							<div class="financial-row">
-								<label class="financial-label">Total Debit:</label>
+							<div class="form-field">
 								<CustomNumericField T="decimal"
 													Value="_accounting.TotalDebitAmount"
 													Placeholder="0.00"
+													Label="Total Debit"
 													ReadOnly="true"
 													Required="false"
 													TabIndex="-1" />
 							</div>
 
+							<hr class="form-divider" />
+
 							<!-- Difference -->
-							<div class="financial-row total-row">
-								<label class="financial-label-total">Difference:</label>
+							<div class="form-field">
 								<CustomNumericField T="decimal"
 													Value="@(_accounting.TotalDebitAmount - _accounting.TotalCreditAmount)"
 													Placeholder="0.00"
+													Label="Difference"
 													ReadOnly="true"
 													Required="false"
 													TabIndex="-1" />

@@ -43,18 +43,9 @@ body {
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-a,
-.btn-link {
+a {
 	color: #006bb7;
 }
-
-	.btn:focus,
-	.btn:active:focus,
-	.btn-link.nav-link:focus,
-	.form-control:focus,
-	.form-check-input:focus {
-		box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-	}
 
 h1:focus {
 	outline: none;
@@ -186,6 +177,18 @@ h1:focus {
 	letter-spacing: 0.3px;
 }
 
+/* Full-width separator — drop inside a form-grid or financial-grid
+   (e.g. above a total field). Spans all columns in a grid layout
+   and stretches the full width in a flex column. */
+.form-divider {
+	grid-column: 1 / -1;
+	width: 100%;
+	height: 1px;
+	background: var(--gray-800);
+	border: none;
+	margin: 1px 0;
+}
+
 /* ================================================================
    6. FORM GRID LAYOUTS
    ================================================================ */
@@ -197,43 +200,7 @@ h1:focus {
 }
 
 /* ================================================================
-   7. SYNCFUSION TEXTBOX (LOGIN PAGES)
-   ================================================================ */
-.custom-textbox {
-	width: 100%;
-}
-
-	.custom-textbox .e-input-group {
-		border: 1px solid var(--gray-300);
-		border-radius: var(--border-radius);
-		background: var(--bg-white);
-		transition: all 0.2s ease;
-		height: 40px;
-	}
-
-		.custom-textbox .e-input-group:hover {
-			border-color: var(--gray-400);
-		}
-
-		.custom-textbox .e-input-group.e-input-focus {
-			border-color: var(--primary-blue);
-			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-		}
-
-		.custom-textbox .e-input-group input,
-		.custom-textbox .e-input-group textarea {
-			font-size: 14px;
-			color: var(--gray-800);
-			padding: 8px 12px;
-		}
-
-			.custom-textbox .e-input-group input::placeholder,
-			.custom-textbox .e-input-group textarea::placeholder {
-				color: var(--gray-400);
-			}
-
-/* ================================================================
-   9. SYNCFUSION GRID (PROFESSIONAL GRID)
+   7. SYNCFUSION GRID (PROFESSIONAL GRID)
    ================================================================ */
 .professional-grid {
 	border: none;
@@ -316,7 +283,7 @@ h1:focus {
 	}
 
 /* ================================================================
-   10. GRID CELL VALUES & AGGREGATES
+   8. GRID CELL VALUES & AGGREGATES
    ================================================================ */
 /* Cell Value Colors */
 .grid-debit {
@@ -382,7 +349,7 @@ h1:focus {
 		}
 
 /* ================================================================
-   11. FILTERS & REPORT LAYOUTS
+   9. FILTERS & REPORT LAYOUTS
    ================================================================ */
 .filters-container {
 	display: flex;
@@ -432,7 +399,7 @@ h1:focus {
 }
 
 /* ================================================================
-   12. TRANSACTION PAGE LAYOUTS
+   10. TRANSACTION PAGE LAYOUTS
    ================================================================ */
 /* Two Column Layout (75-25 split) */
 .two-column-layout {
@@ -508,42 +475,6 @@ h1:focus {
 		min-width: 0;
 	}
 
-/* Financial Grid Layout */
-.financial-grid {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-}
-
-.financial-row {
-	display: grid;
-	grid-template-columns: 100px 1fr;
-	align-items: center;
-	gap: 10px;
-}
-
-	.financial-row.total-row {
-		margin-top: 4px;
-		padding-top: 8px;
-		border-top: 2px solid var(--gray-200);
-	}
-
-.financial-label {
-	font-size: 13px;
-	font-weight: 500;
-	color: var(--gray-600);
-	text-align: right;
-	white-space: nowrap;
-}
-
-.financial-label-total {
-	font-size: 14px;
-	font-weight: 700;
-	color: var(--gray-900);
-	text-align: right;
-	white-space: nowrap;
-}
-
 /* Transaction Date and Financial Year Wrapper */
 .date-year-wrapper {
 	display: flex;
@@ -585,7 +516,7 @@ h1:focus {
 }
 
 /* ================================================================
-   13. CART INPUT SECTION
+   11. CART INPUT SECTION
    ================================================================ */
 .cart-input-row {
 	display: grid;
@@ -604,7 +535,7 @@ h1:focus {
 }
 
 /* ================================================================
-   14. DASHBOARD GRID
+   12. DASHBOARD GRID
    ================================================================ */
 .dashboard-grid {
 	display: flex;

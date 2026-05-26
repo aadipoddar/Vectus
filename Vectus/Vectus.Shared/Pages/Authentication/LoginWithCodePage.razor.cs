@@ -1,6 +1,7 @@
 using Syncfusion.Blazor.Inputs;
 
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
@@ -37,8 +38,8 @@ public partial class LoginWithCodePage
 
 	private List<UserModel> _users = [];
 
-	private SfTextBox _phoneEmailTextBox;
-	private SfTextBox _newPasswordTextBox;
+	private CustomTextField _phoneEmailTextBox;
+	private CustomTextField _newPasswordTextBox;
 	private SfOtpInput _otpInput;
 
 	private ToastNotification _toastNotification;

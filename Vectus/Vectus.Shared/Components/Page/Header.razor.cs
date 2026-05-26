@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Components;
 
-using Syncfusion.Blazor.DropDowns;
-
 using System.Reflection;
 
+using Vectus.Shared.Components.Input;
 using Vectus.Shared.Services;
 
 using VectusLibrary.Common;
@@ -16,14 +15,29 @@ public partial class Header
 	#region Search
 	private string _searchText = string.Empty;
 	private List<GlobalSearchItem> _searchItems = [];
-	private SfAutoComplete<string, GlobalSearchItem> _sfGlobalSearch;
+	private GlobalSearchItem _selectedSearchItem;
+	private CustomAutoComplete<GlobalSearchItem> _globalSearch;
 
 	private async Task FocusSearchBox()
 	{
-		if (_sfGlobalSearch is null)
+		if (_globalSearch is null)
 			return;
 
-		await _sfGlobalSearch.FocusAsync();
+		await _globalSearch.FocusAsync();
+	}
+
+	// Captures the typed text (used by the View/PDF transaction actions) and filters the route list.
+	private Task<IEnumerable<GlobalSearchItem>> HeaderSearch(string searchText)
+	{
+		_searchText = searchText ?? string.Empty;
+
+		if (string.IsNullOrWhiteSpace(searchText))
+			return Task.FromResult<IEnumerable<GlobalSearchItem>>(_searchItems);
+
+		return Task.FromResult(_searchItems.Where(x =>
+			x.DisplayText.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+			x.FriendlyName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+			x.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
 	}
 
 	private void LoadRoutes() => _searchItems = [.. typeof(PageRouteNames)
@@ -128,10 +142,12 @@ public partial class Header
 		return decodedTransaction;
 	}
 
-	private void OnRouteSelected(Syncfusion.Blazor.DropDowns.SelectEventArgs<GlobalSearchItem> args)
+	private void OnRouteSelected(GlobalSearchItem item)
 	{
-		if (args.ItemData is not null)
-			NavigationManager.NavigateTo(args.ItemData.Route);
+		_selectedSearchItem = item;
+
+		if (item is not null)
+			NavigationManager.NavigateTo(item.Route);
 	}
 	#endregion
 
@@ -152,15 +168,6 @@ public partial class Header
 		_user = new UserModel { Name = "aa", Id = 1 };
 		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService);
 		LoadRoutes();
-	}
-
-	private string GetMobileUserName()
-	{
-		if (_user is null || string.IsNullOrWhiteSpace(_user.Name))
-			return string.Empty;
-
-		var userName = _user.Name.Trim();
-		return userName.Length > 5 ? $"{userName[..5]}..." : userName;
 	}
 
 	private void NavigateToHome() =>

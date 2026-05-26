@@ -1,8 +1,7 @@
 using Microsoft.JSInterop;
 
-using Syncfusion.Blazor.Inputs;
-
 using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
 
 using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
@@ -27,8 +26,8 @@ public partial class LoginPage
 
 	private List<UserModel> _users = [];
 
-	private SfTextBox _phoneEmailTextBox;
-	private SfTextBox _passwordTextBox;
+	private CustomTextField _phoneEmailTextBox;
+	private CustomTextField _passwordTextBox;
 
 	private ToastNotification _toastNotification;
 
@@ -75,9 +74,9 @@ public partial class LoginPage
 		}
 	}
 
-	private async Task OnPhoneEmailInput(InputEventArgs args)
+	private async Task OnPhoneEmailChanged(string value)
 	{
-		_phoneEmail = args.Value;
+		_phoneEmail = value;
 
 		var user = _users.FirstOrDefault(u => u.Phone == _phoneEmail || u.Email == _phoneEmail);
 		if (user is null)
@@ -96,9 +95,9 @@ public partial class LoginPage
 		StateHasChanged();
 	}
 
-	private async Task OnPasswordInput(InputEventArgs args)
+	private async Task OnPasswordChanged(string value)
 	{
-		_password = args.Value;
+		_password = value;
 
 		if (_isVerifying)
 			return;

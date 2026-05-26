@@ -171,18 +171,14 @@
 		<div class="form-section">
 			<!-- Phone/Email Input -->
 			<div class="input-group" data-yeti-email="phoneEmailInput">
-				<label class="input-label">Phone / Email</label>
-				<SfTextBox @ref="_phoneEmailTextBox" Placeholder="Enter phone number or email" CssClass="custom-textbox"
-						   Input="OnPhoneEmailInput" ShowClearButton="true">
-				</SfTextBox>
+				<CustomTextField @ref="_phoneEmailTextBox" Value="@_phoneEmail" ValueChanged="OnPhoneEmailChanged"
+								 Label="Phone / Email" Placeholder="Enter Mobile or Email" Required="false" />
 			</div>
 
 			<!-- Password Input -->
 			<div class="input-group" data-yeti-password="passwordInput">
-				<label class="input-label">Password</label>
-				<SfTextBox @ref="_passwordTextBox" Type="InputType.Password" Placeholder="@_passwordPlaceholder"
-						   CssClass="custom-textbox" Input="OnPasswordInput" ShowClearButton="true">
-				</SfTextBox>
+				<CustomTextField @ref="_passwordTextBox" Value="@_password" ValueChanged="OnPasswordChanged" Label="Password"
+								 InputType="MudBlazor.InputType.Password" Placeholder="@_passwordPlaceholder" Required="false" />
 			</div>
 
 			<!-- Login Button -->
@@ -229,14 +225,10 @@
 	:root {
 		--primary-color: #3b82f6;
 		--primary-dark: #2563eb;
-		--primary-light: #60a5fa;
-		--secondary-color: #f8fafc;
 		--text-dark: #1e293b;
 		--text-light: #64748b;
 		--white: #ffffff;
 		--border-color: #e2e8f0;
-		--shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
-		--shadow-hover: 0 15px 50px rgba(59, 130, 246, 0.25);
 		--border-radius: 16px;
 	}
 
@@ -345,44 +337,6 @@
 		margin-bottom: 24px;
 	}
 
-	.input-label {
-		display: block;
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--text-dark);
-		margin-bottom: 8px;
-	}
-
-	/* Syncfusion TextBox Styling */
-	:deep(.custom-textbox) {
-		width: 100%;
-	}
-
-	:deep(.custom-textbox .e-input-group) {
-		border-radius: 12px;
-		border: 1px solid rgba(226, 232, 240, 0.6);
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.6) 100%);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.5);
-	}
-
-	:deep(.custom-textbox .e-input-group:focus-within) {
-		border-color: rgba(59, 130, 246, 0.5);
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(239, 246, 255, 0.7) 100%);
-		box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(59, 130, 246, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);
-	}
-
-	:deep(.custom-textbox .e-input-group input) {
-		padding: 12px 16px;
-		font-size: 15px;
-		color: var(--text-dark);
-	}
-
-	:deep(.custom-textbox .e-input-group input::placeholder) {
-		color: var(--text-light);
-	}
 
 	/* Button Group */
 	.button-group {
@@ -544,10 +498,6 @@
 	@@media (prefers-contrast: high) {
 		.login-card {
 			border: 2px solid var(--text-dark);
-		}
-
-		:deep(.custom-textbox .e-input-group) {
-			border-width: 3px;
 		}
 	}
 </style>
