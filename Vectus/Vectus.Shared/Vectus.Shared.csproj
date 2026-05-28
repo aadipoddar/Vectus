@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.8" />
-	  <PackageReference Include="MudBlazor" Version="9.4.0" />
+	  <PackageReference Include="MudBlazor" Version="9.5.0" />
 	  <PackageReference Include="Syncfusion.Blazor.Buttons" Version="33.2.8" />
 	  <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="33.2.8" />
 	  <PackageReference Include="Syncfusion.Blazor.Grid" Version="33.2.8" />

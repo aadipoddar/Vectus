@@ -138,6 +138,7 @@
     <Build Include="Operations\Settings\Update_Settings.sql" />
     <Build Include="Operations\User\Insert_User.sql" />
     <Build Include="Operations\User\User.sql" />
+    <Build Include="Operations\User\Load_User_By_Phone_Email.sql" />
     <Build Include="Fleet\Vehicle\Table\SDR.sql" />
     <Build Include="Fleet\Vehicle\Insert\Insert_SDR.sql" />
     <Build Include="Fleet\Vehicle\Table\VehicleType.sql" />

@@ -1,4 +1,4 @@
-﻿using VectusLibrary.Common;
+using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
 using VectusLibrary.Operations.Models;
 
@@ -6,12 +6,13 @@ namespace VectusLibrary.Operations.Data;
 
 public static class UserData
 {
-	private static async Task<int> InsertUser(UserModel userModel, SqlDataAccessTransaction transaction = null) =>
+	public static async Task<int> InsertUser(UserModel userModel, SqlDataAccessTransaction transaction = null) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(OperationNames.InsertUser, userModel, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert User.");
 
-	public static async Task<int> InsertUser(UserModel userModel) =>
-		await InsertUser(userModel, null);
+	public static async Task<UserModel> LoadUserByPhoneEmail(string PhoneEmail) =>
+		(await SqlDataAccess.LoadData<UserModel, dynamic>(OperationNames.LoadUserByPhoneEmail, new { PhoneEmail })).FirstOrDefault()
+			is var user and not null ? user : throw new Exception("User not found with the provided phone or email.");
 
 	public static async Task DeleteTransaction(UserModel user, int userId, string platform) =>
 		await SqlDataAccessTransaction.Run(async transaction =>

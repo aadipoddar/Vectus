@@ -171,14 +171,14 @@
 		<div class="form-section">
 			<!-- Phone/Email Input -->
 			<div class="input-group" data-yeti-email="phoneEmailInput">
-				<CustomTextField @ref="_phoneEmailTextBox" Value="@_phoneEmail" ValueChanged="OnPhoneEmailChanged"
+				<CustomTextField @ref="_phoneEmailTextBox" @bind-Value="@_phoneEmail"
 								 Label="Phone / Email" Placeholder="Enter Mobile or Email" Required="false" />
 			</div>
 
 			<!-- Password Input -->
 			<div class="input-group" data-yeti-password="passwordInput">
-				<CustomTextField @ref="_passwordTextBox" Value="@_password" ValueChanged="OnPasswordChanged" Label="Password"
-								 InputType="MudBlazor.InputType.Password" Placeholder="@_passwordPlaceholder" Required="false" />
+				<CustomTextField @ref="_passwordTextBox" @bind-Value="@_password" Label="Password"
+								 InputType="MudBlazor.InputType.Password" Placeholder="Enter password" Required="false" />
 			</div>
 
 			<!-- Login Button -->

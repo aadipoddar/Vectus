@@ -27,6 +27,7 @@ public static class OperationNames
 	#region User
 	public static string User => "User";
 	public static string InsertUser => "Insert_User";
+	public static string LoadUserByPhoneEmail => "Load_User_By_Phone_Email";
 	#endregion
 
 	#region Audit Trail
