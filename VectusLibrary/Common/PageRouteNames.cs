@@ -39,6 +39,7 @@ public static class PageRouteNames
 
 	public const string VehicleDocument = "/fleet/vehicle-document";
 	public const string VehicleDocumentTypeMaster = "/fleet/vehicle-document-type";
+	public const string VehicleDocumentRenewalReport = "/fleet/vehicle-document-renewal-report";
 
 	public const string LocationMaster = "/fleet/location";
 	public const string RouteMaster = "/fleet/route";

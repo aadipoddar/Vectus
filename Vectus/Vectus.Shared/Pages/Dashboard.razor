@@ -323,6 +323,20 @@ else
 								</IconContent>
 							</FioriTile>
 
+							<!-- Document Reports -->
+							<FioriTile Title="Document Renewal Report" Subtitle="Latest document status per vehicle with expiry tracking" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.VehicleDocumentRenewalReport)">
+								<IconContent>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+										<line x1="16" y1="2" x2="16" y2="6" />
+										<line x1="8" y1="2" x2="8" y2="6" />
+										<line x1="3" y1="10" x2="21" y2="10" />
+										<path d="M8 14l3 3 5-5" />
+									</svg>
+								</IconContent>
+							</FioriTile>
+
+
 							<FioriTile Title="Document Type" Subtitle="Manage document categories like RC, insurance and PUC" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.VehicleDocumentTypeMaster)">
 								<IconContent>
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -472,6 +486,24 @@ else
 							</FioriTile>
 						</div>
 					</div>
+					<!-- Document Reports -->
+					<div class="launchpad-section">
+						<h2 class="launchpad-section-title">Document Reports</h2>
+						<div class="dashboard-grid">
+							<FioriTile Title="Document Renewal Report" Subtitle="Latest document status per vehicle with expiry tracking" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.VehicleDocumentRenewalReport)">
+								<IconContent>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+										<line x1="16" y1="2" x2="16" y2="6" />
+										<line x1="8" y1="2" x2="8" y2="6" />
+										<line x1="3" y1="10" x2="21" y2="10" />
+										<path d="M8 14l3 3 5-5" />
+									</svg>
+								</IconContent>
+							</FioriTile>
+						</div>
+					</div>
+
 
 				</MudBlazor.MudTabPanel>
 

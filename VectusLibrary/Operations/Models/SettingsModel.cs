@@ -1,4 +1,4 @@
-﻿namespace VectusLibrary.Operations.Models;
+namespace VectusLibrary.Operations.Models;
 
 public class SettingsModel
 {
@@ -40,6 +40,8 @@ public static class SettingsKeys
 	public static string DefaultSelectedVoucherId => "DefaultSelectedVoucherId";
 
 	public static string AutoRefreshReportTimer => "AutoRefreshReportTimer";
+
+	public static string ReportWarningDays => "ReportWarningDays";
 
 	public static string TruckMileageKmPerLitre => "TruckMileageKmPerLitre";
 	public static string DieselPricePerLitre => "DieselPricePerLitre";

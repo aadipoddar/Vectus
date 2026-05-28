@@ -1,4 +1,4 @@
-﻿namespace VectusLibrary.DataAccess;
+namespace VectusLibrary.DataAccess;
 
 public static class OperationNames
 {
@@ -120,6 +120,8 @@ public static class FleetNames
 	#region Vehicle Document
 	public static string VehicleDocument => "VehicleDocument";
 	public static string VehicleDocumentType => "VehicleDocumentType";
+
+	public static string VehicleDocumentRenewalOverview => "VehicleDocument_Renewal_Overview";
 
 	public static string InsertDocument => "Insert_VehicleDocument";
 	public static string InsertDocumentType => "Insert_VehicleDocumentType";

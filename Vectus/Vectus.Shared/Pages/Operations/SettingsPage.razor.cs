@@ -65,6 +65,7 @@ public partial class SettingsPage
 
 	// Report Settings
 	private int _autoRefreshReportTimer = 5;
+	private int _reportWarningDays = 30;
 
 	// Fuel & Mileage
 	private decimal _truckMileageKmPerLitre = 0;
@@ -172,6 +173,9 @@ public partial class SettingsPage
 
 		s = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
 		_autoRefreshReportTimer = int.TryParse(s?.Value, out var v6) ? v6 : 5;
+
+		s = await SettingsData.LoadSettingsByKey(SettingsKeys.ReportWarningDays);
+		_reportWarningDays = int.TryParse(s?.Value, out var vrw) ? vrw : 30;
 
 		s = await SettingsData.LoadSettingsByKey(SettingsKeys.TruckMileageKmPerLitre);
 		_truckMileageKmPerLitre = decimal.TryParse(s?.Value, out var v7) ? v7 : 0;
@@ -290,6 +294,7 @@ public partial class SettingsPage
 			await UpdateSetting(SettingsKeys.GSTLedgerId, _gstLedgerId, Desc(SettingsKeys.GSTLedgerId));
 			await UpdateSetting(SettingsKeys.DefaultSelectedVoucherId, _defaultSelectedVoucherId, Desc(SettingsKeys.DefaultSelectedVoucherId));
 			await UpdateSetting(SettingsKeys.AutoRefreshReportTimer, _autoRefreshReportTimer.ToString(), Desc(SettingsKeys.AutoRefreshReportTimer));
+			await UpdateSetting(SettingsKeys.ReportWarningDays, _reportWarningDays.ToString(), Desc(SettingsKeys.ReportWarningDays));
 
 			await UpdateSetting(SettingsKeys.TruckMileageKmPerLitre, _truckMileageKmPerLitre.ToString(), Desc(SettingsKeys.TruckMileageKmPerLitre));
 			await UpdateSetting(SettingsKeys.DieselPricePerLitre, _dieselPricePerLitre.ToString(), Desc(SettingsKeys.DieselPricePerLitre));
