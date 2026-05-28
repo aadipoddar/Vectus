@@ -834,8 +834,5 @@ public partial class FinancialAccountingPage
 		await DeleteLocalFiles();
 		PageRefresh.Request();
 	}
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 	#endregion
 }

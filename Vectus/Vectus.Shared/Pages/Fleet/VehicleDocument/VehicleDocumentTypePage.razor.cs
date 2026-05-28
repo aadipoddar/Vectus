@@ -1,4 +1,4 @@
-﻿using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Grids;
 
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
@@ -50,7 +50,7 @@ public partial class VehicleDocumentTypePage
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Fleet]);
 			await LoadData();
 		}
-		catch { NavigateBack(); }
+		catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
 	}
 
 	private async Task LoadData()
@@ -300,6 +300,5 @@ public partial class VehicleDocumentTypePage
 	}
 
 	private void ResetPage() => PageRefresh.Request();
-	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.FleetMastersDashboard);
 	#endregion
 }

@@ -643,8 +643,5 @@ public partial class RepairPage
 		await DeleteLocalFiles();
 		PageRefresh.Request();
 	}
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.FleetTransactionsDashboard);
 	#endregion
 }

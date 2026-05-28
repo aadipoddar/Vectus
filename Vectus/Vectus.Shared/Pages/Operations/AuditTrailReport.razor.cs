@@ -1,4 +1,4 @@
-﻿using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Grids;
 
 using System.Text;
 
@@ -53,7 +53,7 @@ public partial class AuditTrailReport : IAsyncDisposable
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Admin]);
 			await InitializePage();
 		}
-		catch { NavigateBack(); }
+		catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
 	}
 
 	private async Task InitializePage()
@@ -292,10 +292,6 @@ public partial class AuditTrailReport : IAsyncDisposable
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 	}
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard);
-
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);

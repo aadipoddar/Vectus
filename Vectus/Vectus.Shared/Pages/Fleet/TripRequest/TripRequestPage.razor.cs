@@ -51,7 +51,7 @@ public partial class TripRequestPage
 			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Fleet]);
 			await InitializePage();
 		}
-		catch { NavigateBack(); }
+		catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
 	}
 
 	private async Task InitializePage()
@@ -260,6 +260,5 @@ public partial class TripRequestPage
 	}
 
 	private void ResetPage() => PageRefresh.Request();
-	private void NavigateBack() => NavigationManager.NavigateTo(PageRouteNames.FleetTransactionsDashboard);
 	#endregion
 }

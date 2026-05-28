@@ -86,7 +86,7 @@ public partial class SettingsPage
 			_isLoading = false;
 			StateHasChanged();
 		}
-		catch { NavigateBack(); }
+		catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
 	}
 
 	private async Task LoadData()
@@ -385,9 +385,5 @@ public partial class SettingsPage
 				break;
 		}
 	}
-
-	private void NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.OperationsDashboard);
-
 	#endregion
 }

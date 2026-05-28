@@ -65,7 +65,6 @@ public enum IconType
 	View,
 	Refresh,
 	Delete,
-	Back,
 	Add,
 	Get
 }

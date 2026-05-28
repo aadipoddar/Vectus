@@ -1,4 +1,4 @@
-﻿namespace VectusLibrary.Common;
+namespace VectusLibrary.Common;
 
 public static class PageRouteNames
 {
@@ -8,7 +8,6 @@ public static class PageRouteNames
 	public const string LoginWithCodeRedirect = "login-with-code-redirect"; // Do not put leading slash
 
 	public const string Dashboard = "/";
-	public const string OperationsDashboard = "/operations";
 
 	public const string User = "/operations/user";
 	public const string Settings = "/operations/settings";
@@ -16,7 +15,6 @@ public static class PageRouteNames
 	#endregion
 
 	#region Accounts
-	public const string AccountsDashboard = "/accounts";
 	public const string FinancialAccounting = "/accounts/financial-accounting";
 
 	public const string FinancialAccountingReport = "/accounts/reports/financial-accounting";
@@ -35,11 +33,6 @@ public static class PageRouteNames
 	#endregion
 
 	#region Fleet
-	public const string FleetDashboard = "/fleet";
-	public const string FleetReportsDashboard = "/fleet-reports";
-	public const string FleetTransactionsDashboard = "/fleet-transactions";
-	public const string FleetMastersDashboard = "/fleet-masters";
-
 	public const string SDRMaster = "/fleet/sdr";
 	public const string VehicleMaster = "/fleet/vehicle";
 	public const string VehicleTypeMaster = "/fleet/vehicle-type";
