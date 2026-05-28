@@ -19,10 +19,10 @@
 	min-height: 48px;
 }
 
-.launchpad ::deep .mud-tab.mud-tab-active {
-	color: var(--gray-900, #0f172a);
-	font-weight: 600;
-}
+	.launchpad ::deep .mud-tab.mud-tab-active {
+		color: var(--gray-900, #0f172a);
+		font-weight: 600;
+	}
 
 .launchpad ::deep .mud-tabs-tabbar {
 	background: transparent !important;
@@ -34,22 +34,9 @@
 	padding: 20px 0 4px 0;
 }
 
-/* Section group — plain label + tiles directly on the background (no card box) */
-.launchpad-section {
-	margin-bottom: 28px;
-}
 
-.launchpad-section:last-child {
-	margin-bottom: 0;
-}
 
-.launchpad-section-title {
-	font-size: 16px;
-	font-weight: 600;
-	color: var(--gray-700, #334155);
-	margin: 0 0 14px 0;
-	letter-spacing: -0.2px;
-}
+
 
 /* Update Progress Overlay */
 .update-overlay {
@@ -144,16 +131,16 @@
 	overflow: hidden;
 }
 
-.progress-bar-fill::after {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	bottom: 0;
-	right: 0;
-	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-	animation: shimmer 1.5s infinite;
-}
+	.progress-bar-fill::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		animation: shimmer 1.5s infinite;
+	}
 
 .time-remaining {
 	display: flex;
@@ -164,9 +151,9 @@
 	justify-content: center;
 }
 
-.time-remaining svg {
-	color: #94a3b8;
-}
+	.time-remaining svg {
+		color: #94a3b8;
+	}
 
 .update-status {
 	display: flex;
@@ -237,8 +224,7 @@
 
 @keyframes pulse {
 
-	0%,
-	100% {
+	0%, 100% {
 		opacity: 1;
 		transform: scale(1);
 	}

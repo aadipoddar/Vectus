@@ -542,3 +542,20 @@ h1:focus {
 	.dashboard-grid:last-child {
 		margin-bottom: 0;
 	}
+
+/* Section group -- plain label + tiles directly on the background (launchpad tabs & analysis) */
+.launchpad-section {
+	margin-bottom: 28px;
+}
+
+	.launchpad-section:last-child {
+		margin-bottom: 0;
+	}
+
+.launchpad-section-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--gray-700, #334155);
+	margin: 0 0 14px 0;
+	letter-spacing: -0.2px;
+}

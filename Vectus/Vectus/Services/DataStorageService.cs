@@ -1,6 +1,4 @@
-﻿using Vectus.Shared.Services;
-
-using VectusLibrary.Common;
+using Vectus.Shared.Services;
 
 namespace Vectus.Services;
 
@@ -15,18 +13,17 @@ public class DataStorageService : IDataStorageService
 	public async Task SecureRemove(string key) =>
 		SecureStorage.Default.Remove(key);
 
-	public async Task SecureRemoveAll()
+	public Task SecureRemoveAll()
 	{
 		SecureStorage.Default.RemoveAll();
 
-		await LocalRemove(StorageFileNames.UserDataFileName);
-		await LocalRemove(StorageFileNames.UserDeviceIdDataFileName);
+		foreach (var file in Directory.GetFiles(FileSystem.Current.AppDataDirectory, "*.json"))
+		{
+			try { File.Delete(file); }
+			catch { }
+		}
 
-		await LocalRemove(StorageFileNames.FinancialAccountingDataFileName);
-		await LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
-
-		await LocalRemove(StorageFileNames.RepairDataFileName);
-		await LocalRemove(StorageFileNames.RepairJobCartDataFileName);
+		return Task.CompletedTask;
 	}
 
 

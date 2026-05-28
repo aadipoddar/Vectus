@@ -1,21 +1,18 @@
-﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.JSInterop;
 
 using Vectus.Shared.Services;
 
-using VectusLibrary.Common;
-
 namespace Vectus.Web.Services;
 
-public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : IDataStorageService
+public class DataStorageService(ProtectedLocalStorage protectedLocalStorage, IJSRuntime jsRuntime) : IDataStorageService
 {
 	private readonly ProtectedLocalStorage _protectedLocalStorage = protectedLocalStorage;
+	private readonly IJSRuntime _jsRuntime = jsRuntime;
 
 	public async Task SecureSaveAsync(string key, string value)
 	{
-		try
-		{
-			await _protectedLocalStorage.SetAsync(key, value);
-		}
+		try { await _protectedLocalStorage.SetAsync(key, value); }
 		catch { }
 	}
 
@@ -24,23 +21,14 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 
 	public async Task SecureRemove(string key)
 	{
-		try
-		{
-			await _protectedLocalStorage.DeleteAsync(key);
-		}
+		try { await _protectedLocalStorage.DeleteAsync(key); }
 		catch { }
 	}
 
 	public async Task SecureRemoveAll()
 	{
-		await LocalRemove(StorageFileNames.UserDataFileName);
-		await LocalRemove(StorageFileNames.UserDeviceIdDataFileName);
-
-		await LocalRemove(StorageFileNames.FinancialAccountingDataFileName);
-		await LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
-
-		await LocalRemove(StorageFileNames.RepairDataFileName);
-		await LocalRemove(StorageFileNames.RepairJobCartDataFileName);
+		try { await _jsRuntime.InvokeVoidAsync("localStorage.clear"); }
+		catch { }
 	}
 
 

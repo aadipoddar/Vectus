@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace VectusLibrary.Common;
 
@@ -21,6 +21,22 @@ public static class Helper
 
 	public static string FormatDecimalWithTwoDigits(this decimal value) =>
 		value.ToString("0.00", CultureInfo.InvariantCulture);
+
+	public static string FormatMonthlyTrend(decimal current, decimal previous)
+	{
+		if (previous == 0)
+			return "vs last month";
+
+		// Divide by the magnitude of the previous value so the ▲/▼ direction stays
+		// correct even when the previous value is negative (e.g. a prior-month loss).
+		var change = (double)((current - previous) / Math.Abs(previous)) * 100;
+		return change switch
+		{
+			> 0 => $"▲ {change:0}% vs last month",
+			< 0 => $"▼ {Math.Abs(change):0}% vs last month",
+			_ => "same as last month"
+		};
+	}
 
 	/// <summary>
 	/// Formats decimal smartly: shows integer if no decimal part (2.0 -> "2"), 
@@ -58,9 +74,6 @@ public static class Helper
 			var addr = new System.Net.Mail.MailAddress(email);
 			return addr.Address == email;
 		}
-		catch
-		{
-			return false;
-		}
+		catch { return false; }
 	}
 }
