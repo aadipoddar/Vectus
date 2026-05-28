@@ -4,7 +4,6 @@ using Microsoft.JSInterop;
 using System.Globalization;
 
 using VectusLibrary.APIService;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Vehicle.Models;
 
 namespace Vectus.Shared.Components.Map;

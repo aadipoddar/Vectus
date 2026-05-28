@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Components;
 
 using System.Reflection;
 
-using VectusLibrary.DataAccess;
-
 namespace Vectus.Shared.Components.Page;
 
 public partial class Footer

@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Components;
 
-using VectusLibrary.Common;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 

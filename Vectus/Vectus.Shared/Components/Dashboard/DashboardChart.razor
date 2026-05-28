@@ -1,0 +1,93 @@
+<div class="launchpad-section">
+
+	<!-- Row 1: Trip Volume (line) + Repair Spend (bar) trend -->
+	<div class="chart-row">
+
+		<div class="chart-card">
+			<div class="chart-card-title">
+				<span class="chart-dot dot-trips"></span>
+				<span>Trip Volume</span>
+			</div>
+			@if (_tripVolumeSeries.Count == 0)
+			{
+				<div class="chart-empty">Loading…</div>
+			}
+			else
+			{
+				<MudBlazor.MudChart ChartType="MudBlazor.ChartType.Line"
+									ChartSeries="@_tripVolumeSeries"
+									ChartLabels="@_labels"
+									Width="100%"
+									Height="100%"
+									ChartOptions="@_tripVolumeOptions" />
+			}
+		</div>
+
+		<div class="chart-card">
+			<div class="chart-card-title">
+				<span class="chart-dot dot-repair"></span>
+				<span>Repair Spend</span>
+			</div>
+			@if (_repairSpendSeries.Count == 0)
+			{
+				<div class="chart-empty">Loading…</div>
+			}
+			else
+			{
+				<MudBlazor.MudChart ChartType="MudBlazor.ChartType.Bar"
+									ChartSeries="@_repairSpendSeries"
+									ChartLabels="@_labels"
+									Width="100%"
+									Height="100%"
+									ChartOptions="@_repairSpendOptions" />
+			}
+		</div>
+
+	</div>
+
+	<!-- Row 2: Top 5 Repair-Cost Vehicles + Repair Job Breakdown -->
+	<div class="chart-row">
+
+		<div class="chart-card">
+			<div class="chart-card-title">
+				<span class="chart-dot dot-vehicle"></span>
+				<span>Top Repair-Cost Vehicles</span>
+			</div>
+			@if (_vehicleRepairSeries.Count == 0)
+			{
+				<div class="chart-empty">Loading…</div>
+			}
+			else
+			{
+				<MudBlazor.MudChart ChartType="MudBlazor.ChartType.Bar"
+									ChartSeries="@_vehicleRepairSeries"
+									ChartLabels="@_vehicleLabels"
+									Width="100%"
+									Height="100%"
+									ChartOptions="@_vehicleRepairOptions" />
+			}
+		</div>
+
+		<div class="chart-card">
+			<div class="chart-card-title">
+				<span class="chart-dot dot-mix"></span>
+				<span>Repair Job Breakdown</span>
+			</div>
+			@if (_jobBreakdownSeries.Count == 0)
+			{
+				<div class="chart-empty">Loading…</div>
+			}
+			else
+			{
+				<MudBlazor.MudChart ChartType="MudBlazor.ChartType.Pie"
+									ChartSeries="@_jobBreakdownSeries"
+									ChartLabels="@_jobBreakdownLabels"
+									Width="100%"
+									Height="380px"
+									ChartOptions="@_jobBreakdownOptions" />
+			}
+		</div>
+
+	</div>
+
+</div>

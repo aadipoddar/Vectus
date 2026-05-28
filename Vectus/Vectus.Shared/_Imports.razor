@@ -16,8 +16,10 @@
 @using Vectus.Shared.Components.Button
 @using Vectus.Shared.Components.Dialog
 @using Vectus.Shared.Components.Map
+@using Vectus.Shared.Components.Dashboard
 
-@using VectusLibrary.Common
+@using VectusLibrary.DataAccess
+@using VectusLibrary.Operations.Data
 
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.Buttons
@@ -31,7 +33,10 @@
 
 @using MudBlazor.Utilities
 
+@using Microsoft.Extensions.Caching.Memory
+
 @inject NavigationManager NavigationManager
+@inject IMemoryCache MemoryCache
 @inject IJSRuntime JSRuntime
 
 @inject IFormFactor FormFactor

@@ -3,8 +3,6 @@ using Microsoft.JSInterop;
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
-using VectusLibrary.Common;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 

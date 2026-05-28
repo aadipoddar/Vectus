@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using VectusLibrary.Common;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Operations.Models;
 
 namespace Vectus.Shared.Services;

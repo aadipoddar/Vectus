@@ -1,0 +1,153 @@
+@using VectusLibrary.Fleet.Repair.Models
+@using VectusLibrary.Fleet.TripRequest.Models
+@using VectusLibrary.Fleet.Vehicle.Models
+@using VectusLibrary.Fleet.VehicleDocument.Models
+
+<div class="launchpad-section attention-row">
+
+	<div class="attention-col">
+		<h2 class="launchpad-section-title">Document Renewal</h2>
+		<div class="section-card">
+			<div class="section-body grid-body">
+				<SfGrid @ref="_documentsGrid" TValue="VehicleDocumentRenewalOverviewModel" DataSource="_dueDocuments"
+						AllowTextWrap="true" AllowSorting="true" AllowResizing="true" AllowPaging="true"
+						GridLines="GridLine.Horizontal" CssClass="professional-grid"
+						ContextMenuItems="@_documentContextMenuItems"
+						Toolbar="@(new List<string>() { "Search" })">
+
+					<GridEvents TValue="VehicleDocumentRenewalOverviewModel" ContextMenuItemClicked="OnDocumentContextMenuItemClicked" />
+					<GridPageSettings PageSize="5" PageSizes="@(new string[] { "5", "10", "20", "50", "100", "All" })" />
+
+					<GridColumns>
+						<GridColumn Field="@nameof(VehicleDocumentRenewalOverviewModel.VehicleCode)" HeaderText="Vehicle" Width="140" />
+						<GridColumn Field="@nameof(VehicleDocumentRenewalOverviewModel.VehicleDocumentTypeName)" HeaderText="Document Type" Width="180" />
+
+						<GridColumn Field="@nameof(VehicleDocumentRenewalOverviewModel.RenewalDate)" HeaderText="Renewal Date" Width="140" Format="dd/MM/yy" Type="ColumnType.DateTime">
+							<Template>
+								@{
+									var item = (context as VehicleDocumentRenewalOverviewModel);
+									<span class="@(item.DaysRemaining < _warningDays ? "grid-debit" : string.Empty)">@item.RenewalDate.ToString("dd/MM/yy")</span>
+								}
+							</Template>
+						</GridColumn>
+						<GridColumn Field="@nameof(VehicleDocumentRenewalOverviewModel.DaysRemaining)" HeaderText="Days Remaining" Width="140" TextAlign="TextAlign.Right">
+							<Template>
+								@{
+									var item = (context as VehicleDocumentRenewalOverviewModel);
+									<span class="@(item.DaysRemaining < _warningDays ? "grid-debit" : string.Empty)">@item.DaysRemaining</span>
+								}
+							</Template>
+						</GridColumn>
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
+	</div>
+
+	<div class="attention-col">
+		<h2 class="launchpad-section-title">Pending Trip Requests</h2>
+		<div class="section-card">
+			<div class="section-body grid-body">
+				<SfGrid @ref="_pendingGrid" TValue="TripRequestOverviewModel" DataSource="_pendingTripRequests"
+						AllowTextWrap="true" AllowSorting="true" AllowResizing="true" AllowPaging="true"
+						GridLines="GridLine.Horizontal" CssClass="professional-grid"
+						ContextMenuItems="@_pendingContextMenuItems"
+						Toolbar="@(new List<string>() { "Search" })">
+
+					<GridEvents TValue="TripRequestOverviewModel" ContextMenuItemClicked="OnPendingContextMenuItemClicked" />
+					<GridPageSettings PageSize="5" PageSizes="@(new string[] { "5", "10", "20", "50", "100", "All" })" />
+
+					<GridColumns>
+						<GridColumn Field="@nameof(TripRequestOverviewModel.TransactionDateTime)" HeaderText="Request Date" Width="130" Format="dd/MM/yy" Type="ColumnType.DateTime" />
+						<GridColumn Field="@nameof(TripRequestOverviewModel.VehicleCode)" HeaderText="Vehicle" Width="140" />
+						<GridColumn Field="@nameof(TripRequestOverviewModel.RouteDisplay)" HeaderText="Route" Width="200" />
+						<GridColumn Field="@nameof(TripRequestOverviewModel.EstimatedCost)" HeaderText="Estimated Cost" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div class="launchpad-section attention-row">
+
+	<div class="attention-col">
+		<h2 class="launchpad-section-title">Vehicles in Garage</h2>
+		<div class="section-card">
+			<div class="section-body grid-body">
+				<SfGrid @ref="_garageGrid" TValue="RepairOverviewModel" DataSource="_inGarageRepairs"
+						AllowTextWrap="true" AllowSorting="true" AllowResizing="true" AllowPaging="true"
+						GridLines="GridLine.Horizontal" CssClass="professional-grid"
+						ContextMenuItems="@_garageContextMenuItems"
+						Toolbar="@(new List<string>() { "Search" })">
+
+					<GridEvents TValue="RepairOverviewModel" ContextMenuItemClicked="OnGarageContextMenuItemClicked" />
+					<GridPageSettings PageSize="5" PageSizes="@(new string[] { "5", "10", "20", "50", "100", "All" })" />
+
+					<GridAggregates>
+						<GridAggregate>
+							<GridAggregateColumns>
+								<GridAggregateColumn Field="@nameof(RepairOverviewModel.TotalAmount)" Type="AggregateType.Sum" Format="N2">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											<div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
+										}
+									</FooterTemplate>
+								</GridAggregateColumn>
+							</GridAggregateColumns>
+						</GridAggregate>
+					</GridAggregates>
+
+					<GridColumns>
+						<GridColumn Field="@nameof(RepairOverviewModel.GarageInDateTime)" HeaderText="Garage In" Width="130" Format="dd/MM/yy" Type="ColumnType.DateTime" />
+						<GridColumn Field="@nameof(RepairOverviewModel.VehicleCode)" HeaderText="Vehicle" Width="140" />
+						<GridColumn Field="@nameof(RepairOverviewModel.GarageName)" HeaderText="Garage" Width="180" />
+						<GridColumn Field="@nameof(RepairOverviewModel.TotalAmount)" HeaderText="Amount" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
+	</div>
+
+	<div class="attention-col">
+		<h2 class="launchpad-section-title">Idle Vehicles</h2>
+		<div class="section-card">
+			<div class="section-body grid-body">
+				<SfGrid @ref="_idleGrid" TValue="VehicleModel" DataSource="_idleVehicles"
+						AllowTextWrap="true" AllowSorting="true" AllowResizing="true" AllowPaging="true"
+						GridLines="GridLine.Horizontal" CssClass="professional-grid"
+						ContextMenuItems="@_idleContextMenuItems"
+						Toolbar="@(new List<string>() { "Search" })">
+
+					<GridEvents TValue="VehicleModel" ContextMenuItemClicked="OnIdleContextMenuItemClicked" />
+					<GridPageSettings PageSize="5" PageSizes="@(new string[] { "5", "10", "20", "50", "100", "All" })" />
+
+					<GridColumns>
+						<GridColumn Field="@nameof(VehicleModel.Code)" HeaderText="Vehicle" Width="160" />
+						<GridColumn Field="@nameof(VehicleModel.CompanyId)" HeaderText="Company" Width="220">
+							<Template>
+								@{
+									var item = (context as VehicleModel);
+									var company = _companies.FirstOrDefault(c => c.Id == item.CompanyId);
+									<span>@(company is not null ? company.Name : "N/A")</span>
+								}
+							</Template>
+						</GridColumn>
+						<GridColumn Field="@nameof(VehicleModel.VehicleTypeId)" HeaderText="Vehicle Type" Width="180">
+							<Template>
+								@{
+									var item = (context as VehicleModel);
+									var type = _vehicleTypes.FirstOrDefault(t => t.Id == item.VehicleTypeId);
+									<span>@(type is not null ? type.Name : "N/A")</span>
+								}
+							</Template>
+						</GridColumn>
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
+	</div>
+
+</div>

@@ -4,8 +4,6 @@ using MudBlazor;
 
 using System.Reflection;
 
-using Vectus.Shared.Services;
-
 namespace Vectus.Shared.Components.Input;
 
 public partial class CustomAutoComplete<T>

@@ -29,6 +29,7 @@ builder.Services.AddScoped<ISaveAndViewService, SaveAndViewService>();
 builder.Services.AddScoped<ISoundService, SoundService>();
 builder.Services.AddScoped<IDataStorageService, DataStorageService>();
 builder.Services.AddScoped<PageRefreshState>();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

@@ -1,9 +1,5 @@
 ﻿using System.Reflection;
 
-using Vectus.Shared.Services;
-
-using VectusLibrary.Common;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Operations.Models;
 
 namespace Vectus.Shared.Pages;
