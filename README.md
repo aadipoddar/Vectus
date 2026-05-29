@@ -1,4 +1,4 @@
 # Vectus
-Fleet Management Software for Jay Shree Steel Durgapur
+Fleet Management Software for Jai Shree Steel Durgapur
 
-Latest Version = 1.0.0.9
+Latest Version = 1.0.1.0

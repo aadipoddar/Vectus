@@ -559,3 +559,20 @@ h1:focus {
 	margin: 0 0 14px 0;
 	letter-spacing: -0.2px;
 }
+/* ================================================================
+   MOBILE: PREVENT AUTO-ZOOM ON FORM FIELD FOCUS
+   ----------------------------------------------------------------
+   iOS Safari (and some Android browsers) zoom into any input whose
+   font-size is < 16px when it gets focus, forcing the user to pinch
+   back out. Forcing >= 16px on touch devices stops that, while
+   keeping manual pinch-zoom working (we never set user-scalable=no).
+   Applies app-wide; !important overrides Syncfusion / MudBlazor /
+   component-scoped font sizes.
+   ================================================================ */
+@media (pointer: coarse) {
+	input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+	select,
+	textarea {
+		font-size: 16px !important;
+	}
+}
