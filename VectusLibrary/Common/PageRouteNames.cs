@@ -50,6 +50,8 @@ public static class PageRouteNames
 	public const string TyreMounting = "/fleet/tyre-mounting";
 
 	public const string TripRequest = "/fleet/trip-request";
+	public const string TripRequestMobile = "/fleet/trip-request/mobile";
+	public const string TripRequestMobileMap = "/fleet/trip-request/mobile/map";
 	public const string TripRequestReport = "/fleet/reports/trip-request";
 
 	public const string Repair = "/fleet/repair";

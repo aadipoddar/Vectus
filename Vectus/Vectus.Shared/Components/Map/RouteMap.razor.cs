@@ -22,6 +22,9 @@ public partial class RouteMap : IAsyncDisposable
 	[Parameter] public string SelectedVehicleCode { get; set; }
 	[Parameter] public EventCallback<string> OnVehicleSelected { get; set; }
 
+	// Mobile mode: full-bleed map with touch gestures (greedy) and no desktop chrome.
+	[Parameter] public bool Mobile { get; set; }
+
 	private readonly string _elementId = $"routeMap-{Guid.NewGuid():N}";
 	private string _origin;
 	private string _destination;
@@ -75,7 +78,7 @@ public partial class RouteMap : IAsyncDisposable
 
 			await JSRuntime.InvokeVoidAsync("showRoute", _elementId,
 				Secrets.GoogleMapsApiKey, Secrets.GoogleMapsMapId,
-				_origin, _destination, result?.EncodedPolyline, result?.Summary);
+				_origin, _destination, result?.EncodedPolyline, result?.Summary, Mobile);
 
 			if (Vehicles is { Count: > 0 })
 			{

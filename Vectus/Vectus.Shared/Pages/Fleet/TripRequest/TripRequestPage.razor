@@ -1,4 +1,5 @@
 @using VectusLibrary.Accounts.Masters.Models
+@using VectusLibrary.Common
 @using VectusLibrary.Fleet.Route.Models
 @using VectusLibrary.Fleet.Vehicle.Models
 
@@ -201,7 +202,7 @@ else
 									<Template>
 										@{
 											var item = (context as VehicleLocationModel);
-											<span>@(item.HaversineDistance is null ? "—" : item.HaversineDistance.Value < 1m ? $"{item.HaversineDistance.Value * 1000m:N0} M" : $"{item.HaversineDistance.Value:N1} KM")</span>
+											<span>@item.HaversineDistance.FormatDistanceKm()</span>
 										}
 									</Template>
 								</GridColumn>

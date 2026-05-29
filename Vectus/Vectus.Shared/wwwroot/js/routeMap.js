@@ -39,25 +39,29 @@ function badge(inst) {
 	return inst.badge;
 }
 
-async function createMap(element, center, mapId) {
+async function createMap(element, center, mapId, mobile) {
 	const { Map } = await google.maps.importLibrary("maps");
 
 	const map = new Map(element, {
 		zoom: 13,
 		center,
 		mapId, // required for AdvancedMarkerElement (vector map)
-		mapTypeControl: true,
-		streetViewControl: true,
-		zoomControl: true,
+		// On mobile the map is full-bleed, so strip the desktop chrome and let
+		// one finger pan / pinch zoom ("greedy"). On desktop keep the controls
+		// and "cooperative" so the page can still scroll past an embedded map.
+		mapTypeControl: !mobile,
+		streetViewControl: !mobile,
+		fullscreenControl: !mobile,
+		zoomControl: !mobile,
 		zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
-		gestureHandling: "cooperative", // don't swallow page scroll on the form
+		gestureHandling: mobile ? "greedy" : "cooperative",
 		clickableIcons: false,          // no POI popups over the route
 	});
 
 	new google.maps.TrafficLayer().setMap(map); // live traffic overlay
 
 	return {
-		map, origin: null, destination: null, line: null, badge: null,
+		map, mobile, origin: null, destination: null, line: null, badge: null,
 		vehicleMarkers: [], infoWindow: null, vehiclesDrawn: false, focusControl: null,
 	};
 }
@@ -68,15 +72,18 @@ async function createMap(element, center, mapId) {
 function addFocusControl(inst) {
 	if (inst.focusControl) return;
 
+	// Bigger touch target on mobile, and pinned top-right so it clears the
+	// bottom sheet (the desktop zoom controls sit bottom-right).
+	const size = inst.mobile ? 48 : 40;
 	const btn = document.createElement("button");
 	btn.type = "button";
 	btn.title = "Focus on origin";
 	btn.style.cssText =
-		"width:40px;height:40px;margin:10px;border:0;border-radius:8px;cursor:pointer;" +
-		"background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);display:flex;" +
+		`width:${size}px;height:${size}px;margin:10px;border:0;border-radius:${inst.mobile ? 24 : 8}px;cursor:pointer;` +
+		"background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;" +
 		"align-items:center;justify-content:center;";
 	btn.innerHTML =
-		'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1f2937" ' +
+		'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1f2937" ' +
 		'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
 		'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
 	btn.addEventListener("click", () => {
@@ -85,7 +92,8 @@ function addFocusControl(inst) {
 		inst.map.setZoom(18);
 	});
 
-	inst.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(btn);
+	const position = inst.mobile ? google.maps.ControlPosition.RIGHT_TOP : google.maps.ControlPosition.RIGHT_BOTTOM;
+	inst.map.controls[position].push(btn);
 	inst.focusControl = btn;
 }
 
@@ -201,7 +209,7 @@ window.highlightVehicle = function (elementId, code) {
 // Create the map if needed, then (re)draw the route on it. `encodedPolyline`
 // and `summary` come from the server-side Routes API call; when they're null
 // (no route / quota / network) we still show the two endpoints.
-window.showRoute = async function (elementId, key, mapId, origin, destination, encodedPolyline, summary) {
+window.showRoute = async function (elementId, key, mapId, origin, destination, encodedPolyline, summary, mobile) {
 	injectLoader(key);
 
 	const element = document.getElementById(elementId);
@@ -212,7 +220,7 @@ window.showRoute = async function (elementId, key, mapId, origin, destination, e
 
 	let inst = maps.get(elementId);
 	if (!inst || inst.map.getDiv() !== element) {
-		inst = await createMap(element, src, mapId);
+		inst = await createMap(element, src, mapId, mobile);
 		maps.set(elementId, inst);
 	}
 
@@ -244,14 +252,19 @@ window.showRoute = async function (elementId, key, mapId, origin, destination, e
 			strokeOpacity: 0.85,
 		});
 		path.forEach(point => bounds.extend(point));
-		badge(inst).textContent = summary;
+		if (!inst.mobile) badge(inst).textContent = summary;
 	} else {
 		bounds.extend(src);
 		bounds.extend(dst);
-		badge(inst).textContent = "Driving route unavailable for these locations";
+		if (!inst.mobile) badge(inst).textContent = "Driving route unavailable for these locations";
 	}
 
-	inst.map.fitBounds(bounds, 48); // 48px padding so pins aren't on the edge
+	// On mobile a bottom sheet covers the lower ~60% of the screen, so pad the
+	// fit so the whole route stays in the visible strip above the sheet.
+	const padding = inst.mobile
+		? { top: 90, right: 40, bottom: Math.round(element.clientHeight * 0.6) + 24, left: 40 }
+		: 48; // desktop: even 48px padding so pins aren't on the edge
+	inst.map.fitBounds(bounds, padding);
 };
 
 window.disposeRouteMap = function (elementId) {

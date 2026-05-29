@@ -38,4 +38,8 @@
     <Using Include="VectusLibrary.DataAccess" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Fleet\TripRequest\Mobile\" />
+  </ItemGroup>
+
 </Project>

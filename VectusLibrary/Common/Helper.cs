@@ -10,14 +10,26 @@ public static class Helper
 	public static string FormatIndianCurrency(this decimal rate) =>
 		string.Format(new CultureInfo("hi-IN"), "{0:C}", rate);
 
-	public static string FormatIndianCurrency(this decimal? rate)
-	{
-		rate ??= 0;
-		return string.Format(new CultureInfo("hi-IN"), "{0:C}", rate);
-	}
+	public static string FormatIndianCurrency(this decimal? rate) =>
+		string.Format(new CultureInfo("hi-IN"), "{0:C}", rate ?? 0);
 
 	public static string FormatIndianCurrency(this int rate) =>
 		string.Format(new CultureInfo("hi-IN"), "{0:C}", rate);
+
+	public static string FormatIndianCurrencyShort(this decimal rate) =>
+		string.Format(new CultureInfo("hi-IN"), "{0:C0}", rate);
+
+	public static string FormatIndianCurrencyShort(this decimal? rate) =>
+		string.Format(new CultureInfo("hi-IN"), "{0:C0}", rate ?? 0);
+
+	public static string FormatIndianCurrencyShort(this int rate) =>
+		string.Format(new CultureInfo("hi-IN"), "{0:C0}", rate);
+
+	public static string FormatHours(this int hours) =>
+		hours >= 1 ? $"{hours}h" : $"{hours * 60}m";
+
+	public static string FormatDistanceKm(this decimal? km) =>
+		km is null ? "—" : km.Value < 1m ? $"{km.Value * 1000m:N0} m" : $"{km.Value:N1} km";
 
 	public static string FormatDecimalWithTwoDigits(this decimal value) =>
 		value.ToString("0.00", CultureInfo.InvariantCulture);

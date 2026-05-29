@@ -1,0 +1,144 @@
+/* Trip Request — mobile v2, map screen. Real Google map (RouteMap) full-bleed
+   behind the design's bottom sheet + confirm sheet + success overlay. */
+
+.trip-app, .trip-app * { box-sizing: border-box; }
+
+.trip-app {
+	position: fixed;
+	inset: 0;
+	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+	color: var(--ink);
+	background: var(--bg);
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
+	--ink: #0b0b0c;
+	--ink-2: #6b6b6b;
+	--ink-3: #9ca0a8;
+	--bg: #ffffff;
+	--surface: #ffffff;
+	--surface-2: #f1f1f3;
+	--line: rgba(11,11,12,0.08);
+	--accent: #0b0b0c;
+	--accent-ink: #ffffff;
+	--danger: #dc2626;
+}
+
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; letter-spacing: 0; }
+
+/* ── map ── */
+.map-wrap { position: absolute; inset: 0; overflow: hidden; }
+.map-canvas { position: absolute; inset: 0; }
+
+/* ── top bar — back + route summary ── */
+/* Bar spans the top, but only the button + chip should catch touches —
+   the gaps stay click-through so you can pan/zoom the map underneath. */
+.map-top { position: absolute; top: env(safe-area-inset-top, 12px); left: 14px; right: 14px; display: flex; align-items: center; gap: 10px; z-index: 5; padding-top: 10px; pointer-events: none; }
+.map-top > * { pointer-events: auto; }
+.iconbtn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); cursor: pointer; flex-shrink: 0; }
+.iconbtn.solid { background: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.14); }
+.route-chip { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; background: #fff; border-radius: 12px; padding: 9px 14px; box-shadow: 0 6px 18px rgba(0,0,0,.14); font-family: 'Manrope', sans-serif; }
+.route-chip .place { font-weight: 700; font-size: 13.5px; letter-spacing: -0.01em; color: var(--ink); }
+.route-chip .arrow { color: var(--ink-2); }
+
+/* ── bottom sheet — vehicle picker ── */
+.map-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 24px 24px 0 0; box-shadow: 0 -10px 32px rgba(0,0,0,0.14); display: flex; flex-direction: column; z-index: 10; height: 460px; max-height: 62%; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.map-sheet .handle-wrap { display: flex; justify-content: center; align-items: center; padding: 10px 0 8px; cursor: grab; touch-action: none; }
+.map-sheet .handle-wrap:active { cursor: grabbing; }
+.map-sheet .handle { width: 44px; height: 5px; background: var(--ink-3); opacity: .5; border-radius: 3px; }
+.sheet-h { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -0.02em; padding: 12px 22px 4px; text-align: center; }
+.sheet-divider { height: 1px; background: var(--line); margin: 8px 22px 0; }
+.sheet-empty { padding: 28px 24px; text-align: center; color: var(--ink-2); font-size: 14px; font-weight: 500; }
+
+/* selected truck — hero card */
+.hero-vehicle { margin: 12px 18px 8px; border: 2.5px solid var(--ink); border-radius: 18px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; cursor: pointer; }
+.hero-vehicle .top { display: flex; align-items: center; gap: 12px; }
+.hero-vehicle .veh-img { flex-shrink: 0; }
+.hero-vehicle .head { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hero-vehicle .code { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -0.01em; }
+.hero-vehicle .meta { font-size: 12.5px; color: var(--ink-2); font-weight: 500; margin-top: 2px; }
+.hero-vehicle .meta .sdr { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ink); font-weight: 700; }
+.hero-vehicle .badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.hero-vehicle .price-col { text-align: right; }
+.hero-vehicle .price { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.015em; }
+
+.vehicle-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.01em; }
+.vehicle-badge.nearest { background: #0b0b0c; color: #fff; }
+.vehicle-badge.nearest svg { color: #fff; }
+
+/* vehicle search */
+.veh-search { margin: 8px 18px 4px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 12px; color: var(--ink); flex-shrink: 0; }
+.veh-search svg { color: var(--ink-2); flex-shrink: 0; }
+.veh-search input { border: 0; background: transparent; flex: 1; min-width: 0; font-size: 14.5px; font-family: inherit; font-weight: 600; outline: none; color: var(--ink); }
+.veh-search input::placeholder { color: var(--ink-2); }
+
+/* other vehicles — compact rows */
+.truck-list { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1 1 auto; min-height: 0; padding: 0 8px 6px; }
+.truck-list .list-empty { padding: 22px 12px; text-align: center; color: var(--ink-2); font-size: 13.5px; font-weight: 500; }
+.truck-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; cursor: pointer; transition: background .12s ease; }
+.truck-row:hover { background: var(--surface-2); }
+.truck-row .veh-img { flex-shrink: 0; width: 54px; }
+.truck-row .grow { flex: 1; min-width: 0; }
+.truck-row .code { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: -0.005em; display: flex; align-items: center; gap: 8px; }
+.truck-row .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.truck-row .meta { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.truck-row .meta .sdr { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ink); font-weight: 700; }
+.truck-row .meta .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-3); }
+.truck-row .right { text-align: right; flex-shrink: 0; padding-right: 4px; }
+.truck-row .price { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15.5px; letter-spacing: -0.01em; }
+
+/* sticky CTA inside the sheet */
+.sheet-cta { padding: 10px 18px 14px; background: var(--surface); border-top: 1px solid var(--line); flex-shrink: 0; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 56px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -0.005em; cursor: pointer; transition: transform .1s ease, opacity .15s ease; }
+.btn:disabled { opacity: .32; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: scale(0.99); }
+.btn.ghost { background: transparent; color: var(--ink); height: 44px; margin-top: 4px; font-weight: 600; }
+
+/* ── confirm sheet ── */
+.sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+.sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+.confirm-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 26px 26px 0 0; box-shadow: 0 -10px 32px rgba(0,0,0,0.2); transform: translateY(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); z-index: 40; display: flex; flex-direction: column; max-height: 88%; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.confirm-sheet.open { transform: translateY(0); }
+.confirm-sheet .handle-wrap { display: flex; justify-content: center; padding: 10px 0 4px; }
+.confirm-sheet .handle { width: 44px; height: 5px; background: var(--ink-3); opacity: .5; border-radius: 3px; }
+.confirm-sheet h2 { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.025em; margin: 8px 22px 4px; line-height: 1.15; }
+.confirm-sheet .lead { color: var(--ink-2); font-size: 14px; font-weight: 500; margin: 0 22px 14px; }
+.confirm-body { padding: 0 18px 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+.review-card { background: var(--surface-2); border-radius: 16px; padding: 14px 16px; }
+.review-card + .review-card { margin-top: 10px; }
+.review-card .veh-row { display: flex; align-items: center; gap: 12px; }
+.review-card .veh-row .veh-img { flex-shrink: 0; }
+.review-title { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
+.review-title .rt-code { float: right; font-family: 'JetBrains Mono', monospace; }
+.review-line { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; gap: 12px; }
+.review-line + .review-line { border-top: 1px dashed var(--line); }
+.review-line .k { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.review-line .v { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: -0.005em; text-align: right; }
+
+.confirm-route { display: flex; gap: 12px; align-items: stretch; }
+.confirm-route .timeline { display: flex; flex-direction: column; align-items: center; padding-top: 6px; }
+.confirm-route .timeline .dot { width: 10px; height: 10px; border-radius: 50%; }
+.confirm-route .timeline .dot.start { background: var(--ink); }
+.confirm-route .timeline .dot.end { width: 11px; height: 11px; border-radius: 2px; background: var(--danger); }
+.confirm-route .timeline .stem { flex: 1; width: 2px; margin: 3px 0; background: repeating-linear-gradient(to bottom, var(--ink-3) 0 3px, transparent 3px 7px); opacity: .5; }
+.confirm-route .pts { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; padding: 2px 0; }
+.confirm-route .pts .place { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; line-height: 1.2; }
+.confirm-route .pts .city { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+.confirm-sheet .v-head { flex: 1; min-width: 0; }
+.confirm-sheet .v-code { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; letter-spacing: -0.005em; }
+.confirm-sheet .v-meta { font-size: 12.5px; color: var(--ink-2); font-weight: 500; margin-top: 3px; }
+.confirm-sheet .v-meta .sdr { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ink); font-weight: 700; }
+.confirm-sheet .v-dist { text-align: right; }
+.confirm-sheet .v-dist .d { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -0.015em; }
+.confirm-sheet .v-dist .u { font-size: 11px; color: var(--ink-3); font-weight: 600; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.confirm-cta { padding: 6px 18px 16px; }
+
+/* ── success overlay ── */
+.success-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: flex-end; justify-content: center; z-index: 50; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+.success-overlay.on { opacity: 1; pointer-events: auto; }
+.success-card { background: var(--surface); border-radius: 26px 26px 0 0; padding: 30px 24px calc(40px + env(safe-area-inset-bottom, 0px)); width: 100%; }
+.success-card .check { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+.success-card h3 { font-family: 'Manrope', sans-serif; margin: 0 0 8px; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; text-align: center; }
+.success-card p { margin: 0 0 18px; color: var(--ink-2); font-size: 14px; text-align: center; font-weight: 500; }
+.success-card .txnno { font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 12px; background: var(--surface-2); border-radius: 10px; color: var(--ink); margin-bottom: 18px; text-align: center; font-weight: 700; letter-spacing: 0.04em; }

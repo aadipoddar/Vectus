@@ -1,0 +1,127 @@
+/* Trip Request — mobile v2. Bold display type, black/white minimal aesthetic.
+   Ported from the Claude Design prototype (Trip Request Mobile v2.html). */
+
+.trip-app, .trip-app * { box-sizing: border-box; }
+
+.trip-app {
+	position: fixed;
+	inset: 0;
+	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+	font-feature-settings: 'ss01','cv11';
+	color: var(--ink);
+	background: var(--bg);
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
+	--ink: #0b0b0c;
+	--ink-2: #6b6b6b;
+	--ink-3: #9ca0a8;
+	--bg: #ffffff;
+	--surface: #ffffff;
+	--surface-2: #f1f1f3;
+	--surface-3: #e8e8ec;
+	--line: rgba(11,11,12,0.08);
+	--line-2: rgba(11,11,12,0.14);
+	--accent: #0b0b0c;
+	--accent-ink: #ffffff;
+	--promo: #00a868;
+	--warn: #f5a623;
+	--danger: #dc2626;
+}
+
+.display { font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; letter-spacing: 0; }
+
+/* ── screens stack ── */
+.screens { position: absolute; inset: 0; overflow: hidden; }
+.screen {
+	position: absolute;
+	inset: 0;
+	padding-top: env(safe-area-inset-top, 12px);
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+.screen.full-bleed { padding-top: 0; }
+
+/* ── top bar ── */
+.topbar { display: flex; align-items: center; padding: 10px 14px 6px; }
+.iconbtn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); cursor: pointer; transition: background .12s ease; }
+.iconbtn:hover { background: var(--surface-2); }
+
+/* ── body ── */
+.body { flex: 1; overflow: auto; padding: 0 20px 130px; -webkit-overflow-scrolling: touch; }
+.h1 { font-size: 34px; line-height: 1.04; margin: 6px 0 6px; }
+.sub { font-size: 14.5px; color: var(--ink-2); margin-bottom: 22px; font-weight: 500; }
+.section-h { font-family: 'Manrope', sans-serif; font-weight: 800; letter-spacing: -0.02em; font-size: 20px; margin: 24px 4px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.section-h .more { font-size: 13px; color: var(--ink); font-weight: 700; cursor: pointer; white-space: nowrap; text-transform: none; letter-spacing: 0; flex-shrink: 0; }
+
+/* ── where-to pill ── */
+.where { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 18px; padding: 14px 18px; cursor: pointer; transition: background .12s ease; }
+.where:hover { background: var(--surface-3); }
+.where .ico-muted { color: var(--ink-2); display: inline-flex; }
+.where .wt { flex: 1; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; color: var(--ink); text-transform: none; }
+.where .wt.placeholder { color: var(--ink-2); font-weight: 600; }
+.where .code-chip { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px; padding: 6px 10px; background: #fff; color: var(--ink); border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+/* ── recent / saved location rows ── */
+.loc-rows { margin-top: 6px; }
+.loc-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.loc-row:last-child { border-bottom: 0; }
+.loc-row .ico { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.loc-row .grow { flex: 1; min-width: 0; }
+.loc-row .place { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+.loc-row .city { font-size: 13px; color: var(--ink-2); margin-top: 1px; }
+
+/* ── suggestion tiles (favorite routes) ── */
+.suggestion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.tile { position: relative; background: var(--surface-2); border-radius: 16px; padding: 16px 14px 12px; cursor: pointer; transition: background .12s ease; overflow: hidden; }
+.tile:hover { background: var(--surface-3); }
+.tile .star { position: absolute; top: 10px; right: 12px; color: var(--ink); opacity: .7; display: inline-flex; }
+.tile .glyph { display: flex; align-items: center; justify-content: center; height: 70px; margin-bottom: 8px; }
+.tile .name { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+.tile .meta { font-size: 12px; color: var(--ink-2); margin-top: 2px; font-weight: 500; }
+
+/* ── company strip ── */
+.company-strip { display: flex; align-items: center; gap: 12px; background: var(--surface-2); border-radius: 14px; padding: 12px 14px; margin-top: 14px; cursor: pointer; }
+.company-strip .ico { width: 36px; height: 36px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.company-strip .grow { flex: 1; min-width: 0; }
+.company-strip .lbl { font-size: 11px; font-weight: 700; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Manrope', sans-serif; }
+.company-strip .nm { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 14.5px; letter-spacing: -0.01em; margin-top: 1px; }
+.company-strip > svg { color: var(--ink-3); flex-shrink: 0; }
+
+/* ── sticky CTA ── */
+.cta-bar { position: absolute; left: 0; right: 0; bottom: env(safe-area-inset-bottom, 0px); padding: 14px 20px 16px; background: linear-gradient(to top, var(--bg) 75%, transparent); pointer-events: none; }
+.cta-bar > * { pointer-events: auto; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 56px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -0.005em; cursor: pointer; transition: transform .1s ease, opacity .15s ease; }
+.btn svg { color: var(--accent-ink); }
+.btn:disabled { opacity: .32; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: scale(0.99); }
+
+/* ── bottom sheet (picker) ── */
+.sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 30; }
+.sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 26px 26px 0 0; box-shadow: 0 -10px 32px rgba(0,0,0,0.18); transform: translateY(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); z-index: 31; display: flex; flex-direction: column; max-height: 88%; }
+.sheet.open { transform: translateY(0); }
+.sheet .handle-wrap { display: flex; justify-content: center; padding: 10px 0 6px; }
+.sheet .handle { width: 44px; height: 5px; background: var(--ink-3); opacity: .55; border-radius: 3px; }
+.sheet header { padding: 6px 22px 8px; display: flex; align-items: center; }
+.sheet header .h2 { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; flex: 1; }
+.sheet header .iconbtn { width: 36px; height: 36px; background: var(--surface-2); }
+
+.search-pill { margin: 10px 18px 6px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; background: var(--surface-2); border-radius: 14px; color: var(--ink); }
+.search-pill input { border: 0; background: transparent; flex: 1; font-size: 15px; font-family: inherit; font-weight: 600; outline: none; color: var(--ink); }
+.search-pill input::placeholder { color: var(--ink-2); }
+.sheet .list { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 10px 24px; }
+.sheet .list .empty { padding: 28px; text-align: center; color: var(--ink-2); font-size: 14px; font-weight: 500; }
+
+.route-pick { display: flex; align-items: center; gap: 14px; padding: 14px 10px; border-radius: 14px; cursor: pointer; transition: background .12s ease; }
+.route-pick:hover { background: var(--surface-2); }
+.route-pick .lines { flex: 1; min-width: 0; }
+.route-pick .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.route-pick .place { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+.route-pick .arrow { color: var(--ink-2); }
+.route-pick .meta { font-size: 13px; color: var(--ink-2); margin-top: 3px; font-weight: 500; }
+.route-pick .ico { width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.route-pick .ico-faint { color: var(--ink-3); display: inline-flex; }
+.route-pick .ico-check { color: var(--ink); display: inline-flex; }

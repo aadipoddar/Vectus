@@ -1,0 +1,223 @@
+@attribute [Route(PageRouteNames.TripRequestMobile)]
+
+@using VectusLibrary.Common
+
+<PageTitle>Trip Request - Vectus Mobile</PageTitle>
+
+<HeadContent>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+</HeadContent>
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="trip-app">
+		<div class="screens">
+			<div class="screen">
+				@RenderDetailsScreen()
+			</div>
+		</div>
+	</div>
+}
+
+<ToastNotification @ref="_toastNotification" />
+
+@* ───────────────────────── Screen 1 : Plan a trip ───────────────────────── *@
+@{
+	RenderFragment RenderDetailsScreen() =>
+	@<text>
+		<div class="topbar">
+			<button class="iconbtn" style="visibility:hidden">@IconBack</button>
+			<div style="flex:1"></div>
+			<button class="iconbtn" title="Home" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)'>@IconHome</button>
+		</div>
+
+		<div class="body">
+			<h1 class="display h1">Plan a trip</h1>
+			<div class="sub">Pick a saved route — dispatch a truck in seconds.</div>
+
+			@* Where-to pill *@
+			<div class="where" @onclick="() => _routeSheet = true">
+				<span class="ico-muted">@IconSearch</span>
+				@if (_selectedRoute is not null)
+				{
+					<span class="wt">@_selectedRoute.FromLocationName → @_selectedRoute.ToLocationName</span>
+					<span class="code-chip">@_selectedRoute.Code</span>
+				}
+				else
+				{
+					<span class="wt placeholder">Where to?</span>
+				}
+			</div>
+
+			@* Stacked origin/destination rows *@
+			@if (_selectedRoute is not null)
+			{
+				<div class="loc-rows">
+					<div class="loc-row" @onclick="() => _routeSheet = true">
+						<div class="ico">@IconPin</div>
+						<div class="grow">
+							<div class="place">@_selectedRoute.FromLocationName</div>
+							<div class="city">Origin</div>
+						</div>
+					</div>
+					<div class="loc-row" @onclick="() => _routeSheet = true">
+						<div class="ico" style="background:#dc2626">@IconPin</div>
+						<div class="grow">
+							<div class="place">@_selectedRoute.ToLocationName</div>
+							<div class="city">@_selectedRoute.EstimatedDistance km · @_selectedRoute.EstimatedHours.FormatHours()</div>
+						</div>
+					</div>
+				</div>
+			}
+
+			@* Suggestions grid *@
+			<div class="section-h">Suggestions <span class="more" @onclick="() => _routeSheet = true">See all</span></div>
+			<div class="suggestion-grid">
+				@for (var i = 0; i < _suggestions.Count; i++)
+				{
+					var r = _suggestions[i];
+					var fav = i == 0;
+					<div class="tile" @onclick="() => SelectRoute(r)">
+						@if (fav)
+						{
+							<span class="star">@IconStar</span>
+						}
+						<div class="glyph">@VehicleHero(94)</div>
+						<div class="name">@r.FromLocationName → @r.ToLocationName</div>
+						<div class="meta">@r.Code · @r.EstimatedDistance km</div>
+					</div>
+				}
+			</div>
+
+			@* Company strip *@
+			<div class="section-h" style="margin-bottom:10px">Account</div>
+			<div class="company-strip" @onclick="() => _coSheet = true">
+				<div class="ico">@IconBuilding</div>
+				<div class="grow">
+					<div class="lbl">Booking on behalf of</div>
+					<div class="nm">@(_selectedCompany?.Name ?? "Select company")</div>
+				</div>
+				@IconChevron
+			</div>
+		</div>
+
+		@* Sticky CTA *@
+		<div class="cta-bar">
+			<button class="btn" disabled="@(_selectedRoute is null)" @onclick="ContinueToMap">
+				@if (_selectedRoute is not null)
+				{
+					<span>View trucks on map</span>
+					@IconChevron
+				}
+				else
+				{
+					<span>Pick a route to continue</span>
+				}
+			</button>
+		</div>
+
+		@* Route picker sheet *@
+		<div class="sheet-backdrop @(_routeSheet ? "open" : "")" @onclick="() => _routeSheet = false"></div>
+		<div class="sheet @(_routeSheet ? "open" : "")">
+			<div class="handle-wrap"><div class="handle"></div></div>
+			<header>
+				<div class="h2">Where to?</div>
+				<button class="iconbtn" @onclick="() => _routeSheet = false">@IconClose</button>
+			</header>
+			<div class="search-pill">
+				@IconSearch
+				<input placeholder="Search saved route or location" value="@_routeQuery"
+					   @oninput="e => _routeQuery = e.Value?.ToString()" />
+			</div>
+			<div class="list">
+				@if (FilteredRoutes.Count == 0)
+				{
+					<div class="empty">No routes match "@_routeQuery"</div>
+				}
+				@foreach (var r in FilteredRoutes)
+				{
+					<div class="route-pick" @onclick="() => SelectRouteAndClose(r)">
+						<div class="ico">@IconClock</div>
+						<div class="lines">
+							<div class="top">
+								<span class="place">@r.FromLocationName</span>
+								<span class="arrow">→</span>
+								<span class="place">@r.ToLocationName</span>
+							</div>
+							<div class="meta">@r.Code · @r.EstimatedDistance km · @r.EstimatedHours.FormatHours() · @r.EstimatedCost.FormatIndianCurrencyShort()</div>
+						</div>
+						<span class="ico-faint">@IconChevron</span>
+					</div>
+				}
+			</div>
+		</div>
+
+		@* Company picker sheet *@
+		<div class="sheet-backdrop @(_coSheet ? "open" : "")" @onclick="() => _coSheet = false"></div>
+		<div class="sheet @(_coSheet ? "open" : "")" style="max-height:60%">
+			<div class="handle-wrap"><div class="handle"></div></div>
+			<header>
+				<div class="h2">Select company</div>
+				<button class="iconbtn" @onclick="() => _coSheet = false">@IconClose</button>
+			</header>
+			<div class="list" style="margin-top:6px">
+				@foreach (var c in _companies)
+				{
+					<div class="route-pick" @onclick="() => SelectCompany(c)">
+						<div class="ico">@IconBuilding</div>
+						<div class="lines">
+							<div class="place" style="font-size:15px">@c.Name</div>
+							<div class="meta">Primary company</div>
+						</div>
+						@if (_selectedCompany?.Id == c.Id)
+						{
+							<span class="ico-check">@IconCheck</span>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</text>;
+}
+
+@* ───────────────────────── Icons (thin, geometric) ───────────────────────── *@
+@code {
+	private RenderFragment IconBack => @<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>;
+	private RenderFragment IconClose => @<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>;
+	private RenderFragment IconSearch => @<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>;
+	private RenderFragment IconChevron => @<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>;
+	private RenderFragment IconHome => @<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V10.5z" /></svg>;
+	private RenderFragment IconClock => @<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>;
+	private RenderFragment IconPin => @<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 1 1 16 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+	private RenderFragment IconBuilding => @<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="1" /><path d="M9 22V12h6v10M9 6h.01M15 6h.01M9 10h.01M15 10h.01" /></svg>;
+	private RenderFragment IconStar => @<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>;
+	private RenderFragment IconCheck => @<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>;
+
+	// Side-profile cargo truck illustration (cab + box + wheels).
+	private RenderFragment VehicleHero(int size) => @<svg viewBox="0 0 120 80" width="@size" height="@(size * 0.66)" style="display:block;overflow:visible">
+		<ellipse cx="60" cy="74" rx="46" ry="3" fill="rgba(0,0,0,0.14)" />
+		<rect x="44" y="18" width="68" height="40" rx="3" fill="#fff" stroke="#0b0b0c" stroke-width="2.2" />
+		<line x1="44" y1="32" x2="112" y2="32" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="44" y1="44" x2="112" y2="44" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="60" y1="18" x2="60" y2="58" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="78" y1="18" x2="78" y2="58" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="96" y1="18" x2="96" y2="58" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<path d="M 8,58 L 8,38 L 14,30 L 28,30 L 32,18 L 44,18 L 44,58 Z" fill="#fff" stroke="#0b0b0c" stroke-width="2.2" stroke-linejoin="round" />
+		<path d="M 16,32 L 28,32 L 31,22 L 19,22 Z" fill="#1a1a1a" />
+		<line x1="32" y1="32" x2="32" y2="50" stroke="#0b0b0c" stroke-width="1.2" opacity="0.4" />
+		<rect x="36" y="40" width="4" height="1.5" fill="#0b0b0c" opacity="0.5" />
+		<rect x="8" y="42" width="3" height="4" rx="0.5" fill="#ffd166" />
+		<rect x="6" y="54" width="6" height="4" rx="1" fill="#0b0b0c" />
+		<g>
+			<circle cx="22" cy="60" r="7" fill="#0b0b0c" /><circle cx="22" cy="60" r="3" fill="#fff" />
+			<circle cx="80" cy="60" r="7" fill="#0b0b0c" /><circle cx="80" cy="60" r="3" fill="#fff" />
+			<circle cx="96" cy="60" r="7" fill="#0b0b0c" /><circle cx="96" cy="60" r="3" fill="#fff" />
+		</g>
+	</svg>;
+}

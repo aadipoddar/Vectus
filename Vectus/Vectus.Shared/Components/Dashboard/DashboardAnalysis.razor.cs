@@ -123,7 +123,7 @@ public partial class DashboardAnalysis
 		// Repair spend = sum of Repair.TotalAmount within the month.
 		var thisMonthRepairSpend = _repairs.Where(_ => _.TransactionDateTime >= thisMonthStart).Sum(_ => _.TotalAmount);
 		var lastMonthRepairSpend = _repairs.Where(_ => _.TransactionDateTime >= lastMonthStart && _.TransactionDateTime < thisMonthStart).Sum(_ => _.TotalAmount);
-		_thisMonthRepairSpend = thisMonthRepairSpend.FormatIndianCurrency();
+		_thisMonthRepairSpend = thisMonthRepairSpend.FormatIndianCurrencyShort();
 		_thisMonthRepairSpendTrend = Helper.FormatMonthlyTrend(thisMonthRepairSpend, lastMonthRepairSpend);
 
 		// Vehicles in garage = repairs that have not been closed yet (no GarageOutDateTime).
