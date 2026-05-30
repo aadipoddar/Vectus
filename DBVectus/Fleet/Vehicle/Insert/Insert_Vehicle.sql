@@ -10,6 +10,7 @@
 	@CompanyId INT,
 	@SDRId INT,
 	@Remarks VARCHAR(MAX),
+	@AvailableStatus BIT,
 	@Status BIT
 AS
 BEGIN
@@ -27,6 +28,7 @@ BEGIN
 			[CompanyId],
 			[SDRId],
 			[Remarks],
+			[AvailableStatus],
 			[Status]
 		)
 		VALUES
@@ -41,6 +43,7 @@ BEGIN
 			@CompanyId,
 			@SDRId,
 			@Remarks,
+			@AvailableStatus,
 			@Status
 		);
 
@@ -61,6 +64,7 @@ BEGIN
 			[CompanyId] = @CompanyId,
 			[SDRId] = @SDRId,
 			[Remarks] = @Remarks,
+			[AvailableStatus] = @AvailableStatus,
 			[Status] = @Status
 		WHERE [Id] = @Id;
 	END

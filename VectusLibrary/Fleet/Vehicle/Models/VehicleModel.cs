@@ -13,6 +13,7 @@ public class VehicleModel
 	public int CompanyId { get; set; }
 	public int? SDRId { get; set; }
 	public string? Remarks { get; set; }
+	public bool AvailableStatus { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -30,6 +31,7 @@ public class VehicleLocationModel
 	public int CompanyId { get; set; }
 	public int? SDRId { get; set; }
 	public string? Remarks { get; set; }
+	public bool AvailableStatus { get; set; }
 	public bool Status { get; set; }
 
 	public string SDR { get; set; }

@@ -19,7 +19,7 @@ public partial class VehiclePage
 	private bool _isProcessing = false;
 	private bool _showDeleted = false;
 
-	private VehicleModel _vehicle = new() { PurchaseDate = DateTime.Today };
+	private VehicleModel _vehicle = new() { PurchaseDate = DateTime.Today, AvailableStatus = true };
 	private VehicleTypeModel _selectedVehicleType;
 	private CompanyModel _selectedCompany;
 	private SDRModel? _selectedSDR;

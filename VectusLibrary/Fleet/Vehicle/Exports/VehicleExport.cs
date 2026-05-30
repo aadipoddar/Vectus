@@ -29,6 +29,7 @@ public static class VehicleExport
 			Company = companies.FirstOrDefault(c => c.Id == vehicle.CompanyId)?.Name ?? "N/A",
 			SDR = sdrs.FirstOrDefault(o => o.Id == vehicle.SDRId)?.Name ?? "N/A",
 			vehicle.Remarks,
+			AvailableStatus = vehicle.AvailableStatus ? "Available" : "Unavailable",
 			Status = vehicle.Status ? "Active" : "Deleted"
 		});
 
@@ -45,6 +46,7 @@ public static class VehicleExport
 			["Company"] = new() { DisplayName = "Company", Alignment = CellAlignment.Left },
 			["SDR"] = new() { DisplayName = "SDR", Alignment = CellAlignment.Left },
 			[nameof(VehicleModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
+			[nameof(VehicleModel.AvailableStatus)] = new() { DisplayName = "Available Status", Alignment = CellAlignment.Center, IncludeInTotal = false },
 			[nameof(VehicleModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
 
@@ -61,6 +63,7 @@ public static class VehicleExport
 			"Company",
 			"SDR",
 			nameof(VehicleModel.Remarks),
+			nameof(VehicleModel.AvailableStatus),
 			nameof(VehicleModel.Status)
 		];
 

@@ -132,6 +132,14 @@ else
 						</div>
 
 						<div class="form-field">
+							<div class="checkbox-wrapper">
+								<CustomCheckBox @bind-Value="_vehicle.AvailableStatus"
+												Label="Vehicle Available"
+												AriaLabel="Vehicle is available" />
+							</div>
+						</div>
+
+						<div class="form-field">
 							<CustomTextField @bind-Value="_vehicle.Remarks"
 											 Label="Remarks"
 											 Placeholder="Enter remarks (optional)"
@@ -197,6 +205,14 @@ else
 							<GridColumn Field="@nameof(VehicleModel.PurchaseDate)" HeaderText="Purchase Date" Width="150" Format="dd-MMM-yyyy" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(VehicleModel.OpeningKM)" HeaderText="Opening KM" Width="140" Format="N2" TextAlign="TextAlign.Right" />
 							<GridColumn Field="@nameof(VehicleModel.Remarks)" HeaderText="Remarks" Width="250" />
+							<GridColumn Field="@nameof(VehicleModel.AvailableStatus)" HeaderText="Available" Width="120" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as VehicleModel);
+										<span class="@(item.AvailableStatus ? string.Empty : "grid-debit")">@(item.AvailableStatus ? "Available" : "Unavailable")</span>
+									}
+								</Template>
+							</GridColumn>
 							<GridColumn Field="@nameof(VehicleModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
 									@{
