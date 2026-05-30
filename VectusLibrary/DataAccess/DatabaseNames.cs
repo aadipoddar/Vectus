@@ -88,6 +88,8 @@ public static class FleetNames
 	public static string InsertTripRequest => "Insert_TripRequest";
 
 	public static string TripRequestOverview => "TripRequest_Overview";
+
+	public static string LoadTripRequestBySDRRequestStatus => "Load_TripRequest_By_SDR_RequestStatus";
 	#endregion
 
 	#region Repair

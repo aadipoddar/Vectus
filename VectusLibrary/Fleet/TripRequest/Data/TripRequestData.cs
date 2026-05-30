@@ -15,6 +15,10 @@ public static class TripRequestData
 		(await SqlDataAccess.LoadData<int, dynamic>(FleetNames.InsertTripRequest, tripRequest, transaction)).FirstOrDefault()
 			is var id and > 0 ? id : throw new InvalidOperationException("Failed to Insert Trip Request.");
 
+	public static async Task<List<TripRequestOverviewModel>> LoadBySDRRequestStatus(int? SDRId = null, string RequestStatus = null) =>
+		await SqlDataAccess.LoadData<TripRequestOverviewModel, dynamic>(
+			FleetNames.LoadTripRequestBySDRRequestStatus, new { SDRId, RequestStatus });
+
 	public static async Task DeleteTransaction(TripRequestModel tripRequest)
 	{
 		await SqlDataAccessTransaction.Run(async transaction =>
@@ -84,7 +88,7 @@ public static class TripRequestData
 		}
 	}
 
-	public static async Task<int> SaveTransaction(TripRequestModel tripRequest)
+	public static async Task<int> SaveTransaction(TripRequestModel tripRequest, bool showNotification = true)
 	{
 		var isUpdate = tripRequest.Id > 0;
 		await ValidateTransaction(tripRequest, isUpdate);
@@ -109,7 +113,8 @@ public static class TripRequestData
 			return id;
 		});
 
-		await TripRequestNotify.Notify(tripRequest.Id, isUpdate ? NotifyType.Updated : NotifyType.Created);
+		if (showNotification)
+			await TripRequestNotify.Notify(tripRequest.Id, isUpdate ? NotifyType.Updated : NotifyType.Created);
 
 		return tripRequest.Id;
 	}

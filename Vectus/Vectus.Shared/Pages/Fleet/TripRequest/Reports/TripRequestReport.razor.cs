@@ -397,7 +397,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			tripRequest.LastModifiedBy = _user.Id;
 			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await TripRequestData.SaveTransaction(tripRequest);
+			await TripRequestData.SaveTransaction(tripRequest, false);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been accepted successfully.", ToastType.Success);
 		}
@@ -441,7 +441,7 @@ public partial class TripRequestReport : IAsyncDisposable
 			tripRequest.LastModifiedBy = _user.Id;
 			tripRequest.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			tripRequest.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await TripRequestData.SaveTransaction(tripRequest);
+			await TripRequestData.SaveTransaction(tripRequest, false);
 
 			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been rejected successfully.", ToastType.Success);
 		}

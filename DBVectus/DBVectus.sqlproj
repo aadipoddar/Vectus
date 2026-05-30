@@ -177,6 +177,7 @@
     <Build Include="Fleet\Tyre\Insert\Insert_TyreMounting.sql" />
     <Build Include="Fleet\Tyre\Table\TyreMounting.sql" />
     <Build Include="Fleet\Tyre\Table\TyreCompany.sql" />
+    <Build Include="Fleet\TripRequest\Load_TripRequest_By_SDR_RequestStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

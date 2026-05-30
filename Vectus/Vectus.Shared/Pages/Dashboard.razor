@@ -79,6 +79,35 @@ else
 					<DashboardAttention />
 				</MudBlazor.MudTabPanel>
 
+				<!-- MOBILE -->
+				<MudBlazor.MudTabPanel Text="Mobile" Visible="_user.Fleet">
+
+					<!-- Mobile Pages -->
+					<div class="launchpad-section">
+						<div class="dashboard-grid">
+							<FioriTile Title="Trip Request Mobile" Subtitle="Raise a trip request against a route and vehicle for approval" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.TripRequestMobile)">
+								<IconContent>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z" />
+										<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+										<path d="M9 13l2 2 4-4" />
+									</svg>
+								</IconContent>
+							</FioriTile>
+
+							<FioriTile Title="Trip Accept Request" Subtitle="Review pending trip requests and accept or decline them" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.TripRequestMobileAccept)">
+								<IconContent>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+										<polyline points="22 4 12 14.01 9 11.01" />
+									</svg>
+								</IconContent>
+							</FioriTile>
+						</div>
+					</div>
+
+				</MudBlazor.MudTabPanel>
+
 				<!-- ACCOUNTS -->
 				<MudBlazor.MudTabPanel Text="Accounts" Visible="_user.Accounts">
 
@@ -244,16 +273,6 @@ else
 					<!-- Daily Entries -->
 					<div class="launchpad-section">
 						<div class="dashboard-grid">
-							<FioriTile Title="Trip Request Mobile" Subtitle="Raise a trip request against a route and vehicle for approval" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.TripRequestMobile)">
-								<IconContent>
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z" />
-										<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-										<path d="M9 13l2 2 4-4" />
-									</svg>
-								</IconContent>
-							</FioriTile>
-
 							<FioriTile Title="Trip Request" Subtitle="Raise a trip request against a route and vehicle for approval" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.TripRequest)">
 								<IconContent>
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

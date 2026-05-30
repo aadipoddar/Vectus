@@ -1,0 +1,253 @@
+@attribute [Route(PageRouteNames.TripRequestMobileAccept)]
+
+@using VectusLibrary.Common
+
+<PageTitle>Trip Accept — Vectus Mobile</PageTitle>
+
+<HeadContent>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+</HeadContent>
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="accept-app">
+		<div class="a-stage">
+			<div class="a-topbar">
+				<button class="a-iconbtn" style="visibility:hidden">@IconBack</button>
+				<div style="flex:1"></div>
+				<button class="a-iconbtn" title="Home" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)'>@IconHome</button>
+			</div>
+
+			<div class="a-head">
+				<h1 class="display a-h1">
+					@if (_requests.Count > 0)
+					{
+						<text>Trip requests <span class="count">@_requests.Count</span></text>
+					}
+					else
+					{
+						<text>All caught up</text>
+					}
+				</h1>
+				<div class="a-sub">
+					@(_requests.Count > 0 ? "Review each request and accept or decline." : "No pending requests right now.")
+				</div>
+			</div>
+
+			@if (Active is not null)
+			{
+				var active = Active;
+				var queue = Queue;
+
+				<div class="a-body">
+					@* ── focus request card ── *@
+					<div class="req-card">
+						<div class="req-top">
+							<div class="grow">
+								<div class="num">@active.TransactionNo</div>
+								<div class="ago"><span style="color:var(--promo)">@IconDot</span>Received @AgoText(active.CreatedAt)</div>
+							</div>
+						</div>
+
+						<div class="req-route">
+							<div class="timeline">
+								<div class="dot start"></div>
+								<div class="stem"></div>
+								<div class="dot end"></div>
+							</div>
+							<div class="pts">
+								<div>
+									<div class="lbl">Pickup</div>
+									<div class="place">@active.FromLocation</div>
+								</div>
+								<div>
+									<div class="lbl">Drop</div>
+									<div class="place">@active.ToLocation</div>
+								</div>
+							</div>
+							<span class="code-chip">@active.RouteCode</span>
+						</div>
+
+						<div class="req-metrics">
+							<div class="m"><div class="k">Distance</div><div class="v">@active.EstimatedDistance<small> km</small></div></div>
+							<div class="m"><div class="k">Duration</div><div class="v">@active.EstimatedHours.FormatHours()</div></div>
+							<div class="m"><div class="k">Payout</div><div class="v">@active.EstimatedCost.FormatIndianCurrencyShort()</div></div>
+						</div>
+
+						<div class="req-rows">
+							<div class="req-line">
+								<div class="ico">@IconBuilding</div>
+								<div class="grow">
+									<div class="k">Booked by</div>
+									<div class="v">@active.CompanyName</div>
+									<div class="vsub">Dispatcher · @active.CreatedByName</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="veh-line">
+							<div class="veh-img">@Truck(64)</div>
+							<div class="grow">
+								<div class="vcode"><span class="mono">@active.VehicleCode</span></div>
+								<div class="vmeta">
+									@if (!string.IsNullOrWhiteSpace(active.SDRName))
+									{
+										<text><span class="mono">@active.SDRName</span> · </text>
+									}
+									Assigned vehicle
+								</div>
+							</div>
+						</div>
+					</div>
+
+					@* ── waiting queue ── *@
+					@if (queue.Count > 0)
+					{
+						<div class="a-queue-h">Also waiting <span class="n">@queue.Count pending</span></div>
+						@foreach (var q in queue)
+						{
+							<div class="q-row" @onclick="() => _activeId = q.Id">
+								<div class="veh-img">@Truck(50)</div>
+								<div class="grow">
+									<div class="qtop">
+										<span class="qroute">@q.FromLocation</span>
+										<span class="qarrow">→</span>
+										<span class="qroute">@q.ToLocation</span>
+									</div>
+									<div class="qmeta">
+										<span class="mono" style="color:var(--ink);font-weight:700">@q.VehicleCode</span>
+										<span class="sep"></span>
+										<span>@q.EstimatedDistance km · @q.EstimatedHours.FormatHours()</span>
+									</div>
+								</div>
+								<div class="qright">
+									<div class="qcost">@q.EstimatedCost.FormatIndianCurrencyShort()</div>
+									<div class="qwait">@AgoText(q.CreatedAt)</div>
+								</div>
+							</div>
+						}
+					}
+				</div>
+
+				<div class="a-actions">
+					<button class="a-btn decline" disabled="@_isProcessing" @onclick='() => OpenConfirm("decline")'>@IconX Decline</button>
+					<button class="a-btn accept" disabled="@_isProcessing" @onclick='() => OpenConfirm("accept")'>@IconCheckSmall Accept trip</button>
+				</div>
+			}
+			else
+			{
+				<div class="a-body" style="display:flex">
+					<div class="a-empty">
+						<div class="ring">@IconCheckRing</div>
+						<h3>All caught up</h3>
+						<p>You've responded to every trip request. New ones will appear here automatically.</p>
+					</div>
+				</div>
+			}
+		</div>
+
+		@* ── confirm sheet (accept / decline) ── *@
+		@{
+			var decline = _confirmMode == "decline";
+			var sheetOpen = _confirmMode is not null;
+			var routeText = Active is not null ? $"{Active.FromLocation} → {Active.ToLocation}" : "this trip";
+		}
+		<div class="a-backdrop @(sheetOpen ? "open" : "")" @onclick="() => _confirmMode = null"></div>
+		<div class="a-sheet @(sheetOpen ? "open" : "")">
+			<div class="handle-wrap"><div class="handle"></div></div>
+			<h2>@(decline ? "Decline request" : "Accept trip")</h2>
+			<p class="lead">
+				@if (decline)
+				{
+					<text>Decline @routeText — add a note so dispatch can reassign.</text>
+				}
+				else
+				{
+					<text>Confirm @routeText — add a note for dispatch if needed.</text>
+				}
+			</p>
+
+			<div class="remarks-wrap">
+				<div class="remarks-lbl">Remarks <span class="opt">Optional</span></div>
+				<textarea class="remarks"
+						  placeholder="@(decline ? "e.g. Vehicle already on another trip." : "e.g. Will reach pickup 15 min early.")"
+						  value="@_remarks"
+						  @oninput="e => _remarks = e.Value?.ToString()"></textarea>
+			</div>
+
+			<div class="sheet-cta">
+				<button class="a-btn @(decline ? "danger" : "accept")" disabled="@_isProcessing" @onclick="ConfirmTransaction">
+					@(decline ? "Confirm & decline" : "Confirm & accept")
+				</button>
+			</div>
+		</div>
+
+		@* ── success / declined overlay ── *@
+		<div class="a-overlay @(_overlayKind is not null ? "on" : "")">
+			@if (_overlayKind is not null)
+			{
+				var accepted = _overlayKind == "accept";
+				<div class="a-overcard">
+					<div class="badge @(accepted ? "ok" : "no")">
+						@(accepted ? IconCheckBadge : IconXBadge)
+					</div>
+					<h3>@(accepted ? "Trip accepted" : "Request declined")</h3>
+					<p>
+						@(accepted
+							? "Dispatch has been notified. Navigation details are on the way."
+							: "Dispatch will reassign this trip.")
+					</p>
+					@if (!string.IsNullOrWhiteSpace(_overlayRemarks))
+					{
+						<div class="over-remarks">“@_overlayRemarks”</div>
+					}
+					<div class="txnno">@_overlayNum</div>
+					<button class="a-btn accept" @onclick="() => _overlayKind = null">Done</button>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+<ToastNotification @ref="_toastNotification" />
+
+@* ───────────────────────── Icons (thin, geometric) ───────────────────────── *@
+@code {
+	private RenderFragment IconBack => @<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>;
+	private RenderFragment IconHome => @<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V10.5z" /></svg>;
+	private RenderFragment IconBuilding => @<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="1" /><path d="M9 22V12h6v10M9 6h.01M15 6h.01M9 10h.01M15 10h.01" /></svg>;
+	private RenderFragment IconDot => @<svg viewBox="0 0 24 24" width="8" height="8" fill="currentColor"><circle cx="12" cy="12" r="5" /></svg>;
+	private RenderFragment IconX => @<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>;
+	private RenderFragment IconCheckSmall => @<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>;
+	private RenderFragment IconCheckRing => @<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>;
+	private RenderFragment IconCheckBadge => @<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>;
+	private RenderFragment IconXBadge => @<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>;
+
+	// Side-profile cargo truck illustration (cab + box + wheels) — same as the dispatch flow.
+	private RenderFragment Truck(int size) => @<svg viewBox="0 0 120 80" width="@size" height="@(size * 0.66)" style="display:block;overflow:visible">
+		<ellipse cx="60" cy="74" rx="46" ry="3" fill="rgba(0,0,0,0.14)" />
+		<rect x="44" y="18" width="68" height="40" rx="3" fill="#fff" stroke="#0b0b0c" stroke-width="2.2" />
+		<line x1="44" y1="32" x2="112" y2="32" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="44" y1="44" x2="112" y2="44" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="60" y1="18" x2="60" y2="58" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="78" y1="18" x2="78" y2="58" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<line x1="96" y1="18" x2="96" y2="58" stroke="#0b0b0c" stroke-width="1" opacity="0.25" />
+		<path d="M 8,58 L 8,38 L 14,30 L 28,30 L 32,18 L 44,18 L 44,58 Z" fill="#fff" stroke="#0b0b0c" stroke-width="2.2" stroke-linejoin="round" />
+		<path d="M 16,32 L 28,32 L 31,22 L 19,22 Z" fill="#1a1a1a" />
+		<line x1="32" y1="32" x2="32" y2="50" stroke="#0b0b0c" stroke-width="1.2" opacity="0.4" />
+		<rect x="36" y="40" width="4" height="1.5" fill="#0b0b0c" opacity="0.5" />
+		<rect x="8" y="42" width="3" height="4" rx="0.5" fill="#ffd166" />
+		<rect x="6" y="54" width="6" height="4" rx="1" fill="#0b0b0c" />
+		<g>
+			<circle cx="22" cy="60" r="7" fill="#0b0b0c" /><circle cx="22" cy="60" r="3" fill="#fff" />
+			<circle cx="80" cy="60" r="7" fill="#0b0b0c" /><circle cx="80" cy="60" r="3" fill="#fff" />
+			<circle cx="96" cy="60" r="7" fill="#0b0b0c" /><circle cx="96" cy="60" r="3" fill="#fff" />
+		</g>
+	</svg>;
+}
