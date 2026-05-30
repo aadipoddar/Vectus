@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>pa</AssemblyVersion>
+    <AssemblyVersion>1.0.1.4</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
