@@ -19,6 +19,8 @@ public static class StorageFileNames
 	public static string DueDocumentsDataFileName => "due_documents_data.json";
 	public static string InGarageRepairsDataFileName => "in_garage_repairs_data.json";
 	public static string IdleVehiclesDataFileName => "idle_vehicles_data.json";
+	public static string CompaniesDataFileName => "companies_data.json";
+	public static string VehicleTypesDataFileName => "vehicle_types_data.json";
 	public static string TripRequestsYearOverviewDataFileName => "trip_requests_year_overview_data.json";
 	public static string RepairsYearOverviewDataFileName => "repairs_year_overview_data.json";
 	public static string RepairJobsYearOverviewDataFileName => "repair_jobs_year_overview_data.json";

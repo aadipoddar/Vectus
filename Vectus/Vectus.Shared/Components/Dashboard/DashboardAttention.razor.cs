@@ -58,23 +58,33 @@ public partial class DashboardAttention
 
 	private async Task LoadData()
 	{
-		LoadCachedAttentions();
+		if (LoadCachedAttentions())
+			return;
+
 		await LoadNewAttentions();
 
-		var expiry = TimeSpan.FromMinutes(30);
+		var expiry = TimeSpan.FromHours(1);
 		MemoryCache.Set(StorageFileNames.DueDocumentsDataFileName, _dueDocuments, expiry);
 		MemoryCache.Set(StorageFileNames.PendingTripRequestsDataFileName, _pendingTripRequests, expiry);
 		MemoryCache.Set(StorageFileNames.InGarageRepairsDataFileName, _inGarageRepairs, expiry);
 		MemoryCache.Set(StorageFileNames.IdleVehiclesDataFileName, _idleVehicles, expiry);
+		MemoryCache.Set(StorageFileNames.CompaniesDataFileName, _companies, expiry);
+		MemoryCache.Set(StorageFileNames.VehicleTypesDataFileName, _vehicleTypes, expiry);
 	}
 
-	private void LoadCachedAttentions()
+	private bool LoadCachedAttentions()
 	{
+		if (!MemoryCache.TryGetValue(StorageFileNames.IdleVehiclesDataFileName, out List<VehicleModel> idleVehicles))
+			return false;
+
+		_idleVehicles = idleVehicles ?? [];
 		_dueDocuments = MemoryCache.Get<List<VehicleDocumentRenewalOverviewModel>>(StorageFileNames.DueDocumentsDataFileName) ?? [];
 		_pendingTripRequests = MemoryCache.Get<List<TripRequestOverviewModel>>(StorageFileNames.PendingTripRequestsDataFileName) ?? [];
 		_inGarageRepairs = MemoryCache.Get<List<RepairOverviewModel>>(StorageFileNames.InGarageRepairsDataFileName) ?? [];
-		_idleVehicles = MemoryCache.Get<List<VehicleModel>>(StorageFileNames.IdleVehiclesDataFileName) ?? [];
+		_companies = MemoryCache.Get<List<CompanyModel>>(StorageFileNames.CompaniesDataFileName) ?? [];
+		_vehicleTypes = MemoryCache.Get<List<VehicleTypeModel>>(StorageFileNames.VehicleTypesDataFileName) ?? [];
 		StateHasChanged();
+		return true;
 	}
 
 	private async Task LoadNewAttentions()

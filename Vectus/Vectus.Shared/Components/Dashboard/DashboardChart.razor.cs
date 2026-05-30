@@ -69,26 +69,29 @@ public partial class DashboardChart
 
 	private async Task LoadData()
 	{
-		LoadCached();
+		if (LoadCached())
+			return;
+
 		await LoadFresh();
 
-		var expiry = TimeSpan.FromMinutes(30);
+		var expiry = TimeSpan.FromHours(1);
 		MemoryCache.Set(StorageFileNames.TripRequestsYearOverviewDataFileName, _tripRequests, expiry);
 		MemoryCache.Set(StorageFileNames.RepairsYearOverviewDataFileName, _repairs, expiry);
 		MemoryCache.Set(StorageFileNames.RepairJobsYearOverviewDataFileName, _repairJobs, expiry);
 	}
 
-	private void LoadCached()
+	private bool LoadCached()
 	{
-		_tripRequests = MemoryCache.Get<List<TripRequestOverviewModel>>(StorageFileNames.TripRequestsYearOverviewDataFileName) ?? [];
+		if (!MemoryCache.TryGetValue(StorageFileNames.TripRequestsYearOverviewDataFileName, out List<TripRequestOverviewModel> tripRequests))
+			return false;
+
+		_tripRequests = tripRequests ?? [];
 		_repairs = MemoryCache.Get<List<RepairOverviewModel>>(StorageFileNames.RepairsYearOverviewDataFileName) ?? [];
 		_repairJobs = MemoryCache.Get<List<RepairJobOverviewModel>>(StorageFileNames.RepairJobsYearOverviewDataFileName) ?? [];
 
-		if (_tripRequests.Count > 0 || _repairs.Count > 0 || _repairJobs.Count > 0)
-		{
-			BuildAll();
-			StateHasChanged();
-		}
+		BuildAll();
+		StateHasChanged();
+		return true;
 	}
 
 	private async Task LoadFresh()
