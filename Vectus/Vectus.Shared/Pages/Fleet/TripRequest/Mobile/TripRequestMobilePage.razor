@@ -134,6 +134,10 @@ else
 				@IconSearch
 				<input placeholder="Search saved route or location" value="@_routeQuery"
 					   @oninput="e => _routeQuery = e.Value?.ToString()" />
+				@if (!string.IsNullOrEmpty(_routeQuery))
+				{
+					<button class="clear" @onclick="() => _routeQuery = string.Empty">@IconClose</button>
+				}
 			</div>
 			<div class="list">
 				@if (FilteredRoutes.Count == 0)

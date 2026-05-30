@@ -112,6 +112,8 @@
 .search-pill { margin: 10px 18px 6px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; background: var(--surface-2); border-radius: 14px; color: var(--ink); }
 .search-pill input { border: 0; background: transparent; flex: 1; font-size: 15px; font-family: inherit; font-weight: 600; outline: none; color: var(--ink); }
 .search-pill input::placeholder { color: var(--ink-2); }
+.search-pill .clear { border: 0; background: transparent; color: var(--ink-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; }
+.search-pill .clear:hover { color: var(--ink); }
 .sheet .list { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 10px 24px; }
 .sheet .list .empty { padding: 28px; text-align: center; color: var(--ink-2); font-size: 14px; font-weight: 500; }
 

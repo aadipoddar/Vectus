@@ -70,6 +70,9 @@
 .veh-search svg { color: var(--ink-2); flex-shrink: 0; }
 .veh-search input { border: 0; background: transparent; flex: 1; min-width: 0; font-size: 14.5px; font-family: inherit; font-weight: 600; outline: none; color: var(--ink); }
 .veh-search input::placeholder { color: var(--ink-2); }
+.veh-search .clear { border: 0; background: transparent; color: var(--ink-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; }
+.veh-search .clear svg { color: inherit; }
+.veh-search .clear:hover { color: var(--ink); }
 
 /* other vehicles — compact rows */
 .truck-list { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1 1 auto; min-height: 0; padding: 0 8px 6px; }
