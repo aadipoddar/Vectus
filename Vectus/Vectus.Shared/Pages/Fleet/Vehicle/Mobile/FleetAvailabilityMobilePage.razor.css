@@ -1,0 +1,104 @@
+/* Fleet Availability — mobile. The SDR flips each truck available / off-duty.
+   Tapping a toggle commits instantly (no confirm); a live summary + progress
+   bar update in place and a small toast confirms the change. Same visual
+   language as the Trip Accept / Trip Request mobile pages. Ported from the
+   Claude Design prototype (Fleet Availability.html / trip-availability.jsx). */
+
+.fleet-app, .fleet-app * { box-sizing: border-box; }
+
+.fleet-app {
+	position: fixed;
+	inset: 0;
+	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+	font-feature-settings: 'ss01','cv11';
+	color: var(--ink);
+	background: var(--bg);
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
+	--ink: #0b0b0c;
+	--ink-2: #6b6b6b;
+	--ink-3: #9ca0a8;
+	--bg: #ffffff;
+	--surface: #ffffff;
+	--surface-2: #f1f1f3;
+	--surface-3: #e8e8ec;
+	--line: rgba(11,11,12,0.08);
+	--line-2: rgba(11,11,12,0.14);
+	--accent: #0b0b0c;
+	--accent-ink: #ffffff;
+	--promo: #00a868;
+	--warn: #f5a623;
+	--danger: #dc2626;
+}
+
+.display { font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 600; letter-spacing: 0; }
+
+.f-stage { position: absolute; inset: 0; padding-top: env(safe-area-inset-top, 12px); padding-bottom: env(safe-area-inset-bottom, 0px); overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── top bar ── */
+.f-topbar { display: flex; align-items: center; gap: 6px; padding: 8px 14px 4px; }
+.f-iconbtn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); cursor: pointer; transition: background .12s ease; }
+.f-iconbtn:hover { background: var(--surface-2); }
+
+/* ── header ── */
+.f-head { padding: 6px 20px 4px; }
+.f-h1 { font-size: 32px; line-height: 1.05; margin: 0; }
+.f-sub { font-size: 14px; color: var(--ink-2); font-weight: 500; margin-top: 4px; }
+
+/* ── summary card ── */
+.f-summary { margin: 16px 16px 6px; border: 2px solid var(--ink); border-radius: 20px; padding: 16px 18px 18px; }
+.f-summary .row1 { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.f-summary .big { display: flex; align-items: baseline; gap: 8px; }
+.f-summary .big .n { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 42px; letter-spacing: -0.03em; line-height: 0.9; }
+.f-summary .big .of { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 14px; color: var(--ink-2); letter-spacing: -0.01em; }
+.f-allbtn { border: 1.5px solid var(--line-2); background: transparent; color: var(--ink); font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: -0.005em; padding: 9px 14px; border-radius: 999px; cursor: pointer; transition: background .12s ease; white-space: nowrap; flex-shrink: 0; }
+.f-allbtn:hover { background: var(--surface-2); }
+.f-allbtn:disabled { opacity: .4; cursor: not-allowed; }
+.f-summary .track { height: 8px; border-radius: 999px; background: var(--surface-3); margin-top: 16px; overflow: hidden; }
+.f-summary .fill { height: 100%; border-radius: 999px; background: var(--promo); transition: width .35s cubic-bezier(.4,0,.2,1); }
+.f-summary .legend { display: flex; align-items: center; gap: 16px; margin-top: 11px; }
+.f-summary .legend .li { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.f-summary .legend .sw { width: 9px; height: 9px; border-radius: 50%; }
+
+/* ── search ── */
+.f-search { margin: 12px 16px 2px; padding: 11px 14px; display: flex; align-items: center; gap: 11px; background: var(--surface-2); border-radius: 14px; color: var(--ink-2); }
+.f-search input { border: 0; background: transparent; flex: 1; min-width: 0; font-size: 15px; font-family: inherit; font-weight: 600; outline: none; color: var(--ink); }
+.f-search input::placeholder { color: var(--ink-3); font-weight: 500; }
+.f-clear { border: 0; background: transparent; color: var(--ink-3); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; }
+.f-clear:hover { color: var(--ink); }
+
+/* ── list ── */
+.f-list { flex: 1; overflow: auto; padding: 10px 16px 28px; -webkit-overflow-scrolling: touch; }
+
+.v-row { display: flex; align-items: center; gap: 13px; padding: 13px 15px; background: var(--surface-2); border-radius: 16px; transition: background .15s ease, opacity .2s ease; }
+.v-row + .v-row { margin-top: 9px; }
+.v-row.off { opacity: 0.62; }
+.v-row .veh-img { flex-shrink: 0; width: 58px; }
+.v-row .grow { flex: 1; min-width: 0; }
+.v-row .vcode { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15.5px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+.v-row .vcode .sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.v-row .vmeta { font-size: 12.5px; color: var(--ink-2); font-weight: 500; margin-top: 3px; display: flex; align-items: center; gap: 5px; min-width: 0; }
+.v-row .vmeta .loc { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v-row .state { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 5px; }
+.v-row.on .state { color: var(--promo); }
+.v-row.off .state { color: var(--ink-3); }
+
+/* ── toggle ── */
+.toggle { width: 52px; height: 31px; border-radius: 999px; background: var(--surface-3); position: relative; cursor: pointer; transition: background .2s ease; flex-shrink: 0; border: 0; padding: 0; }
+.toggle.on { background: var(--accent); }
+.toggle .knob { position: absolute; top: 3px; left: 3px; width: 25px; height: 25px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.28); transition: transform .22s cubic-bezier(.4,0,.2,1); }
+.toggle.on .knob { transform: translateX(21px); }
+.toggle:active .knob { width: 28px; }
+.toggle:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ── empty state ── */
+.f-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 50px 30px; }
+.f-empty h3 { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -0.02em; margin: 0 0 6px; }
+.f-empty p { font-size: 14px; color: var(--ink-2); font-weight: 500; margin: 0; max-width: 260px; }
+
+/* ── toast ── */
+.f-toast { position: absolute; left: 50%; bottom: 50px; transform: translateX(-50%) translateY(14px); background: var(--ink); color: var(--bg); font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: -0.005em; padding: 11px 16px; border-radius: 999px; display: flex; align-items: center; gap: 9px; box-shadow: 0 10px 30px rgba(0,0,0,0.28); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .25s cubic-bezier(.4,0,.2,1); z-index: 40; white-space: nowrap; }
+.f-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.f-toast .tdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.f-toast .mono { font-weight: 700; }

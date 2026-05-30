@@ -73,7 +73,7 @@ else
 							   TabPanelsClass="launchpad-tab-panels">
 
 				<!-- ANALYSIS (Overview) -->
-				<MudBlazor.MudTabPanel Text="Analysis">
+				<MudBlazor.MudTabPanel Text="Analysis" Visible="_user.Admin">
 					<DashboardAnalysis />
 					<DashboardChart />
 					<DashboardAttention />
@@ -100,6 +100,17 @@ else
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
 										<polyline points="22 4 12 14.01 9 11.01" />
+									</svg>
+								</IconContent>
+							</FioriTile>
+
+							<FioriTile Title="Fleet Availability" Subtitle="Mark your assigned trucks available or off duty — saves instantly" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FleetAvailabilityMobile)">
+								<IconContent>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M10 17h4V5H2v12h3" />
+										<path d="M14 9h4l4 4v4h-3" />
+										<circle cx="7.5" cy="17.5" r="2.5" />
+										<circle cx="17.5" cy="17.5" r="2.5" />
 									</svg>
 								</IconContent>
 							</FioriTile>
