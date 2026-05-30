@@ -1,5 +1,7 @@
 using VectusLibrary.Common;
+using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Vehicle.Models;
+using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
 
 namespace VectusLibrary.Fleet.Vehicle.Exports;
@@ -10,11 +12,14 @@ public static class SDRExport
 		IEnumerable<SDRModel> sdrData,
 		ReportExportType exportType)
 	{
+		var users = await CommonData.LoadTableData<UserModel>(OperationNames.User);
+
 		var enrichedData = sdrData.Select(sdr => new
 		{
 			sdr.Id,
 			sdr.Name,
 			sdr.Code,
+			User = users.FirstOrDefault(u => u.Id == sdr.UserId)?.Name ?? "N/A",
 			sdr.Remarks,
 			Status = sdr.Status ? "Active" : "Deleted"
 		});
@@ -24,6 +29,7 @@ public static class SDRExport
 			[nameof(SDRModel.Id)] = new() { DisplayName = "ID", Alignment = CellAlignment.Center, IncludeInTotal = false },
 			[nameof(SDRModel.Name)] = new() { DisplayName = "Name", Alignment = CellAlignment.Left, IsRequired = true },
 			[nameof(SDRModel.Code)] = new() { DisplayName = "Code", Alignment = CellAlignment.Left, IsRequired = true },
+			["User"] = new() { DisplayName = "User", Alignment = CellAlignment.Left },
 			[nameof(SDRModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
 			[nameof(SDRModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
@@ -33,6 +39,7 @@ public static class SDRExport
 			nameof(SDRModel.Id),
 			nameof(SDRModel.Name),
 			nameof(SDRModel.Code),
+			"User",
 			nameof(SDRModel.Remarks),
 			nameof(SDRModel.Status)
 		];

@@ -1,4 +1,5 @@
 @using VectusLibrary.Fleet.Vehicle.Models
+@using VectusLibrary.Operations.Models
 
 @attribute [Route(PageRouteNames.SDRMaster)]
 
@@ -77,6 +78,15 @@ else
 						</div>
 
 						<div class="form-field">
+							<CustomAutoComplete T="UserModel"
+												@bind-Value="_selectedUser"
+												DataSource="@_users"
+												Placeholder="Select User"
+												Label="User"
+												FieldValue="@nameof(UserModel.Name)" />
+						</div>
+
+						<div class="form-field">
 							<CustomTextField @bind-Value="_sdr.Remarks"
 											 Label="Remarks"
 											 Placeholder="Enter remarks (optional)"
@@ -110,6 +120,15 @@ else
 							<GridColumn Field="@nameof(SDRModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(SDRModel.Name)" HeaderText="SDR Name" Width="300" />
 							<GridColumn Field="@nameof(SDRModel.Code)" HeaderText="Code" Width="150" />
+							<GridColumn Field="@nameof(SDRModel.UserId)" HeaderText="User" Width="220">
+								<Template>
+									@{
+										var item = (context as SDRModel);
+										var user = _users.FirstOrDefault(u => u.Id == item.UserId);
+										<span>@(user is not null ? user.Name : "N/A")</span>
+									}
+								</Template>
+							</GridColumn>
 							<GridColumn Field="@nameof(SDRModel.Remarks)" HeaderText="Remarks" Width="400" />
 							<GridColumn Field="@nameof(SDRModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>

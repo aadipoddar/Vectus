@@ -58,6 +58,9 @@ public static class SDRData
 		if (string.IsNullOrWhiteSpace(item.Code))
 			throw new Exception("SDR code is required. Please try again.");
 
+		if (item.UserId <= 0)
+			throw new Exception("User is required. Please select a valid user.");
+
 		var allSDRs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
 
 		var existingByName = allSDRs.FirstOrDefault(x => x.Id != item.Id && x.Name.Equals(item.Name, StringComparison.OrdinalIgnoreCase));

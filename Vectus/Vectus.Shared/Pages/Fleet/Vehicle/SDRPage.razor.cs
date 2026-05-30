@@ -19,8 +19,10 @@ public partial class SDRPage
 	private bool _showDeleted = false;
 
 	private SDRModel _sdr = new();
+	private UserModel _selectedUser;
 
 	private List<SDRModel> _sdrs = [];
+	private List<UserModel> _users = [];
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
@@ -53,6 +55,9 @@ public partial class SDRPage
 	private async Task LoadData()
 	{
 		_sdrs = await CommonData.LoadTableData<SDRModel>(FleetNames.SDR);
+		_users = await CommonData.LoadTableData<UserModel>(OperationNames.User);
+
+		_selectedUser = _users.FirstOrDefault(u => u.Id == _sdr.UserId);
 
 		if (!_showDeleted)
 			_sdrs = [.. _sdrs.Where(sdr => sdr.Status)];
@@ -83,6 +88,8 @@ public partial class SDRPage
 				throw new Exception("You do not have permission to perform this action.");
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
+
+			_sdr.UserId = _selectedUser?.Id ?? 0;
 
 			await SDRData.SaveTransaction(_sdr, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
@@ -249,6 +256,7 @@ public partial class SDRPage
 			return;
 		}
 
+		_selectedUser = _users.FirstOrDefault(u => u.Id == _sdr.UserId);
 		StateHasChanged();
 		await _sfFirstFocus.FocusAsync();
 	}

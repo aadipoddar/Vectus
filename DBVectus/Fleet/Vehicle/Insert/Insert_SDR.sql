@@ -2,6 +2,7 @@
 	@Id INT OUTPUT,
 	@Name VARCHAR(250),
 	@Code VARCHAR(10),
+	@UserId INT,
 	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
@@ -12,6 +13,7 @@ BEGIN
 		(
 			[Name],
 			[Code],
+			[UserId],
 			[Remarks],
 			[Status]
 		)
@@ -19,6 +21,7 @@ BEGIN
 		(
 			@Name,
 			@Code,
+			@UserId,
 			@Remarks,
 			@Status
 		);
@@ -32,6 +35,7 @@ BEGIN
 		SET
 			[Name] = @Name,
 			[Code] = @Code,
+			[UserId] = @UserId,
 			[Remarks] = @Remarks,
 			[Status] = @Status
 		WHERE [Id] = @Id;
