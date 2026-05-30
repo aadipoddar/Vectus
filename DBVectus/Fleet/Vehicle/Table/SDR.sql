@@ -4,6 +4,6 @@
     [Name] VARCHAR(250) NOT NULL UNIQUE,
     [Code] VARCHAR(10) NOT NULL UNIQUE,
     [UserId] INT NOT NULL ,
-    [Remarks] VARCHAR(MAX) NULL,
+    [Remarks] VARCHAR(MAX) NULL DEFAULT 1,
     [Status] BIT NOT NULL DEFAULT 1
 )
