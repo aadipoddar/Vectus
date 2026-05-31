@@ -1,10 +1,14 @@
 ﻿using OfficeOpenXml;
 
+using VectusLibrary.Common;
 using VectusLibrary.DataAccess;
+using VectusLibrary.Fleet.Route.Data;
+using VectusLibrary.Fleet.Route.Models;
+using VectusLibrary.Fleet.Vehicle.Models;
 
 SqlDataAccess.SetupConfiguration();
 
-FileInfo fileInfo = new(@"C:\Others\vehicledriver.xlsx");
+FileInfo fileInfo = new(@"C:\Others\driver.xlsx");
 
 ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
@@ -14,6 +18,7 @@ await package.LoadAsync(fileInfo);
 
 var worksheet1 = package.Workbook.Worksheets[0];
 
+await InsertVehicleDriver(worksheet1);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -229,3 +234,39 @@ static async Task InsertVehicleDriver(ExcelWorksheet worksheet1)
 
 */
 #endregion
+
+static async Task InsertVehicleDriver(ExcelWorksheet worksheet1)
+{
+	int row = 2;
+	while (worksheet1.Cells[row, 1].Value != null)
+	{
+		var code = worksheet1.Cells[row, 1].Value.ToString();
+		var name = worksheet1.Cells[row, 2].Value.ToString();
+
+		if (string.IsNullOrWhiteSpace(code) ||
+			string.IsNullOrWhiteSpace(name))
+		{
+			Console.WriteLine("Not Inserted Row = " + row);
+			continue;
+		}
+
+		code = code.Trim();
+		name = name.Trim();
+
+		var vehicles = await CommonData.LoadTableData<VehicleModel>(FleetNames.Vehicle);
+		var drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver);
+
+		var vehicle = vehicles.FirstOrDefault(v => string.Equals(v.ShortCode, code[^4..], StringComparison.OrdinalIgnoreCase));
+		var driver = drivers.FirstOrDefault(d => string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
+
+		Console.WriteLine("Inserting New Vehicle: " + code);
+		await VehicleDriverData.SaveTransaction(new()
+		{
+			Id = 0,
+			DriverId = driver.Id,
+			StartDateTime = DateTime.Now,
+			VehicleId = vehicle.Id
+		}, 1, "Import Script");
+		row++;
+	}
+}

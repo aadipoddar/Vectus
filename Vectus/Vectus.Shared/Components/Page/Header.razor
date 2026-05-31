@@ -17,17 +17,19 @@
 	</div>
 	<div class="header-right">
 		<div class="global-search-container">
-			<div class="global-search-input">
-				<CustomAutoComplete @ref="_globalSearch" T="GlobalSearchItem"
-									Value="_selectedSearchItem"
-									ValueChanged="OnRouteSelected"
-									SearchFunction="HeaderSearch"
-									FieldValue="@nameof(GlobalSearchItem.DisplayText)"
-									Placeholder="Search Route, Code, Trans (F2)"
-									Required="false" />
+			<div class="global-search-box">
+				<div class="global-search-input">
+					<CustomAutoComplete @ref="_globalSearch" T="GlobalSearchItem"
+										Value="_selectedSearchItem"
+										ValueChanged="OnRouteSelected"
+										SearchFunction="HeaderSearch"
+										FieldValue="@nameof(GlobalSearchItem.DisplayText)"
+										Placeholder="Search Route, Code, Trans (F2)"
+										Required="false" />
+				</div>
+				<IconButton Icon="IconType.View" Variant="ButtonVariant.View" Title="View" OnClick="NavigateToSearch" />
+				<IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Title="Print PDF" OnClick="DownloadPdfFromSearch" />
 			</div>
-			<IconButton Icon="IconType.View" Variant="ButtonVariant.View" Title="View" OnClick="NavigateToSearch" />
-			<IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Title="Print PDF" OnClick="DownloadPdfFromSearch" />
 
 			<div class="header-divider"></div>
 			@if (RightContent != null)
@@ -36,6 +38,7 @@
 			}
 			<button type="button" class="user-badge" title="Logout (Ctrl+L)" @onclick="Logout">
 				<span class="user-name-text">@_user?.Name</span>
+				<span class="user-name-mobile">@GetMobileUserName()</span>
 				<span class="logout-power-button">
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
@@ -56,6 +59,7 @@
 		background: #ffffff;
 		border-bottom: 1px solid #e2e8f0;
 		padding: 10px 24px;
+		padding-top: max(10px, env(safe-area-inset-top));
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
@@ -175,8 +179,18 @@
 		border-radius: 8px;
 	}
 
+	.global-search-box {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
 	.global-search-input {
 		width: 250px;
+	}
+
+	.user-name-mobile {
+		display: none;
 	}
 
 	/* Keep the MudBlazor AutoComplete compact so it fits the header height */
@@ -200,17 +214,27 @@
 
 	@@media (max-width: 768px) {
 
-		.header-divider,
-		.global-search-container {
+		.global-search-box,
+		.header-divider {
 			display: none;
+		}
+
+		.global-search-container {
+			margin-left: 0;
+			background-color: transparent;
+			padding: 0;
 		}
 
 		.user-name-text {
 			display: none;
 		}
 
+		.user-name-mobile {
+			display: inline;
+		}
+
 		.user-badge {
-			padding: 3px;
+			padding: 3px 8px;
 		}
 	}
 </style>

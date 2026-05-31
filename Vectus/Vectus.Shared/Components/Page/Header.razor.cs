@@ -168,6 +168,15 @@ public partial class Header
 		LoadRoutes();
 	}
 
+	private string GetMobileUserName()
+	{
+		if (_user is null || string.IsNullOrWhiteSpace(_user.Name))
+			return string.Empty;
+
+		var userName = _user.Name.Trim();
+		return userName.Length > 5 ? $"{userName[..5]}..." : userName;
+	}
+
 	private void NavigateToHome() =>
 		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
 
