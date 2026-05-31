@@ -22,6 +22,7 @@ public static class PageRouteNames
 	public const string TrialBalanceReport = "/accounts/reports/trial-balance";
 	public const string ProfitAndLossReport = "/accounts/reports/profit-and-loss";
 	public const string BalanceSheetReport = "/accounts/reports/balance-sheet";
+	public const string BankReconciliation = "/accounts/reports/bank-reconciliation";
 
 	public const string CompanyMaster = "/accounts/masters/company";
 	public const string LedgerMaster = "/accounts/masters/ledger";

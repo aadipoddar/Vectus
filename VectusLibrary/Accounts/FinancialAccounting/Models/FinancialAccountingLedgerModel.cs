@@ -10,6 +10,9 @@ public class FinancialAccountingLedgerModel
 	public string? ReferenceNo { get; set; }
 	public decimal? Debit { get; set; }
 	public decimal? Credit { get; set; }
+	public string? InstrumentNo { get; set; }
+	public DateTime? InstrumentDate { get; set; }
+	public DateTime? ClearingDate { get; set; }
 	public string? Remarks { get; set; }
 	public bool Status { get; set; }
 }
@@ -23,6 +26,8 @@ public class FinancialAccountingLedgerCartModel
 	public string? ReferenceNo { get; set; }
 	public decimal? Debit { get; set; }
 	public decimal? Credit { get; set; }
+	public string? InstrumentNo { get; set; }
+	public DateTime? InstrumentDate { get; set; }
 	public string? Remarks { get; set; }
 }
 
@@ -41,11 +46,13 @@ public class FinancialAccountingLedgerOverviewModel
 	public int? LedgerReferenceId { get; set; }
 	public string? LedgerReferenceType { get; set; }
 	public string? LedgerReferenceNo { get; set; }
-	public DateTime? LedgerReferenceDateTime { get; set; }
-	public decimal? LedgerReferenceAmount { get; set; }
 
 	public decimal? Debit { get; set; }
 	public decimal? Credit { get; set; }
+
+	public string? InstrumentNo { get; set; }
+	public DateTime? InstrumentDate { get; set; }
+	public DateTime? ClearingDate { get; set; }
 
 	public string? LedgerRemarks { get; set; }
 

@@ -49,6 +49,7 @@ else
 								<MenuItem Text="Trial Balance" Id="TrialBalance" Disabled="@_isProcessing" />
 								<MenuItem Text="Profit & Loss" Id="ProfitLoss" Disabled="@_isProcessing" />
 								<MenuItem Text="Balance Sheet" Id="BalanceSheet" Disabled="@_isProcessing" />
+								<MenuItem Text="Bank Reconciliation" Id="BankReconciliation" Disabled="@_isProcessing" />
 							</MenuItems>
 						</MenuItem>
 						<MenuItem Text="Periods" IconCss="e-icons e-clock">
@@ -254,26 +255,6 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceAmount)" Type="AggregateType.Sum" Format="N2">
-										<FooterTemplate>
-											@{
-												var aggregate = (context as AggregateTemplateContext);
-												<div><strong>@aggregate.Sum</strong></div>
-											}
-										</FooterTemplate>
-										<GroupFooterTemplate>
-											@{
-												var aggregate = (context as AggregateTemplateContext);
-												<div><strong>@aggregate.Sum</strong></div>
-											}
-										</GroupFooterTemplate>
-										<GroupCaptionTemplate>
-											@{
-												var aggregate = (context as AggregateTemplateContext);
-												<div><strong>@aggregate.Sum</strong></div>
-											}
-										</GroupCaptionTemplate>
-									</GridAggregateColumn>
 								</GridAggregateColumns>
 							</GridAggregate>
 						</GridAggregates>
@@ -286,8 +267,20 @@ else
 
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceType)" HeaderText="Ref Type" Width="130" />
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceNo)" HeaderText="Ref No" Width="150" />
-							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceDateTime)" HeaderText="Ref Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceAmount)" HeaderText="Ref Amt" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+
+							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.InstrumentNo)" HeaderText="Instrument No" Width="150" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.InstrumentDate)" HeaderText="Instrument Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.ClearingDate)" HeaderText="Clearing Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+							<GridColumn HeaderText="Reconciled" Width="120" TextAlign="TextAlign.Center" Visible="_showAllColumns">
+								<Template>
+									@{
+										var line = (context as FinancialAccountingLedgerOverviewModel);
+										<span class="@(line.ClearingDate is not null ? "grid-credit" : "grid-debit")">
+											@(line.ClearingDate is not null ? "Reconciled" : "Unreconciled")
+										</span>
+									}
+								</Template>
+							</GridColumn>
 
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.Debit)" HeaderText="Debit" Width="140" TextAlign="TextAlign.Right">
 								<Template>

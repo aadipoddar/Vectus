@@ -55,6 +55,11 @@ public partial class SettingsPage
 	private LedgerModel _selectedGSTLedger;
 	private List<LedgerModel> _ledgers = [];
 
+	// Bank Reconciliation
+	private string _bankAccountTypeId = string.Empty;
+	private AccountTypeModel _selectedBankAccountType;
+	private List<AccountTypeModel> _accountTypes = [];
+
 	// Default Values
 	private string _defaultSelectedVoucherId = string.Empty;
 	private VoucherModel _selectedDefaultVoucher;
@@ -94,6 +99,7 @@ public partial class SettingsPage
 			await LoadAllSettings();
 			await LoadCompanies();
 			await LoadLedgers();
+			await LoadAccountTypes();
 			await LoadVouchers();
 			MapSelections();
 		}
@@ -165,6 +171,9 @@ public partial class SettingsPage
 		s = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
 		_gstLedgerId = s?.Value ?? string.Empty;
 
+		s = await SettingsData.LoadSettingsByKey(SettingsKeys.BankAccountTypeId);
+		_bankAccountTypeId = s?.Value ?? string.Empty;
+
 		s = await SettingsData.LoadSettingsByKey(SettingsKeys.DefaultSelectedVoucherId);
 		_defaultSelectedVoucherId = s?.Value ?? string.Empty;
 
@@ -193,6 +202,12 @@ public partial class SettingsPage
 		_ledgers = result ?? [];
 	}
 
+	private async Task LoadAccountTypes()
+	{
+		var result = await CommonData.LoadTableData<AccountTypeModel>(AccountNames.AccountType);
+		_accountTypes = result ?? [];
+	}
+
 	private async Task LoadVouchers()
 	{
 		var result = await CommonData.LoadTableData<VoucherModel>(AccountNames.Voucher);
@@ -209,6 +224,9 @@ public partial class SettingsPage
 
 		if (!string.IsNullOrWhiteSpace(_gstLedgerId) && int.TryParse(_gstLedgerId, out var gstId))
 			_selectedGSTLedger = _ledgers.FirstOrDefault(l => l.Id == gstId);
+
+		if (!string.IsNullOrWhiteSpace(_bankAccountTypeId) && int.TryParse(_bankAccountTypeId, out var bankAccountTypeId))
+			_selectedBankAccountType = _accountTypes.FirstOrDefault(a => a.Id == bankAccountTypeId);
 
 		if (!string.IsNullOrWhiteSpace(_defaultSelectedVoucherId) && int.TryParse(_defaultSelectedVoucherId, out var voucherId))
 			_selectedDefaultVoucher = _vouchers.FirstOrDefault(v => v.Id == voucherId);
@@ -234,6 +252,12 @@ public partial class SettingsPage
 	{
 		_selectedGSTLedger = value;
 		_gstLedgerId = value?.Id.ToString() ?? string.Empty;
+	}
+
+	private void OnBankAccountTypeChange(AccountTypeModel value)
+	{
+		_selectedBankAccountType = value;
+		_bankAccountTypeId = value?.Id.ToString() ?? string.Empty;
 	}
 
 	private void OnDefaultVoucherChange(VoucherModel value)
@@ -289,6 +313,7 @@ public partial class SettingsPage
 			await UpdateSetting(SettingsKeys.PrimaryCompanyLinkingId, _primaryCompanyLinkingId, Desc(SettingsKeys.PrimaryCompanyLinkingId));
 			await UpdateSetting(SettingsKeys.CashLedgerId, _cashLedgerId, Desc(SettingsKeys.CashLedgerId));
 			await UpdateSetting(SettingsKeys.GSTLedgerId, _gstLedgerId, Desc(SettingsKeys.GSTLedgerId));
+			await UpdateSetting(SettingsKeys.BankAccountTypeId, _bankAccountTypeId, Desc(SettingsKeys.BankAccountTypeId));
 			await UpdateSetting(SettingsKeys.DefaultSelectedVoucherId, _defaultSelectedVoucherId, Desc(SettingsKeys.DefaultSelectedVoucherId));
 			await UpdateSetting(SettingsKeys.AutoRefreshReportTimer, _autoRefreshReportTimer.ToString(), Desc(SettingsKeys.AutoRefreshReportTimer));
 			await UpdateSetting(SettingsKeys.ReportWarningDays, _reportWarningDays.ToString(), Desc(SettingsKeys.ReportWarningDays));

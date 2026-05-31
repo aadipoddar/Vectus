@@ -145,9 +145,11 @@ public static class FinancialAccountingReportExport
             
             [nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceType)] = new() { DisplayName = "Ref Type", Alignment = CellAlignment.Left, IncludeInTotal = false },
             [nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceNo)] = new() { DisplayName = "Ref No", Alignment = CellAlignment.Left, IncludeInTotal = false },
-            [nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceDateTime)] = new() { DisplayName = "Ref Date", Format = "dd-MMM-yyyy", Alignment = CellAlignment.Center, IncludeInTotal = false },
-            [nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceAmount)] = new() { DisplayName = "Ref Amt", Format = "#,##0.00", Alignment = CellAlignment.Right, IncludeInTotal = true },
-            
+
+            [nameof(FinancialAccountingLedgerOverviewModel.InstrumentNo)] = new() { DisplayName = "Instrument No", Alignment = CellAlignment.Left, IncludeInTotal = false },
+            [nameof(FinancialAccountingLedgerOverviewModel.InstrumentDate)] = new() { DisplayName = "Instrument Date", Format = "dd-MMM-yyyy", Alignment = CellAlignment.Center, IncludeInTotal = false },
+            [nameof(FinancialAccountingLedgerOverviewModel.ClearingDate)] = new() { DisplayName = "Clearing Date", Format = "dd-MMM-yyyy", Alignment = CellAlignment.Center, IncludeInTotal = false },
+
             [nameof(FinancialAccountingLedgerOverviewModel.Debit)] = new() { DisplayName = "Debit", Format = "#,##0.00", Alignment = CellAlignment.Right, IncludeInTotal = true },
             [nameof(FinancialAccountingLedgerOverviewModel.Credit)] = new() { DisplayName = "Credit", Format = "#,##0.00", Alignment = CellAlignment.Right, IncludeInTotal = true },
 
@@ -185,8 +187,9 @@ public static class FinancialAccountingReportExport
                 nameof(FinancialAccountingLedgerOverviewModel.GroupName),
                 nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceType),
                 nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceNo),
-                nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceDateTime),
-                nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceAmount),
+                nameof(FinancialAccountingLedgerOverviewModel.InstrumentNo),
+                nameof(FinancialAccountingLedgerOverviewModel.InstrumentDate),
+                nameof(FinancialAccountingLedgerOverviewModel.ClearingDate),
                 nameof(FinancialAccountingLedgerOverviewModel.Debit),
                 nameof(FinancialAccountingLedgerOverviewModel.Credit),
                 nameof(FinancialAccountingLedgerOverviewModel.LedgerRemarks),
@@ -222,6 +225,9 @@ public static class FinancialAccountingReportExport
                 nameof(FinancialAccountingLedgerOverviewModel.TransactionNo),
                 nameof(FinancialAccountingLedgerOverviewModel.TransactionDateTime),
                 nameof(FinancialAccountingLedgerOverviewModel.LedgerReferenceNo),
+                nameof(FinancialAccountingLedgerOverviewModel.InstrumentNo),
+                nameof(FinancialAccountingLedgerOverviewModel.InstrumentDate),
+                nameof(FinancialAccountingLedgerOverviewModel.ClearingDate),
                 nameof(FinancialAccountingLedgerOverviewModel.Debit),
                 nameof(FinancialAccountingLedgerOverviewModel.Credit),
                 nameof(FinancialAccountingLedgerOverviewModel.LedgerRemarks),

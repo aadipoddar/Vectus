@@ -30,7 +30,9 @@ BEGIN
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'CashLedgerId'					, N'1'		, N'Cash ledger account for Cash Entries')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'GSTLedgerId'						, N'2'		, N'GST ledger account for GST Tax Entries')
 
-	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'DefaultSelectedVoucherId'		, N'1', N'Default selected voucher type in transactions')
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'BankAccountTypeId'				, N'2'		, N'Account Type that identifies Bank ledgers for reconciliation')
+
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'DefaultSelectedVoucherId'		, N'1',		N'Default selected voucher type in transactions')
 
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'AutoRefreshReportTimer'			, N'5', N'Auto refresh interval for reports in minutes')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'ReportWarningDays'			, N'30', N'Days threshold used to highlight due items in reports')

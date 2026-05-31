@@ -7,6 +7,9 @@
 	@ReferenceNo VARCHAR(MAX),
 	@Debit MONEY,
 	@Credit MONEY,
+	@InstrumentNo VARCHAR(MAX),
+	@InstrumentDate DATETIME,
+	@ClearingDate DATETIME,
 	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
@@ -22,6 +25,9 @@ BEGIN
 			[ReferenceNo],
 			[Debit],
 			[Credit],
+			[InstrumentNo],
+			[InstrumentDate],
+			[ClearingDate],
 			[Remarks],
 			[Status]
 		) VALUES
@@ -33,6 +39,9 @@ BEGIN
 			@ReferenceNo,
 			@Debit,
 			@Credit,
+			@InstrumentNo,
+			@InstrumentDate,
+			@ClearingDate,
 			@Remarks,
 			@Status
 		)
@@ -51,6 +60,9 @@ BEGIN
 			[ReferenceNo] = @ReferenceNo,
 			[Debit] = @Debit,
 			[Credit] = @Credit,
+			[InstrumentNo] = @InstrumentNo,
+			[InstrumentDate] = @InstrumentDate,
+			[ClearingDate] = @ClearingDate,
 			[Remarks] = @Remarks,
 			[Status] = @Status
 		WHERE

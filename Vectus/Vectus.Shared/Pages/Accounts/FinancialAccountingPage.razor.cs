@@ -229,6 +229,8 @@ public partial class FinancialAccountingPage
 						ReferenceId = item.ReferenceId,
 						ReferenceNo = item.ReferenceNo,
 						ReferenceType = item.ReferenceType,
+						InstrumentNo = item.InstrumentNo,
+						InstrumentDate = item.InstrumentDate,
 						Remarks = item.Remarks
 					});
 				}
@@ -378,6 +380,8 @@ public partial class FinancialAccountingPage
 			ReferenceId = _selectedCart.ReferenceId,
 			ReferenceNo = _selectedCart.ReferenceNo,
 			ReferenceType = _selectedCart.ReferenceType,
+			InstrumentNo = string.IsNullOrWhiteSpace(_selectedCart.InstrumentNo) ? null : _selectedCart.InstrumentNo.Trim(),
+			InstrumentDate = _selectedCart.InstrumentDate,
 			Remarks = _selectedCart.Remarks
 		});
 
@@ -415,6 +419,8 @@ public partial class FinancialAccountingPage
 			ReferenceId = cartItem.ReferenceId,
 			ReferenceNo = cartItem.ReferenceNo,
 			ReferenceType = cartItem.ReferenceType,
+			InstrumentNo = cartItem.InstrumentNo,
+			InstrumentDate = cartItem.InstrumentDate,
 			Remarks = cartItem.Remarks
 		};
 
@@ -485,7 +491,7 @@ public partial class FinancialAccountingPage
 				.Where(x => (x.Debit ?? 0) != (x.Credit ?? 0) &&
 							x.LedgerReferenceId is not null &&
 							!string.IsNullOrWhiteSpace(x.LedgerReferenceNo))
-				.OrderByDescending(x => x.LedgerReferenceDateTime)];
+				.OrderByDescending(x => x.TransactionDateTime)];
 
 			if (_accountingLedgers.Count == 0)
 				throw new Exception("No outstanding references found for the selected ledger. All references are fully balanced.");

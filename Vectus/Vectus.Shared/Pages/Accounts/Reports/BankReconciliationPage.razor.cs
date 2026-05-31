@@ -14,7 +14,7 @@ using VectusLibrary.Utils.ExportUtils;
 
 namespace Vectus.Shared.Pages.Accounts.Reports;
 
-public partial class AccountingLedgerReport : IAsyncDisposable
+public partial class BankReconciliationPage : IAsyncDisposable
 {
 	private PeriodicTimer _autoRefreshTimer;
 	private CancellationTokenSource _autoRefreshCts;
@@ -24,20 +24,22 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
-	private bool _showDeleted = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
 
 	private CompanyModel? _selectedCompany = null;
-	private VoucherModel? _selectedVoucher = null;
+	private AccountTypeModel? _selectedAccountType = null;
 	private LedgerModel? _selectedLedger = null;
-	private TrialBalanceModel _selectedTrialBalance = new();
+	private int _reconciledFilter = YesNoFilterOptions.All;
+	private YesNoFilterOption _selectedReconciledFilter;
 
 	private List<CompanyModel> _companies = [];
-	private List<VoucherModel> _vouchers = [];
+	private List<AccountTypeModel> _accountTypes = [];
 	private List<LedgerModel> _ledgers = [];
+
 	private List<FinancialAccountingLedgerOverviewModel> _transactionOverviews = [];
+	private readonly HashSet<int> _dirtyLineIds = [];
 
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
@@ -89,12 +91,17 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		_toDate = _fromDate;
 
 		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(AccountNames.Company);
-		_vouchers = await CommonData.LoadTableDataByStatus<VoucherModel>(AccountNames.Voucher);
+		_accountTypes = await CommonData.LoadTableDataByStatus<AccountTypeModel>(AccountNames.AccountType);
 		_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(AccountNames.Ledger);
 
 		_companies = [.. _companies.OrderBy(s => s.Name)];
-		_vouchers = [.. _vouchers.OrderBy(s => s.Name)];
+		_accountTypes = [.. _accountTypes.OrderBy(s => s.Name)];
 		_ledgers = [.. _ledgers.OrderBy(s => s.Name)];
+
+		// Default the Type filter to the configured bank account type (soft).
+		var bankTypeSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.BankAccountTypeId);
+		if (int.TryParse(bankTypeSetting?.Value, out var bankTypeId) && bankTypeId > 0)
+			_selectedAccountType = _accountTypes.FirstOrDefault(a => a.Id == bankTypeId);
 	}
 
 	private async Task LoadTransactionOverviews()
@@ -106,57 +113,34 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
+			await _toastNotification.ShowAsync("Loading", "Fetching ledger lines...", ToastType.Info);
 
 			_transactionOverviews = await CommonData.LoadTableDataByDate<FinancialAccountingLedgerOverviewModel>(
 				AccountNames.FinancialAccountingLedgerOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
 
-			if (!_showDeleted)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.Status)];
-
 			if (_selectedCompany?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+				_transactionOverviews = [.. _transactionOverviews.Where(l => l.CompanyId == _selectedCompany.Id)];
 
-			if (_selectedVoucher?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.VoucherId == _selectedVoucher.Id)];
+			if (_selectedAccountType?.Id > 0)
+				_transactionOverviews = [.. _transactionOverviews.Where(l => l.AccountTypeId == _selectedAccountType.Id)];
 
-			// Filter by ledger with contra ledger details
 			if (_selectedLedger?.Id > 0)
-			{
-				List<FinancialAccountingLedgerOverviewModel> filteredOverviews = [];
-				var partyLedgers = _transactionOverviews.Where(l => l.Id == _selectedLedger.Id).ToList();
+				_transactionOverviews = [.. _transactionOverviews.Where(l => l.LedgerId == _selectedLedger.Id)];
 
-				foreach (var item in partyLedgers)
-				{
-					var referenceLedgers = _transactionOverviews
-						.Where(l => l.MasterId == item.MasterId && l.Id != _selectedLedger.Id)
-						.ToList();
-
-					var referenceLedgerNamesWithAmount = string.Join("\n",
-						referenceLedgers.Select(l =>
-						$"{l.LedgerName}\t({(l.Debit is > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit is > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})"));
-
-					item.LedgerName = referenceLedgerNamesWithAmount;
-					filteredOverviews.Add(item);
-				}
-
-				_transactionOverviews = filteredOverviews;
-
-				var trialBalances = await FinancialAccountingData.LoadTrialBalanceByCompanyDate(
-					_selectedCompany?.Id ?? 0,
-					DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-					DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
-
-				_selectedTrialBalance = trialBalances.FirstOrDefault(tb => tb.LedgerId == _selectedLedger.Id);
-			}
+			if (_reconciledFilter == YesNoFilterOptions.Yes)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.ClearingDate is not null)];
+			else if (_reconciledFilter == YesNoFilterOptions.No)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.ClearingDate is null)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			_dirtyLineIds.Clear();
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"Failed to load transactions: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Failed to load lines: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -182,15 +166,22 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		await LoadTransactionOverviews();
 	}
 
+	private async Task OnAccountTypeChanged(AccountTypeModel value)
+	{
+		_selectedAccountType = value;
+		await LoadTransactionOverviews();
+	}
+
 	private async Task OnLedgerChanged(LedgerModel value)
 	{
 		_selectedLedger = value;
 		await LoadTransactionOverviews();
 	}
 
-	private async Task OnVoucherChanged(VoucherModel value)
+	private async Task OnReconciledFilterChanged(YesNoFilterOption value)
 	{
-		_selectedVoucher = value;
+		_selectedReconciledFilter = value;
+		_reconciledFilter = value?.Id ?? YesNoFilterOptions.All;
 		await LoadTransactionOverviews();
 	}
 
@@ -198,6 +189,56 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	{
 		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
 		await LoadTransactionOverviews();
+	}
+	#endregion
+
+	#region Reconcile Editing
+	private void OnClearingDateChanged(FinancialAccountingLedgerOverviewModel line, DateTime? date)
+	{
+		if (line is null)
+			return;
+
+		line.ClearingDate = date;
+		_dirtyLineIds.Add(line.Id);
+		StateHasChanged();
+	}
+
+	private async Task SaveReconciliation()
+	{
+		if (_isProcessing)
+			return;
+
+		if (_dirtyLineIds.Count == 0)
+		{
+			await _toastNotification.ShowAsync("Nothing to Save", "No clearing dates have changed.", ToastType.Warning);
+			return;
+		}
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Saving", "Updating clearing dates...", ToastType.Info);
+
+			var changed = _transactionOverviews
+				.Where(l => _dirtyLineIds.Contains(l.Id))
+				.Select(l => new FinancialAccountingLedgerModel { Id = l.Id, ClearingDate = l.ClearingDate })
+				.ToList();
+
+			await FinancialAccountingData.SaveBRSDates(changed, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+
+			await _toastNotification.ShowAsync("Saved", $"{changed.Count} line(s) updated successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error", $"Failed to save reconciliation: {ex.Message}", ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+			await LoadTransactionOverviews();
+		}
 	}
 	#endregion
 
@@ -219,11 +260,9 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 				DateOnly.FromDateTime(_fromDate),
 				DateOnly.FromDateTime(_toDate),
 				_showAllColumns,
-				_showDeleted,
+				false,
 				_selectedCompany?.Id > 0 ? _selectedCompany : null,
-				_selectedLedger?.Id > 0 ? _selectedLedger : null,
-				_selectedLedger?.Id > 0 ? _selectedTrialBalance : null
-			);
+				_selectedLedger?.Id > 0 ? _selectedLedger : null);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -256,11 +295,9 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 				DateOnly.FromDateTime(_fromDate),
 				DateOnly.FromDateTime(_toDate),
 				_showAllColumns,
-				_showDeleted,
+				false,
 				_selectedCompany?.Id > 0 ? _selectedCompany : null,
-				_selectedLedger?.Id > 0 ? _selectedLedger : null,
-				_selectedLedger?.Id > 0 ? _selectedTrialBalance : null
-			);
+				_selectedLedger?.Id > 0 ? _selectedLedger : null);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -462,20 +499,20 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		switch (args.Item.Id)
 		{
 			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager); break;
+			case "Save": await SaveReconciliation(); break;
 			case "Refresh": await LoadTransactionOverviews(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ToggleDeleted": await ToggleDeleted(); break;
 			case "ExportPdf": await ExportPdf(); break;
 			case "ExportExcel": await ExportExcel(); break;
 			case "ViewSelected": await ViewSelectedTransaction(); break;
 			case "DownloadSelectedPdf": await ExportSelectedTransactionPdf(); break;
 			case "DownloadSelectedExcel": await ExportSelectedTransactionExcel(); break;
 			case "DeleteRecoverSelected": await DeleteRecoverSelectedTransaction(); break;
+			case "AccountingLedger": await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "AccountingReport": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "TrialBalance": await AuthenticationService.NavigateToRoute(PageRouteNames.TrialBalanceReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "ProfitLoss": await AuthenticationService.NavigateToRoute(PageRouteNames.ProfitAndLossReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "BalanceSheet": await AuthenticationService.NavigateToRoute(PageRouteNames.BalanceSheetReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "BankReconciliation": await AuthenticationService.NavigateToRoute(PageRouteNames.BankReconciliation, FormFactor, JSRuntime, NavigationManager); break;
 			case "PeriodToday": await HandleDatesChanged(DateRangeType.Today); break;
 			case "PeriodPreviousDay": await HandleDatesChanged(DateRangeType.Yesterday); break;
 			case "PeriodNextDay": await HandleDatesChanged(DateRangeType.NextDay); break;
@@ -509,12 +546,6 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			await _sfGrid.Refresh();
 	}
 
-	private async Task ToggleDeleted()
-	{
-		_showDeleted = !_showDeleted;
-		await LoadTransactionOverviews();
-		StateHasChanged();
-	}
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
@@ -530,7 +561,11 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		try
 		{
 			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
-				await LoadTransactionOverviews();
+			{
+				// Never clobber in-progress reconciliation edits.
+				if (_dirtyLineIds.Count == 0)
+					await LoadTransactionOverviews();
+			}
 		}
 		catch (OperationCanceledException)
 		{

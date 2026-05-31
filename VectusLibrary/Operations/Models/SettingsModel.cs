@@ -37,6 +37,8 @@ public static class SettingsKeys
 	public static string CashLedgerId => "CashLedgerId";
 	public static string GSTLedgerId => "GSTLedgerId";
 
+	public static string BankAccountTypeId => "BankAccountTypeId";
+
 	public static string DefaultSelectedVoucherId => "DefaultSelectedVoucherId";
 
 	public static string AutoRefreshReportTimer => "AutoRefreshReportTimer";
