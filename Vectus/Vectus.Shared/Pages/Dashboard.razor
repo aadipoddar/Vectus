@@ -73,7 +73,7 @@ else
 							   TabPanelsClass="launchpad-tab-panels">
 
 				<!-- ANALYSIS (Overview) -->
-				<MudBlazor.MudTabPanel Text="Analysis" Visible="_user.Admin">
+				<MudBlazor.MudTabPanel Text="Analysis" Visible="_user.Admin && !IsMobile">
 					<DashboardAnalysis />
 					<DashboardChart />
 					<DashboardAttention />
@@ -120,7 +120,7 @@ else
 				</MudBlazor.MudTabPanel>
 
 				<!-- ACCOUNTS -->
-				<MudBlazor.MudTabPanel Text="Accounts" Visible="_user.Accounts">
+				<MudBlazor.MudTabPanel Text="Accounts" Visible="_user.Accounts && !IsMobile">
 
 					<!-- Entry Pages -->
 					<div class="launchpad-section">
@@ -293,7 +293,7 @@ else
 				</MudBlazor.MudTabPanel>
 
 				<!-- FLEET TRANSACTIONS -->
-				<MudBlazor.MudTabPanel Text="Fleet Transactions" Visible="_user.Fleet">
+				<MudBlazor.MudTabPanel Text="Fleet Transactions" Visible="_user.Fleet && !IsMobile">
 
 					<!-- Daily Entries -->
 					<div class="launchpad-section">
@@ -321,7 +321,7 @@ else
 				</MudBlazor.MudTabPanel>
 
 				<!-- FLEET REPORTS -->
-				<MudBlazor.MudTabPanel Text="Fleet Reports" Visible="_user.Reports && _user.Fleet">
+				<MudBlazor.MudTabPanel Text="Fleet Reports" Visible="_user.Reports && _user.Fleet && !IsMobile">
 
 					<!-- Trip Reports -->
 					<div class="launchpad-section">
@@ -389,7 +389,7 @@ else
 				</MudBlazor.MudTabPanel>
 
 				<!-- FLEET MASTERS -->
-				<MudBlazor.MudTabPanel Text="Fleet Masters" Visible="_user.Fleet">
+				<MudBlazor.MudTabPanel Text="Fleet Masters" Visible="_user.Fleet && !IsMobile">
 
 					<!-- Routes & Drivers -->
 					<div class="launchpad-section">
@@ -565,7 +565,7 @@ else
 				</MudBlazor.MudTabPanel>
 
 				<!-- ADMINISTRATION -->
-				<MudBlazor.MudTabPanel Text="Site Administration" Visible="_user.Admin">
+				<MudBlazor.MudTabPanel Text="Site Administration" Visible="_user.Admin && !IsMobile">
 
 					<!-- Users & Settings -->
 					<div class="launchpad-section">

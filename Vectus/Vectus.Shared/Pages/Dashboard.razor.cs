@@ -9,6 +9,7 @@ public partial class Dashboard
 	#region Device Info
 	private string Factor => FormFactor.GetFormFactor();
 	private string Platform => FormFactor.GetPlatform();
+	private bool IsMobile => string.Equals(Factor, "Phone", StringComparison.OrdinalIgnoreCase);
 	private static string AppVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
 	#endregion
 
