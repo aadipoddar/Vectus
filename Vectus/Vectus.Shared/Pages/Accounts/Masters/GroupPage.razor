@@ -47,10 +47,7 @@ else
 			</LeftContent>
 		</Header>
 
-		<!-- Main Content Container -->
 		<div class="page-container">
-
-			<!-- Group Entry Section -->
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">
@@ -64,7 +61,6 @@ else
 				</div>
 				<div class="section-body">
 					<div class="form-grid">
-						<!-- Group Name -->
 						<div class="form-field">
 							<CustomTextField @ref="_sfFirstFocus"
 											 @bind-Value="_group.Name"
@@ -72,7 +68,6 @@ else
 											 Placeholder="Enter Group Name" />
 						</div>
 
-						<!-- Nature -->
 						<div class="form-field">
 							<CustomAutoComplete T="NatureModel"
 												Value="_selectedNature"
@@ -83,7 +78,6 @@ else
 												FieldValue="@nameof(NatureModel.Name)" />
 						</div>
 
-						<!-- Remarks -->
 						<div class="form-field">
 							<CustomTextField @bind-Value="_group.Remarks"
 											 Label="Remarks"
@@ -95,7 +89,6 @@ else
 				</div>
 			</div>
 
-			<!-- Groups List Section -->
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">

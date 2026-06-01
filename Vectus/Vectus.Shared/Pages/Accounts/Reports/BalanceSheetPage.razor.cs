@@ -1,5 +1,3 @@
-using Syncfusion.Blazor.Grids;
-
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
@@ -11,6 +9,8 @@ using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
+
+using Syncfusion.Blazor.Grids;
 
 namespace Vectus.Shared.Pages.Accounts.Reports;
 
@@ -101,12 +101,8 @@ public partial class BalanceSheetPage : IAsyncDisposable
 		}
 		finally
 		{
-			if (_assetsGrid is not null)
-				await _assetsGrid.Refresh();
-
-			if (_liabilitiesGrid is not null)
-				await _liabilitiesGrid.Refresh();
-
+			if (_assetsGrid is not null) await _assetsGrid.Refresh();
+			if (_liabilitiesGrid is not null) await _liabilitiesGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
@@ -121,21 +117,21 @@ public partial class BalanceSheetPage : IAsyncDisposable
 		await LoadBalanceSheet();
 	}
 
-	private async Task OnCompanyChanged(CompanyModel value)
-	{
-		_selectedCompany = value;
-		await LoadBalanceSheet();
-	}
-
 	private async Task HandleDatesChanged(DateRangeType dateRangeType)
 	{
 		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
 		await LoadBalanceSheet();
 	}
+
+	private async Task OnCompanyChanged(CompanyModel value)
+	{
+		_selectedCompany = value;
+		await LoadBalanceSheet();
+	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportReport(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -149,7 +145,7 @@ public partial class BalanceSheetPage : IAsyncDisposable
 			// Export Assets Statement
 			var (assetsStream, assetsFileName) = await BalanceSheetReportExport.ExportAssetsReport(
 					_assetsTrialBalance,
-					ReportExportType.Excel,
+					isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 					DateOnly.FromDateTime(_fromDate),
 					DateOnly.FromDateTime(_toDate),
 					_showAllColumns,
@@ -161,55 +157,7 @@ public partial class BalanceSheetPage : IAsyncDisposable
 			// Export Liabilities Statement
 			var (liabilitiesStream, liabilitiesFileName) = await BalanceSheetReportExport.ExportLiabilitiesReport(
 					_liabilitiesTrialBalance,
-					ReportExportType.Excel,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null
-				);
-
-			await SaveAndViewService.SaveAndView(liabilitiesFileName, liabilitiesStream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			// Export Assets Statement
-			var (assetsStream, assetsFileName) = await BalanceSheetReportExport.ExportAssetsReport(
-					_assetsTrialBalance,
-					ReportExportType.PDF,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null
-				);
-
-			await SaveAndViewService.SaveAndView(assetsFileName, assetsStream);
-
-			// Export Liabilities Statement
-			var (liabilitiesStream, liabilitiesFileName) = await BalanceSheetReportExport.ExportLiabilitiesReport(
-					_liabilitiesTrialBalance,
-					ReportExportType.PDF,
+					isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 					DateOnly.FromDateTime(_fromDate),
 					DateOnly.FromDateTime(_toDate),
 					_showAllColumns,
@@ -240,8 +188,8 @@ public partial class BalanceSheetPage : IAsyncDisposable
 			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager); break;
 			case "Refresh": await LoadBalanceSheet(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "ExportExcel": await ExportExcel(); break;
+			case "ExportPdf": await ExportReport(); break;
+			case "ExportExcel": await ExportReport(true); break;
 			case "TransactionHistory": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "LedgerReport": await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "TrialBalance": await AuthenticationService.NavigateToRoute(PageRouteNames.TrialBalanceReport, FormFactor, JSRuntime, NavigationManager); break;
@@ -264,11 +212,10 @@ public partial class BalanceSheetPage : IAsyncDisposable
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_assetsGrid is not null)
-			await _assetsGrid.Refresh();
-		if (_liabilitiesGrid is not null)
-			await _liabilitiesGrid.Refresh();
+		if (_assetsGrid is not null) await _assetsGrid.Refresh();
+		if (_liabilitiesGrid is not null) await _liabilitiesGrid.Refresh();
 	}
+
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);

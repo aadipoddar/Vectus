@@ -320,6 +320,7 @@ else
 							Toolbar="@(new List<string>() { "Search" })">
 
 						<GridEvents TValue="FinancialAccountingLedgerCartModel" ContextMenuItemClicked="OnCartGridContextMenuItemClicked" />
+
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 
 						<GridAggregates>
@@ -400,6 +401,6 @@ else
 	</div>
 }
 
-<ToastNotification @ref="_toastNotification" />
-
 <NavigationLock ConfirmExternalNavigation="@_isProcessing" />
+
+<ToastNotification @ref="_toastNotification" />

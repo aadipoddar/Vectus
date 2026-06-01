@@ -4,6 +4,7 @@ using VectusLibrary.Accounts.Masters.Exports;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Fleet.Garage.Exports;
 using VectusLibrary.Fleet.Garage.Models;
+using VectusLibrary.Fleet.Repair.Exports;
 using VectusLibrary.Fleet.Repair.Models;
 using VectusLibrary.Fleet.Route.Exports;
 using VectusLibrary.Fleet.Route.Models;
@@ -101,8 +102,8 @@ public static class DecodeCode
 			case CodeType.Repair:
 				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByTransactionNo<RepairModel>(FleetNames.Repair, transactionNo);
 				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.Repair}/{(decodeTransactionNoModel.TransactionModel as RepairModel).Id}";
-				// if (pdf) decodeTransactionNoModel.PDFStream = await RepairInvoiceExport.ExportInvoice((decodeTransactionNoModel.TransactionModel as RepairModel).Id, InvoiceExportType.PDF);
-				// if (excel) decodeTransactionNoModel.ExcelStream = await RepairInvoiceExport.ExportInvoice((decodeTransactionNoModel.TransactionModel as RepairModel).Id, InvoiceExportType.Excel);
+				if (pdf) decodeTransactionNoModel.PDFStream = await RepairInvoiceExport.ExportInvoice((decodeTransactionNoModel.TransactionModel as RepairModel).Id, InvoiceExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await RepairInvoiceExport.ExportInvoice((decodeTransactionNoModel.TransactionModel as RepairModel).Id, InvoiceExportType.Excel);
 				break;
 			case CodeType.Garage:
 				var garages = await CommonData.LoadTableData<GarageModel>(FleetNames.Garage);

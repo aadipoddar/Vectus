@@ -48,10 +48,7 @@ else
 			</LeftContent>
 		</Header>
 
-		<!-- Main Content Container -->
 		<div class="page-container">
-
-			<!-- Financial Year Entry Section -->
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">
@@ -65,7 +62,6 @@ else
 				</div>
 				<div class="section-body">
 					<div class="form-grid">
-						<!-- Start Date -->
 						<div class="form-field">
 							<CustomDatePicker @ref="_sfFirstFocus"
 											  Value="StartDateTime"
@@ -74,7 +70,6 @@ else
 											  ShowFinancialYear="false" />
 						</div>
 
-						<!-- End Date -->
 						<div class="form-field">
 							<CustomDatePicker Value="EndDateTime"
 											  ValueChanged="OnEndDateChanged"
@@ -82,7 +77,6 @@ else
 											  ShowFinancialYear="false" />
 						</div>
 
-						<!-- Year No -->
 						<div class="form-field">
 							<CustomNumericField T="int"
 												@bind-Value="_financialYear.YearNo"
@@ -92,7 +86,6 @@ else
 												Min="1" />
 						</div>
 
-						<!-- Locked Checkbox -->
 						<div class="form-field">
 							<div class="checkbox-wrapper">
 								<CustomCheckBox @bind-Value="_financialYear.Locked"
@@ -101,7 +94,6 @@ else
 							</div>
 						</div>
 
-						<!-- Remarks -->
 						<div class="form-field">
 							<CustomTextField @bind-Value="_financialYear.Remarks"
 											 Label="Remarks"
@@ -113,7 +105,6 @@ else
 				</div>
 			</div>
 
-			<!-- Financial Years List Section -->
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">

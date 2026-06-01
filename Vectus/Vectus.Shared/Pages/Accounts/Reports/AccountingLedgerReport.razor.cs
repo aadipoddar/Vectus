@@ -38,6 +38,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	private List<VoucherModel> _vouchers = [];
 	private List<LedgerModel> _ledgers = [];
 	private List<FinancialAccountingLedgerOverviewModel> _transactionOverviews = [];
+	private List<FinancialAccountingLedgerOverviewModel> _allTransactionOverviews = [];
 
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
@@ -108,51 +109,12 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
 
-			_transactionOverviews = await CommonData.LoadTableDataByDate<FinancialAccountingLedgerOverviewModel>(
+			_allTransactionOverviews = await CommonData.LoadTableDataByDate<FinancialAccountingLedgerOverviewModel>(
 				AccountNames.FinancialAccountingLedgerOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
 
-			if (!_showDeleted)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.Status)];
-
-			if (_selectedCompany?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
-
-			if (_selectedVoucher?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.VoucherId == _selectedVoucher.Id)];
-
-			// Filter by ledger with contra ledger details
-			if (_selectedLedger?.Id > 0)
-			{
-				List<FinancialAccountingLedgerOverviewModel> filteredOverviews = [];
-				var partyLedgers = _transactionOverviews.Where(l => l.Id == _selectedLedger.Id).ToList();
-
-				foreach (var item in partyLedgers)
-				{
-					var referenceLedgers = _transactionOverviews
-						.Where(l => l.MasterId == item.MasterId && l.Id != _selectedLedger.Id)
-						.ToList();
-
-					var referenceLedgerNamesWithAmount = string.Join("\n",
-						referenceLedgers.Select(l =>
-						$"{l.LedgerName}\t({(l.Debit is > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit is > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})"));
-
-					item.LedgerName = referenceLedgerNamesWithAmount;
-					filteredOverviews.Add(item);
-				}
-
-				_transactionOverviews = filteredOverviews;
-
-				var trialBalances = await FinancialAccountingData.LoadTrialBalanceByCompanyDate(
-					_selectedCompany?.Id ?? 0,
-					DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-					DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
-
-				_selectedTrialBalance = trialBalances.FirstOrDefault(tb => tb.LedgerId == _selectedLedger.Id);
-			}
-
-			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+			await ApplyFilters();
 		}
 		catch (Exception ex)
 		{
@@ -160,11 +122,58 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 		finally
 		{
-			if (_sfGrid is not null)
-				await _sfGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
+	}
+
+	private async Task ApplyFilters()
+	{
+		var query = _allTransactionOverviews.AsEnumerable();
+
+		if (!_showDeleted) query = query.Where(t => t.MasterStatus);
+		if (_selectedCompany?.Id > 0) query = query.Where(t => t.CompanyId == _selectedCompany.Id);
+		if (_selectedVoucher?.Id > 0) query = query.Where(t => t.VoucherId == _selectedVoucher.Id);
+
+		var filtered = query.ToList();
+
+		// Filter by ledger with contra ledger details
+		if (_selectedLedger?.Id > 0)
+		{
+			List<FinancialAccountingLedgerOverviewModel> ledgerOverviews = [];
+			var partyLedgers = filtered.Where(l => l.Id == _selectedLedger.Id).ToList();
+
+			foreach (var item in partyLedgers)
+			{
+				var referenceLedgers = filtered
+					.Where(l => l.MasterId == item.MasterId && l.Id != _selectedLedger.Id)
+					.ToList();
+
+				var referenceLedgerNamesWithAmount = string.Join("\n",
+					referenceLedgers.Select(l =>
+					$"{l.LedgerName}\t({(l.Debit is > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit is > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})"));
+
+				// Clone so the cached row's LedgerName isn't overwritten across filter changes
+				var partyLedger = item.Clone();
+				partyLedger.LedgerName = referenceLedgerNamesWithAmount;
+				ledgerOverviews.Add(partyLedger);
+			}
+
+			filtered = ledgerOverviews;
+
+			var trialBalances = await FinancialAccountingData.LoadTrialBalanceByCompanyDate(
+				_selectedCompany?.Id ?? 0,
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
+
+			_selectedTrialBalance = trialBalances.FirstOrDefault(tb => tb.LedgerId == _selectedLedger.Id);
+		}
+
+		_transactionOverviews = [.. filtered.OrderBy(t => t.TransactionDateTime)];
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+		StateHasChanged();
 	}
 	#endregion
 
@@ -176,33 +185,33 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		await LoadTransactionOverviews();
 	}
 
-	private async Task OnCompanyChanged(CompanyModel value)
-	{
-		_selectedCompany = value;
-		await LoadTransactionOverviews();
-	}
-
-	private async Task OnLedgerChanged(LedgerModel value)
-	{
-		_selectedLedger = value;
-		await LoadTransactionOverviews();
-	}
-
-	private async Task OnVoucherChanged(VoucherModel value)
-	{
-		_selectedVoucher = value;
-		await LoadTransactionOverviews();
-	}
-
 	private async Task HandleDatesChanged(DateRangeType dateRangeType)
 	{
 		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
 		await LoadTransactionOverviews();
 	}
+
+	private async Task OnCompanyChanged(CompanyModel value)
+	{
+		_selectedCompany = value;
+		await ApplyFilters();
+	}
+
+	private async Task OnLedgerChanged(LedgerModel value)
+	{
+		_selectedLedger = value;
+		await ApplyFilters();
+	}
+
+	private async Task OnVoucherChanged(VoucherModel value)
+	{
+		_selectedVoucher = value;
+		await ApplyFilters();
+	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportReport(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -215,7 +224,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 
 			var (stream, fileName) = await FinancialAccountingReportExport.ExportLedgerReport(
 				_transactionOverviews,
-				ReportExportType.Excel,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 				DateOnly.FromDateTime(_fromDate),
 				DateOnly.FromDateTime(_toDate),
 				_showAllColumns,
@@ -239,44 +248,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 	}
 
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await FinancialAccountingReportExport.ExportLedgerReport(
-				_transactionOverviews,
-				ReportExportType.PDF,
-				DateOnly.FromDateTime(_fromDate),
-				DateOnly.FromDateTime(_toDate),
-				_showAllColumns,
-				_showDeleted,
-				_selectedCompany?.Id > 0 ? _selectedCompany : null,
-				_selectedLedger?.Id > 0 ? _selectedLedger : null,
-				_selectedLedger?.Id > 0 ? _selectedTrialBalance : null
-			);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportSelectedTransactionPdf()
+	private async Task ExportSelectedTransaction(bool isExcel = false)
 	{
 		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
@@ -287,35 +259,9 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var decodeTransactionNo = await DecodeCode.DecodeTransactionNo(_sfGrid.SelectedRecords.First().TransactionNo, true, false);
-			await SaveAndViewService.SaveAndView(decodeTransactionNo.PDFStream.fileName, decodeTransactionNo.PDFStream.stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportSelectedTransactionExcel()
-	{
-		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var decodeTransactionNo = await DecodeCode.DecodeTransactionNo(_sfGrid.SelectedRecords.First().TransactionNo, false, true);
-			await SaveAndViewService.SaveAndView(decodeTransactionNo.ExcelStream.fileName, decodeTransactionNo.ExcelStream.stream);
+			var decodeTransactionNo = await DecodeCode.DecodeTransactionNo(_sfGrid.SelectedRecords.First().TransactionNo, !isExcel, isExcel);
+			await SaveAndViewService.SaveAndView(isExcel ? decodeTransactionNo.ExcelStream.fileName : decodeTransactionNo.PDFStream.fileName,
+				isExcel ? decodeTransactionNo.ExcelStream.stream : decodeTransactionNo.PDFStream.stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
 		}
@@ -337,7 +283,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
 
-		if (!_sfGrid.SelectedRecords.First().Status)
+		if (!_sfGrid.SelectedRecords.First().MasterStatus)
 		{
 			await _toastNotification.ShowAsync("Cannot View", "The selected transaction is deleted. Please recover it first.", ToastType.Warning);
 			return;
@@ -347,7 +293,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		await AuthenticationService.NavigateToRoute(decodedTransactionNo.PageRouteName, FormFactor, JSRuntime, NavigationManager);
 	}
 
-	private async Task DeleteTransaction(int id, string transactionNo)
+	private async Task DeleteRecoverTransaction(int id, string transactionNo, bool recover)
 	{
 		if (_isProcessing || id == 0)
 			return;
@@ -355,61 +301,27 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		try
 		{
 			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
+				throw new UnauthorizedAccessException("You do not have permission for the action.");
 
 			_isProcessing = true;
 			StateHasChanged();
 
-			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", $"{(recover ? "Recovering" : "Deleting")} transaction...", ToastType.Info);
 
 			var accounting = await CommonData.LoadTableDataById<FinancialAccountingModel>(AccountNames.FinancialAccounting, id)
 				?? throw new Exception("Transaction not found.");
 			accounting.LastModifiedBy = _user.Id;
 			accounting.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			accounting.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await FinancialAccountingData.DeleteTransaction(accounting);
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been deleted successfully.", ToastType.Success);
+			if (recover) await FinancialAccountingData.RecoverTransaction(accounting);
+			else await FinancialAccountingData.DeleteTransaction(accounting);
+
+			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been {(recover ? "recovered" : "deleted")} successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while deleting transaction: {ex.Message}", ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadTransactionOverviews();
-		}
-	}
-
-	private async Task RecoverTransaction(int id, string transactionNo)
-	{
-		if (_isProcessing || id == 0)
-			return;
-
-		try
-		{
-			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
-
-			_isProcessing = true;
-			StateHasChanged();
-
-			await _toastNotification.ShowAsync("Processing", "Recovering transaction...", ToastType.Info);
-
-			var accounting = await CommonData.LoadTableDataById<FinancialAccountingModel>(AccountNames.FinancialAccounting, id)
-				?? throw new Exception("Transaction not found.");
-			accounting.LastModifiedBy = _user.Id;
-			accounting.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			accounting.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await FinancialAccountingData.RecoverTransaction(accounting);
-
-			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been recovered successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while recovering transaction: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"An error occurred while {(recover ? "recovering" : "deleting")} transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -426,10 +338,9 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 
 		var record = _sfGrid.SelectedRecords.First();
 
-		if (record.Status)
-			await ShowConfirmation("Delete", $"Are you sure you want to delete transaction {record.TransactionNo}", () => DeleteTransaction(record.MasterId, record.TransactionNo));
-		else
-			await ShowConfirmation("Recover", $"Are you sure you want to recover transaction {record.TransactionNo}", () => RecoverTransaction(record.MasterId, record.TransactionNo));
+		await ShowConfirmation(record.MasterStatus ? "Delete" : "Recover",
+			$"Are you sure you want to {(record.MasterStatus ? "delete" : "recover")} transaction {record.TransactionNo}",
+			() => DeleteRecoverTransaction(record.MasterId, record.TransactionNo, !record.MasterStatus));
 	}
 
 	private async Task ShowConfirmation(string title, string message, Func<Task> action)
@@ -465,11 +376,11 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			case "Refresh": await LoadTransactionOverviews(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
 			case "ToggleDeleted": await ToggleDeleted(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "ExportExcel": await ExportExcel(); break;
+			case "ExportPdf": await ExportReport(); break;
+			case "ExportExcel": await ExportReport(true); break;
 			case "ViewSelected": await ViewSelectedTransaction(); break;
-			case "DownloadSelectedPdf": await ExportSelectedTransactionPdf(); break;
-			case "DownloadSelectedExcel": await ExportSelectedTransactionExcel(); break;
+			case "DownloadSelectedPdf": await ExportSelectedTransaction(); break;
+			case "DownloadSelectedExcel": await ExportSelectedTransaction(true); break;
 			case "DeleteRecoverSelected": await DeleteRecoverSelectedTransaction(); break;
 			case "AccountingReport": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "TrialBalance": await AuthenticationService.NavigateToRoute(PageRouteNames.TrialBalanceReport, FormFactor, JSRuntime, NavigationManager); break;
@@ -494,8 +405,8 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		switch (args.Item.Id)
 		{
 			case "View": await ViewSelectedTransaction(); break;
-			case "ExportSelectedPdf": await ExportSelectedTransactionPdf(); break;
-			case "ExportSelectedExcel": await ExportSelectedTransactionExcel(); break;
+			case "ExportSelectedPdf": await ExportSelectedTransaction(); break;
+			case "ExportSelectedExcel": await ExportSelectedTransaction(true); break;
 			case "DeleteRecover": await DeleteRecoverSelectedTransaction(); break;
 		}
 	}
@@ -512,9 +423,9 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	private async Task ToggleDeleted()
 	{
 		_showDeleted = !_showDeleted;
-		await LoadTransactionOverviews();
-		StateHasChanged();
+		await ApplyFilters();
 	}
+
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);

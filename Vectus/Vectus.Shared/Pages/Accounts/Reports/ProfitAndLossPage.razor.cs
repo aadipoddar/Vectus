@@ -1,5 +1,3 @@
-using Syncfusion.Blazor.Grids;
-
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
@@ -11,6 +9,8 @@ using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
+
+using Syncfusion.Blazor.Grids;
 
 namespace Vectus.Shared.Pages.Accounts.Reports;
 
@@ -101,12 +101,8 @@ public partial class ProfitAndLossPage : IAsyncDisposable
 		}
 		finally
 		{
-			if (_incomeGrid is not null)
-				await _incomeGrid.Refresh();
-
-			if (_expenseGrid is not null)
-				await _expenseGrid.Refresh();
-
+			if (_incomeGrid is not null) await _incomeGrid.Refresh();
+			if (_expenseGrid is not null) await _expenseGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
@@ -121,21 +117,21 @@ public partial class ProfitAndLossPage : IAsyncDisposable
 		await LoadProfitAndLoss();
 	}
 
-	private async Task OnCompanyChanged(CompanyModel value)
-	{
-		_selectedCompany = value;
-		await LoadProfitAndLoss();
-	}
-
 	private async Task HandleDatesChanged(DateRangeType dateRangeType)
 	{
 		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
 		await LoadProfitAndLoss();
 	}
+
+	private async Task OnCompanyChanged(CompanyModel value)
+	{
+		_selectedCompany = value;
+		await LoadProfitAndLoss();
+	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportReport(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -149,73 +145,23 @@ public partial class ProfitAndLossPage : IAsyncDisposable
 			// Export Income Statement
 			var (incomeStream, incomeFileName) = await ProfitAndLossReportExport.ExportIncomeReport(
 					_incomeTrialBalance,
-					ReportExportType.Excel,
+					isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 					DateOnly.FromDateTime(_fromDate),
 					DateOnly.FromDateTime(_toDate),
 					_showAllColumns,
 					_selectedCompany?.Id > 0 ? _selectedCompany : null
 				);
-
 			await SaveAndViewService.SaveAndView(incomeFileName, incomeStream);
 
 			// Export Expense Statement
 			var (expenseStream, expenseFileName) = await ProfitAndLossReportExport.ExportExpenseReport(
 					_expenseTrialBalance,
-					ReportExportType.Excel,
+					isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 					DateOnly.FromDateTime(_fromDate),
 					DateOnly.FromDateTime(_toDate),
 					_showAllColumns,
 					_selectedCompany?.Id > 0 ? _selectedCompany : null
 				);
-
-			await SaveAndViewService.SaveAndView(expenseFileName, expenseStream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			// Export Income Statement
-			var (incomeStream, incomeFileName) = await ProfitAndLossReportExport.ExportIncomeReport(
-					_incomeTrialBalance,
-					ReportExportType.PDF,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null
-				);
-
-			await SaveAndViewService.SaveAndView(incomeFileName, incomeStream);
-
-			// Export Expense Statement
-			var (expenseStream, expenseFileName) = await ProfitAndLossReportExport.ExportExpenseReport(
-					_expenseTrialBalance,
-					ReportExportType.PDF,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null
-				);
-
 			await SaveAndViewService.SaveAndView(expenseFileName, expenseStream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -240,8 +186,8 @@ public partial class ProfitAndLossPage : IAsyncDisposable
 			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager); break;
 			case "Refresh": await LoadProfitAndLoss(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "ExportExcel": await ExportExcel(); break;
+			case "ExportPdf": await ExportReport(); break;
+			case "ExportExcel": await ExportReport(true); break;
 			case "TransactionHistory": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "LedgerReport": await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "TrialBalance": await AuthenticationService.NavigateToRoute(PageRouteNames.TrialBalanceReport, FormFactor, JSRuntime, NavigationManager); break;
@@ -264,11 +210,10 @@ public partial class ProfitAndLossPage : IAsyncDisposable
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_incomeGrid is not null)
-			await _incomeGrid.Refresh();
-		if (_expenseGrid is not null)
-			await _expenseGrid.Refresh();
+		if (_incomeGrid is not null) await _incomeGrid.Refresh();
+		if (_expenseGrid is not null) await _expenseGrid.Refresh();
 	}
+
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);

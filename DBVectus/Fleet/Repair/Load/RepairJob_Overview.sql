@@ -41,7 +41,7 @@ SELECT
 	[r].[LastModifiedAt],
 	[r].[LastModifiedFromPlatform],
 
-	[r].[Status]
+	[r].[Status] AS MasterStatus
 
 FROM
     [dbo].[RepairJob] tr

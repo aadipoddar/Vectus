@@ -116,7 +116,7 @@ public partial class DashboardChart
 
 			_tripRequests = [.. _tripRequests.Where(_ => _.Status)];
 			_repairs = [.. _repairs.Where(_ => _.Status)];
-			_repairJobs = [.. _repairJobs.Where(_ => _.Status)];
+			_repairJobs = [.. _repairJobs.Where(_ => _.MasterStatus)];
 
 			BuildAll();
 		}

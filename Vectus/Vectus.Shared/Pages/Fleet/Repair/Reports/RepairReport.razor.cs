@@ -39,6 +39,7 @@ public partial class RepairReport : IAsyncDisposable
 	private List<VehicleModel> _vehicles = [];
 	private List<GarageModel> _garages = [];
 	private List<RepairOverviewModel> _transactionOverviews = [];
+	private List<RepairOverviewModel> _allTransactionOverviews = [];
 
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
@@ -109,24 +110,12 @@ public partial class RepairReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
 
-			_transactionOverviews = await CommonData.LoadTableDataByDate<RepairOverviewModel>(
+			_allTransactionOverviews = await CommonData.LoadTableDataByDate<RepairOverviewModel>(
 				FleetNames.RepairOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
 
-			if (!_showDeleted)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.Status)];
-
-			if (_selectedCompany?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
-
-			if (_selectedVehicle?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.VehicleId == _selectedVehicle.Id)];
-
-			if (_selectedGarage?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.GarageId == _selectedGarage.Id)];
-
-			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+			await ApplyFilters();
 		}
 		catch (Exception ex)
 		{
@@ -134,15 +123,35 @@ public partial class RepairReport : IAsyncDisposable
 		}
 		finally
 		{
-			if (_sfGrid is not null)
-				await _sfGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
 	}
+
+	private async Task ApplyFilters()
+	{
+		var query = _allTransactionOverviews.AsEnumerable();
+
+		if (!_showDeleted) query = query.Where(t => t.Status);
+		if (_selectedCompany?.Id > 0) query = query.Where(t => t.CompanyId == _selectedCompany.Id);
+		if (_selectedVehicle?.Id > 0) query = query.Where(t => t.VehicleId == _selectedVehicle.Id);
+		if (_selectedGarage?.Id > 0) query = query.Where(t => t.GarageId == _selectedGarage.Id);
+
+		_transactionOverviews = [.. query.OrderBy(t => t.TransactionDateTime)];
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+		StateHasChanged();
+	}
 	#endregion
 
 	#region Changed Events
+	private async Task HandleDatesChanged(DateRangeType dateRangeType)
+	{
+		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
+		await LoadTransactionOverviews();
+	}
+
 	private async Task OnDateRangeChanged(MudBlazor.DateRange range)
 	{
 		_fromDate = range?.Start ?? _fromDate;
@@ -153,30 +162,24 @@ public partial class RepairReport : IAsyncDisposable
 	private async Task OnCompanyChanged(CompanyModel value)
 	{
 		_selectedCompany = value;
-		await LoadTransactionOverviews();
+		await ApplyFilters();
 	}
 
 	private async Task OnVehicleChanged(VehicleModel value)
 	{
 		_selectedVehicle = value;
-		await LoadTransactionOverviews();
+		await ApplyFilters();
 	}
 
 	private async Task OnGarageChanged(GarageModel value)
 	{
 		_selectedGarage = value;
-		await LoadTransactionOverviews();
-	}
-
-	private async Task HandleDatesChanged(DateRangeType dateRangeType)
-	{
-		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
-		await LoadTransactionOverviews();
+		await ApplyFilters();
 	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportReport(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -189,7 +192,7 @@ public partial class RepairReport : IAsyncDisposable
 
 			var (stream, fileName) = await RepairReportExport.ExportReport(
 				_transactionOverviews,
-				ReportExportType.Excel,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 				DateOnly.FromDateTime(_fromDate),
 				DateOnly.FromDateTime(_toDate),
 				_showAllColumns,
@@ -213,44 +216,7 @@ public partial class RepairReport : IAsyncDisposable
 		}
 	}
 
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await RepairReportExport.ExportReport(
-				_transactionOverviews,
-				ReportExportType.PDF,
-				DateOnly.FromDateTime(_fromDate),
-				DateOnly.FromDateTime(_toDate),
-				_showAllColumns,
-				_showDeleted,
-				_selectedCompany?.Id > 0 ? _selectedCompany : null,
-				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedGarage?.Id > 0 ? _selectedGarage : null
-			);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportSelectedTransactionPdf()
+	private async Task ExportSelectedTransaction(bool isExcel = false)
 	{
 		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
@@ -261,34 +227,7 @@ public partial class RepairReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the invoice...", ToastType.Info);
 
-			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, InvoiceExportType.PDF);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The invoice has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportSelectedTransactionExcel()
-	{
-		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the invoice...", ToastType.Info);
-
-			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, InvoiceExportType.Excel);
+			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, isExcel ? InvoiceExportType.Excel : InvoiceExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The invoice has been downloaded successfully.", ToastType.Success);
@@ -322,7 +261,7 @@ public partial class RepairReport : IAsyncDisposable
 		await AuthenticationService.NavigateToRoute(decodedTransactionNo.PageRouteName, FormFactor, JSRuntime, NavigationManager);
 	}
 
-	private async Task DeleteTransaction(int id, string transactionNo)
+	private async Task DeleteRecoverTransaction(int id, string transactionNo, bool isRecover)
 	{
 		if (_isProcessing || id == 0)
 			return;
@@ -330,61 +269,27 @@ public partial class RepairReport : IAsyncDisposable
 		try
 		{
 			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
+				throw new UnauthorizedAccessException("You do not have permission for the action.");
 
 			_isProcessing = true;
 			StateHasChanged();
 
-			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", $"{(isRecover ? "Recovering" : "Deleting")} transaction...", ToastType.Info);
 
 			var repair = await CommonData.LoadTableDataById<RepairModel>(FleetNames.Repair, id)
 				?? throw new Exception("Transaction not found.");
 			repair.LastModifiedBy = _user.Id;
 			repair.LastModifiedAt = await CommonData.LoadCurrentDateTime();
 			repair.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await RepairData.DeleteTransaction(repair);
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been deleted successfully.", ToastType.Success);
+			if (isRecover) await RepairData.RecoverTransaction(repair);
+			else await RepairData.DeleteTransaction(repair);
+
+			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been {(isRecover ? "recovered" : "deleted")} successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while deleting transaction: {ex.Message}", ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadTransactionOverviews();
-		}
-	}
-
-	private async Task RecoverTransaction(int id, string transactionNo)
-	{
-		if (_isProcessing || id == 0)
-			return;
-
-		try
-		{
-			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
-
-			_isProcessing = true;
-			StateHasChanged();
-
-			await _toastNotification.ShowAsync("Processing", "Recovering transaction...", ToastType.Info);
-
-			var repair = await CommonData.LoadTableDataById<RepairModel>(FleetNames.Repair, id)
-				?? throw new Exception("Transaction not found.");
-			repair.LastModifiedBy = _user.Id;
-			repair.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			repair.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-			await RepairData.RecoverTransaction(repair);
-
-			await _toastNotification.ShowAsync("Success", $"Transaction {transactionNo} has been recovered successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while recovering transaction: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"An error occurred while {(isRecover ? "recovering" : "deleting")} transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -401,10 +306,9 @@ public partial class RepairReport : IAsyncDisposable
 
 		var record = _sfGrid.SelectedRecords.First();
 
-		if (record.Status)
-			await ShowConfirmation("Delete", $"Are you sure you want to delete transaction {record.TransactionNo}", () => DeleteTransaction(record.Id, record.TransactionNo));
-		else
-			await ShowConfirmation("Recover", $"Are you sure you want to recover transaction {record.TransactionNo}", () => RecoverTransaction(record.Id, record.TransactionNo));
+		await ShowConfirmation(record.Status ? "Delete" : "Recover",
+			$"Are you sure you want to {(record.Status ? "delete" : "recover")} transaction {record.TransactionNo}",
+			() => DeleteRecoverTransaction(record.Id, record.TransactionNo, !record.Status));
 	}
 
 	private async Task ShowConfirmation(string title, string message, Func<Task> action)
@@ -441,11 +345,11 @@ public partial class RepairReport : IAsyncDisposable
 			case "Refresh": await LoadTransactionOverviews(); break;
 			case "ToggleDeleted": await ToggleDeleted(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "ExportExcel": await ExportExcel(); break;
+			case "ExportPdf": await ExportReport(); break;
+			case "ExportExcel": await ExportReport(true); break;
 			case "ViewSelected": await ViewSelectedTransaction(); break;
-			case "ExportSelectedPdf": await ExportSelectedTransactionPdf(); break;
-			case "ExportSelectedExcel": await ExportSelectedTransactionExcel(); break;
+			case "ExportSelectedPdf": await ExportSelectedTransaction(); break;
+			case "ExportSelectedExcel": await ExportSelectedTransaction(true); break;
 			case "DeleteRecoverSelected": await DeleteRecoverSelectedTransaction(); break;
 			case "PeriodToday": await HandleDatesChanged(DateRangeType.Today); break;
 			case "PeriodPreviousDay": await HandleDatesChanged(DateRangeType.Yesterday); break;
@@ -465,8 +369,8 @@ public partial class RepairReport : IAsyncDisposable
 		switch (args.Item.Id)
 		{
 			case "View": await ViewSelectedTransaction(); break;
-			case "ExportSelectedPdf": await ExportSelectedTransactionPdf(); break;
-			case "ExportSelectedExcel": await ExportSelectedTransactionExcel(); break;
+			case "ExportSelectedPdf": await ExportSelectedTransaction(); break;
+			case "ExportSelectedExcel": await ExportSelectedTransaction(true); break;
 			case "DeleteRecover": await DeleteRecoverSelectedTransaction(); break;
 		}
 	}
@@ -483,9 +387,9 @@ public partial class RepairReport : IAsyncDisposable
 	private async Task ToggleDeleted()
 	{
 		_showDeleted = !_showDeleted;
-		await LoadTransactionOverviews();
-		StateHasChanged();
+		await ApplyFilters();
 	}
+
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);

@@ -11,8 +11,8 @@
 <MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadBalanceSheet" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadBalanceSheet" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport()" Disabled="@_isProcessing" />
 
 @if (_isLoading)
 {
@@ -25,8 +25,7 @@ else
 			<LeftContent>
 				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
 					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
-					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected"
-								OnOpen='async () => await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0)' />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" OnOpen='async () => await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0)' />
 					<MenuItems>
 						<MenuItem Text="File" IconCss="e-icons e-folder">
 							<MenuItems>

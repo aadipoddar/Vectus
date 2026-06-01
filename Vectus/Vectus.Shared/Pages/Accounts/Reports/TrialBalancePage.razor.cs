@@ -1,5 +1,3 @@
-using Syncfusion.Blazor.Grids;
-
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
@@ -11,6 +9,8 @@ using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
+
+using Syncfusion.Blazor.Grids;
 
 namespace Vectus.Shared.Pages.Accounts.Reports;
 
@@ -34,6 +34,7 @@ public partial class TrialBalancePage : IAsyncDisposable
 	private List<GroupModel> _groups = [];
 	private List<AccountTypeModel> _accountTypes = [];
 	private List<TrialBalanceModel> _trialBalance = [];
+	private List<TrialBalanceModel> _allTrialBalance = [];
 
 	private SfGrid<TrialBalanceModel> _sfGrid;
 	private CustomDateRangePicker _sfFirstFocus;
@@ -91,18 +92,12 @@ public partial class TrialBalancePage : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
 
-			_trialBalance = await FinancialAccountingData.LoadTrialBalanceByCompanyDate(
+			_allTrialBalance = await FinancialAccountingData.LoadTrialBalanceByCompanyDate(
 				_selectedCompany?.Id ?? 0,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
 
-			if (_selectedGroup?.Id > 0)
-				_trialBalance = [.. _trialBalance.Where(_ => _.GroupId == _selectedGroup.Id)];
-
-			if (_selectedAccountType?.Id > 0)
-				_trialBalance = [.. _trialBalance.Where(_ => _.AccountTypeId == _selectedAccountType.Id)];
-
-			_trialBalance = [.. _trialBalance.OrderBy(_ => _.LedgerName)];
+			await ApplyFilters();
 		}
 		catch (Exception ex)
 		{
@@ -110,11 +105,23 @@ public partial class TrialBalancePage : IAsyncDisposable
 		}
 		finally
 		{
-			if (_sfGrid is not null)
-				await _sfGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
+	}
+
+	private async Task ApplyFilters()
+	{
+		var query = _allTrialBalance.AsEnumerable();
+
+		if (_selectedGroup?.Id > 0) query = query.Where(t => t.GroupId == _selectedGroup.Id);
+		if (_selectedAccountType?.Id > 0) query = query.Where(t => t.AccountTypeId == _selectedAccountType.Id);
+
+		_trialBalance = [.. query.OrderBy(t => t.LedgerName)];
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+		StateHasChanged();
 	}
 	#endregion
 
@@ -126,33 +133,33 @@ public partial class TrialBalancePage : IAsyncDisposable
 		await LoadTrialBalance();
 	}
 
+	private async Task HandleDatesChanged(DateRangeType dateRangeType)
+	{
+		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
+		await LoadTrialBalance();
+	}
+
 	private async Task OnCompanyChanged(CompanyModel value)
 	{
 		_selectedCompany = value;
 		await LoadTrialBalance();
 	}
 
-	private async Task OnAccountTypeChanged(AccountTypeModel value)
-	{
-		_selectedAccountType = value;
-		await LoadTrialBalance();
-	}
-
 	private async Task OnGroupChanged(GroupModel value)
 	{
 		_selectedGroup = value;
-		await LoadTrialBalance();
+		await ApplyFilters();
 	}
 
-	private async Task HandleDatesChanged(DateRangeType dateRangeType)
+	private async Task OnAccountTypeChanged(AccountTypeModel value)
 	{
-		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
-		await LoadTrialBalance();
+		_selectedAccountType = value;
+		await ApplyFilters();
 	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportReport(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -164,51 +171,15 @@ public partial class TrialBalancePage : IAsyncDisposable
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
 			var (stream, fileName) = await TrialBalanceReportExport.ExportReport(
-					_trialBalance,
-					ReportExportType.Excel,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null,
-					_selectedGroup?.Id > 0 ? _selectedGroup : null,
-					_selectedAccountType?.Id > 0 ? _selectedAccountType : null
-				);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await TrialBalanceReportExport.ExportReport(
-					_trialBalance,
-					ReportExportType.PDF,
-					DateOnly.FromDateTime(_fromDate),
-				 DateOnly.FromDateTime(_toDate),
-					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany : null,
-					_selectedGroup?.Id > 0 ? _selectedGroup : null,
-					_selectedAccountType?.Id > 0 ? _selectedAccountType : null
-				);
+				_trialBalance,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
+				DateOnly.FromDateTime(_fromDate),
+				DateOnly.FromDateTime(_toDate),
+				_showAllColumns,
+				_selectedCompany?.Id > 0 ? _selectedCompany : null,
+				_selectedGroup?.Id > 0 ? _selectedGroup : null,
+				_selectedAccountType?.Id > 0 ? _selectedAccountType : null
+			);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -233,8 +204,8 @@ public partial class TrialBalancePage : IAsyncDisposable
 			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager); break;
 			case "Refresh": await LoadTrialBalance(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "ExportExcel": await ExportExcel(); break;
+			case "ExportPdf": await ExportReport(); break;
+			case "ExportExcel": await ExportReport(true); break;
 			case "TransactionHistory": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "LedgerReport": await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager); break;
 			case "ProfitLoss": await AuthenticationService.NavigateToRoute(PageRouteNames.ProfitAndLossReport, FormFactor, JSRuntime, NavigationManager); break;
@@ -260,6 +231,7 @@ public partial class TrialBalancePage : IAsyncDisposable
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 	}
+
 	private async Task StartAutoRefresh()
 	{
 		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);

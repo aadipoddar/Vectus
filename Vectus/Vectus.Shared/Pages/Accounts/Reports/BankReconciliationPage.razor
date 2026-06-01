@@ -11,11 +11,11 @@
 <MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadTransactionOverviews" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveReconciliation" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport(true)" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyO KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ViewSelectedTransaction" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ExportSelectedTransactionPdf" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ExportSelectedTransactionExcel" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="() => ExportSelectedTransaction()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="() => ExportSelectedTransaction(true)" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedTransaction" Disabled="@_isProcessing" />
 
 @if (_isLoading || _user is null)
@@ -215,13 +215,16 @@ else
 								</Template>
 							</GridColumn>
 
-							<GridColumn HeaderText="Status" Width="120" TextAlign="TextAlign.Center" AllowFiltering="false">
+							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.Reconciled)" HeaderText="Reconciled" Width="120" TextAlign="TextAlign.Center">
 								<Template>
 									@{
 										var line = (context as FinancialAccountingLedgerOverviewModel);
-										<span class="@(line.ClearingDate is not null ? "grid-credit" : "grid-debit")">
-											@(line.ClearingDate is not null ? "Reconciled" : "Unreconciled")
-										</span>
+										if (line.Reconciled is not null)
+										{
+											<span class="@(line.Reconciled.Value ? "grid-credit" : "grid-debit")">
+												@(line.Reconciled.Value ? "Reconciled" : "Unreconciled")
+											</span>
+										}
 									}
 								</Template>
 							</GridColumn>

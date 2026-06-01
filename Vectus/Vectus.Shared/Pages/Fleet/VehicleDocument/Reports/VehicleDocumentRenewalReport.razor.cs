@@ -31,6 +31,7 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 	private List<VehicleModel> _vehicles = [];
 	private List<VehicleDocumentTypeModel> _documentTypes = [];
 	private List<VehicleDocumentRenewalOverviewModel> _transactionOverviews = [];
+	private List<VehicleDocumentRenewalOverviewModel> _allTransactionOverviews = [];
 
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
@@ -91,15 +92,9 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
 
-			_transactionOverviews = await CommonData.LoadTableData<VehicleDocumentRenewalOverviewModel>(FleetNames.VehicleDocumentRenewalOverview);
+			_allTransactionOverviews = await CommonData.LoadTableData<VehicleDocumentRenewalOverviewModel>(FleetNames.VehicleDocumentRenewalOverview);
 
-			if (_selectedVehicle?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.VehicleId == _selectedVehicle.Id)];
-
-			if (_selectedDocumentType?.Id > 0)
-				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.VehicleDocumentTypeId == _selectedDocumentType.Id)];
-
-			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.RenewalDate)];
+			await ApplyFilters();
 		}
 		catch (Exception ex)
 		{
@@ -107,12 +102,23 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 		}
 		finally
 		{
-			if (_sfGrid is not null)
-				await _sfGrid.Refresh();
-
 			_isProcessing = false;
 			StateHasChanged();
 		}
+	}
+
+	private async Task ApplyFilters()
+	{
+		var query = _allTransactionOverviews.AsEnumerable();
+
+		if (_selectedVehicle?.Id > 0) query = query.Where(t => t.VehicleId == _selectedVehicle.Id);
+		if (_selectedDocumentType?.Id > 0) query = query.Where(t => t.VehicleDocumentTypeId == _selectedDocumentType.Id);
+
+		_transactionOverviews = [.. query.OrderBy(t => t.RenewalDate)];
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+		StateHasChanged();
 	}
 	#endregion
 
@@ -120,18 +126,18 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 	private async Task OnVehicleChanged(VehicleModel value)
 	{
 		_selectedVehicle = value;
-		await LoadTransactionOverviews();
+		await ApplyFilters();
 	}
 
 	private async Task OnDocumentTypeChanged(VehicleDocumentTypeModel value)
 	{
 		_selectedDocumentType = value;
-		await LoadTransactionOverviews();
+		await ApplyFilters();
 	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportReport(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -144,44 +150,11 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 
 			var (stream, fileName) = await VehicleDocumentRenewalReportExport.ExportReport(
 				_transactionOverviews,
-				ReportExportType.Excel,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 				_showAllColumns,
 				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
 				_selectedDocumentType?.Id > 0 ? _selectedDocumentType : null
 			);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await VehicleDocumentRenewalReportExport.ExportReport(
-				_transactionOverviews,
-				ReportExportType.PDF,
-				_showAllColumns,
-				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedDocumentType?.Id > 0 ? _selectedDocumentType : null
-			 );
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -243,8 +216,8 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.VehicleDocument, FormFactor, JSRuntime, NavigationManager); break;
 			case "Refresh": await LoadTransactionOverviews(); break;
 			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "ExportExcel": await ExportExcel(); break;
+			case "ExportPdf": await ExportReport(); break;
+			case "ExportExcel": await ExportReport(true); break;
 			case "VehicleDocument": await AuthenticationService.NavigateToRoute(PageRouteNames.VehicleDocument, FormFactor, JSRuntime, NavigationManager); break;
 			case "VehicleDocumentType": await AuthenticationService.NavigateToRoute(PageRouteNames.VehicleDocumentTypeMaster, FormFactor, JSRuntime, NavigationManager); break;
 			case "DownloadSelectedDocument": await DownloadSelectedDocument(); break;

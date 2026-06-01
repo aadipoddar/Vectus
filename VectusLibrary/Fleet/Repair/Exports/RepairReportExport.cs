@@ -168,7 +168,7 @@ public static class RepairReportExport
 			[nameof(RepairJobOverviewModel.CreatedByName)] = new() { DisplayName = "Created By", Alignment = CellAlignment.Left, IncludeInTotal = false },
 			[nameof(RepairJobOverviewModel.CreatedAt)] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", Alignment = CellAlignment.Center, IncludeInTotal = false },
 			[nameof(RepairJobOverviewModel.CreatedFromPlatform)] = new() { DisplayName = "Created Platform", Alignment = CellAlignment.Left, IncludeInTotal = false },
-			[nameof(RepairJobOverviewModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
+			[nameof(RepairJobOverviewModel.MasterStatus)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
 		};
 
 		List<string> columnOrder;
@@ -195,11 +195,11 @@ public static class RepairReportExport
 				nameof(RepairJobOverviewModel.CreatedByName),
 				nameof(RepairJobOverviewModel.CreatedAt),
 				nameof(RepairJobOverviewModel.CreatedFromPlatform),
-				nameof(RepairJobOverviewModel.Status)
+				nameof(RepairJobOverviewModel.MasterStatus)
 			];
 
 			if (!showDeleted)
-				columnOrder.Remove(nameof(RepairJobOverviewModel.Status));
+				columnOrder.Remove(nameof(RepairJobOverviewModel.MasterStatus));
 		}
 		else
 		{
@@ -212,11 +212,11 @@ public static class RepairReportExport
 				nameof(RepairJobOverviewModel.Quantity),
 				nameof(RepairJobOverviewModel.Rate),
 				nameof(RepairJobOverviewModel.Total),
-				nameof(RepairJobOverviewModel.Status)
+				nameof(RepairJobOverviewModel.MasterStatus)
 			];
 
 			if (!showDeleted)
-				columnOrder.Remove(nameof(RepairJobOverviewModel.Status));
+				columnOrder.Remove(nameof(RepairJobOverviewModel.MasterStatus));
 		}
 
 		string fileName = "REPAIR_DETAILS_REPORT";

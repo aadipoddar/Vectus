@@ -306,12 +306,12 @@ public partial class FinancialYearPage
 			return;
 
 		var record = selectedRecords[0];
-		var identifier = $"{record.StartDate:dd-MMM-yyyy} to {record.EndDate:dd-MMM-yyyy}";
+		var label = $"{record.StartDate:dd-MMM-yyyy} to {record.EndDate:dd-MMM-yyyy}";
 
 		if (record.Status)
-			await ShowConfirmation("Delete", $"Are you sure you want to delete {identifier}", () => DeleteTransaction(record.Id));
+			await ShowConfirmation("Delete", $"Are you sure you want to delete {label}", () => DeleteTransaction(record.Id));
 		else
-			await ShowConfirmation("Recover", $"Are you sure you want to recover {identifier}", () => RecoverTransaction(record.Id));
+			await ShowConfirmation("Recover", $"Are you sure you want to recover {label}", () => RecoverTransaction(record.Id));
 	}
 
 	private async Task ShowConfirmation(string title, string message, Func<Task> action)

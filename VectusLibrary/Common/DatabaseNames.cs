@@ -1,12 +1,12 @@
 namespace VectusLibrary.Common;
 
-public static class OperationNames
+public static class CommonNames
 {
-	#region Common
 	public static string LoadTableData => "Load_TableData";
 	public static string LoadTableDataById => "Load_TableData_By_Id";
 	public static string LoadTableDataByStatus => "Load_TableData_By_Status";
 	public static string LoadTableDataByMasterId => "Load_TableData_By_MasterId";
+	public static string LoadTableDataByFinancialAccountingId => "Load_TableData_By_FinancialAccountingId";
 	public static string LoadTableDataByCode => "Load_TableData_By_Code";
 	public static string LoadTableDataByTransactionNo => "Load_TableData_By_TransactionNo";
 	public static string LoadTableDataByDate => "Load_TableData_By_Date";
@@ -14,7 +14,10 @@ public static class OperationNames
 	public static string LoadLastTableDataByFinancialYear => "Load_LastTableData_By_FinancialYear";
 	public static string LoadLastTableDataByCompanyFinancialYear => "Load_LastTableData_By_Company_FinancialYear";
 	public static string LoadCurrentDateTime => "Load_CurrentDateTime";
-	#endregion
+}
+
+public static class OperationNames
+{
 
 	#region Settings
 	public static string Settings => "Settings";

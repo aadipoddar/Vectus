@@ -22,6 +22,12 @@ SELECT
 	[ad].[InstrumentDate] AS InstrumentDate,
 	[ad].[ClearingDate] AS ClearingDate,
 
+	CASE
+		WHEN [ad].[InstrumentDate] IS NULL THEN NULL
+		WHEN [ad].[ClearingDate] IS NOT NULL THEN CAST(1 AS BIT)
+		ELSE CAST(0 AS BIT)
+	END AS Reconciled,
+
 	[ad].[Remarks] AS LedgerRemarks,
 
 	[ad].[MasterId],
@@ -57,7 +63,7 @@ SELECT
 	[a].[LastModifiedAt],
 	[a].[LastModifiedFromPlatform],
 
-	[a].[Status]
+	[a].[Status] AS MasterStatus
 
 FROM
 	[dbo].[FinancialAccountingLedger] ad

@@ -70,6 +70,9 @@ public static class FinancialAccountingData
 
 	public static async Task RecoverTransaction(FinancialAccountingModel accounting)
 	{
+		if (accounting.ReferenceId is not null || !string.IsNullOrWhiteSpace(accounting.ReferenceNo))
+			throw new InvalidOperationException("Transactions with reference cannot be recovered. Please create a new transaction instead.");
+
 		accounting.Status = true;
 		var ledgers = await CommonData.LoadTableDataByMasterId<FinancialAccountingLedgerModel>(AccountNames.FinancialAccountingLedger, accounting.Id);
 
@@ -78,6 +81,7 @@ public static class FinancialAccountingData
 		await FinancialAccountingNotify.Notify(accounting.Id, NotifyType.Recovered);
 	}
 
+	#region Saving
 	private static async Task<FinancialAccountingModel> ValidateTransaction(FinancialAccountingModel accounting, bool update = false, SqlDataAccessTransaction sqlDataAccessTransaction = null)
 	{
 		accounting.Remarks = string.IsNullOrWhiteSpace(accounting.Remarks) ? null : accounting.Remarks.Trim();
@@ -224,6 +228,7 @@ public static class FinancialAccountingData
 			CreatedFromPlatform = update ? accounting.LastModifiedFromPlatform : accounting.CreatedFromPlatform
 		}, sqlDataAccessTransaction);
 	}
+	#endregion
 
 	#region BRS
 	private static async Task ValidateBRS(int masterId, SqlDataAccessTransaction sqlDataAccessTransaction)

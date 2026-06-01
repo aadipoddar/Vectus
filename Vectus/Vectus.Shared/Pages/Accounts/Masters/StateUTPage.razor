@@ -47,10 +47,7 @@ else
 			</LeftContent>
 		</Header>
 
-		<!-- Main Content Container -->
 		<div class="page-container">
-
-			<!-- State/UT Entry Section -->
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">
@@ -63,7 +60,6 @@ else
 				</div>
 				<div class="section-body">
 					<div class="form-grid">
-						<!-- State/UT Name -->
 						<div class="form-field">
 							<CustomTextField @ref="_sfFirstFocus"
 											 @bind-Value="_stateUT.Name"
@@ -71,7 +67,6 @@ else
 											 Placeholder="Enter State/UT Name" />
 						</div>
 
-						<!-- Union Territory Checkbox -->
 						<div class="form-field">
 							<div class="checkbox-wrapper">
 								<CustomCheckBox @bind-Value="_stateUT.UnionTerritory"
@@ -80,7 +75,6 @@ else
 							</div>
 						</div>
 
-						<!-- Remarks -->
 						<div class="form-field">
 							<CustomTextField @bind-Value="_stateUT.Remarks"
 											 Label="Remarks"
@@ -92,7 +86,6 @@ else
 				</div>
 			</div>
 
-			<!-- States/UTs List Section -->
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">

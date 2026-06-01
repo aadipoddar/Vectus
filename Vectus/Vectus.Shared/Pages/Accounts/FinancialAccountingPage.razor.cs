@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Components;
 
-using Syncfusion.Blazor.Grids;
-
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
@@ -13,6 +11,8 @@ using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
+
+using Syncfusion.Blazor.Grids;
 
 namespace Vectus.Shared.Pages.Accounts;
 
@@ -229,8 +229,6 @@ public partial class FinancialAccountingPage
 						ReferenceId = item.ReferenceId,
 						ReferenceNo = item.ReferenceNo,
 						ReferenceType = item.ReferenceType,
-						InstrumentNo = item.InstrumentNo,
-						InstrumentDate = item.InstrumentDate,
 						Remarks = item.Remarks
 					});
 				}

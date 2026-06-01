@@ -63,5 +63,5 @@ public class RepairJobOverviewModel
 	public DateTime? LastModifiedAt { get; set; }
 	public string? LastModifiedFromPlatform { get; set; }
 
-	public bool Status { get; set; }
+	public bool MasterStatus { get; set; }
 }

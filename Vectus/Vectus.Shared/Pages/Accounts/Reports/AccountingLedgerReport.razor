@@ -11,12 +11,12 @@
 <MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadTransactionOverviews" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadTransactionOverviews" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport()" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyO KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ViewSelectedTransaction" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ExportSelectedTransactionPdf" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ExportSelectedTransactionExcel" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="() => ExportSelectedTransaction()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="() => ExportSelectedTransaction(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedTransaction" Disabled="@_isProcessing" />
 
 @if (_isLoading || _user is null)
@@ -271,13 +271,16 @@ else
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.InstrumentNo)" HeaderText="Instrument No" Width="150" Visible="_showAllColumns" />
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.InstrumentDate)" HeaderText="Instrument Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.ClearingDate)" HeaderText="Clearing Date" Width="150" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-							<GridColumn HeaderText="Reconciled" Width="120" TextAlign="TextAlign.Center" Visible="_showAllColumns">
+							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.Reconciled)" HeaderText="Reconciled" Width="120" TextAlign="TextAlign.Center" Visible="_showAllColumns">
 								<Template>
 									@{
 										var line = (context as FinancialAccountingLedgerOverviewModel);
-										<span class="@(line.ClearingDate is not null ? "grid-credit" : "grid-debit")">
-											@(line.ClearingDate is not null ? "Reconciled" : "Unreconciled")
-										</span>
+										if (line.Reconciled is not null)
+										{
+											<span class="@(line.Reconciled.Value ? "grid-credit" : "grid-debit")">
+												@(line.Reconciled.Value ? "Reconciled" : "Unreconciled")
+											</span>
+										}
 									}
 								</Template>
 							</GridColumn>
@@ -343,12 +346,12 @@ else
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy" Type="ColumnType.DateTime" Visible="_showAllColumns" />
 							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
 
-							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+							<GridColumn Field="@nameof(FinancialAccountingLedgerOverviewModel.MasterStatus)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
 									@{
 										var item = (context as FinancialAccountingLedgerOverviewModel);
-										<span class="@(item.Status ? string.Empty : "grid-debit")">
-											@(item.Status ? "Active" : "Deleted")
+										<span class="@(item.MasterStatus ? string.Empty : "grid-debit")">
+											@(item.MasterStatus ? "Active" : "Deleted")
 										</span>
 									}
 								</Template>

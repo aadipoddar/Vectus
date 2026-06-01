@@ -67,7 +67,6 @@
     <Folder Include="Accounts\Masters\Table" />
     <Folder Include="Operations" />
     <Folder Include="Operations\AuditTrail" />
-    <Folder Include="Operations\Common" />
     <Folder Include="Operations\Settings" />
     <Folder Include="Operations\User" />
     <Folder Include="PublishLocations" />
@@ -93,6 +92,7 @@
     <Folder Include="Fleet\Tyre\Delete" />
     <Folder Include="Fleet\Tyre\Insert" />
     <Folder Include="Fleet\Tyre\Table" />
+    <Folder Include="Common" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -121,17 +121,6 @@
     <Build Include="Accounts\Masters\Table\Voucher.sql" />
     <Build Include="Operations\AuditTrail\AuditTrail.sql" />
     <Build Include="Operations\AuditTrail\Insert_AuditTrail.sql" />
-    <Build Include="Operations\Common\Load_CurrentDateTime.sql" />
-    <Build Include="Operations\Common\Load_LastTableData.sql" />
-    <Build Include="Operations\Common\Load_LastTableData_By_Company_FinancialYear.sql" />
-    <Build Include="Operations\Common\Load_LastTableData_By_FinancialYear.sql" />
-    <Build Include="Operations\Common\Load_TableData.sql" />
-    <Build Include="Operations\Common\Load_TableData_By_Code.sql" />
-    <Build Include="Operations\Common\Load_TableData_By_Date.sql" />
-    <Build Include="Operations\Common\Load_TableData_By_Id.sql" />
-    <Build Include="Operations\Common\Load_TableData_By_MasterId.sql" />
-    <Build Include="Operations\Common\Load_TableData_By_Status.sql" />
-    <Build Include="Operations\Common\Load_TableData_By_TransactionNo.sql" />
     <Build Include="Operations\Settings\Load_Settings_By_Key.sql" />
     <Build Include="Operations\Settings\Reset_Settings.sql" />
     <Build Include="Operations\Settings\Settings.sql" />
@@ -178,6 +167,18 @@
     <Build Include="Fleet\Tyre\Table\TyreMounting.sql" />
     <Build Include="Fleet\Tyre\Table\TyreCompany.sql" />
     <Build Include="Fleet\TripRequest\Load_TripRequest_By_SDR_RequestStatus.sql" />
+    <Build Include="Common\Load_CurrentDateTime.sql" />
+    <Build Include="Common\Load_LastTableData.sql" />
+    <Build Include="Common\Load_LastTableData_By_Company_FinancialYear.sql" />
+    <Build Include="Common\Load_LastTableData_By_FinancialYear.sql" />
+    <Build Include="Common\Load_TableData.sql" />
+    <Build Include="Common\Load_TableData_By_Code.sql" />
+    <Build Include="Common\Load_TableData_By_Date.sql" />
+    <Build Include="Common\Load_TableData_By_Id.sql" />
+    <Build Include="Common\Load_TableData_By_FinancialAccountingId.sql" />
+    <Build Include="Common\Load_TableData_By_MasterId.sql" />
+    <Build Include="Common\Load_TableData_By_Status.sql" />
+    <Build Include="Common\Load_TableData_By_TransactionNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />
