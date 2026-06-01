@@ -1,4 +1,4 @@
-namespace VectusLibrary.DataAccess;
+namespace VectusLibrary.Common;
 
 public static class OperationNames
 {

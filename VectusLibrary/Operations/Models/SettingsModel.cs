@@ -45,6 +45,8 @@ public static class SettingsKeys
 
 	public static string ReportWarningDays => "ReportWarningDays";
 
+	public static string AnalysisCacheHours => "AnalysisCacheHours";
+
 	public static string TruckMileageKmPerLitre => "TruckMileageKmPerLitre";
 	public static string DieselPricePerLitre => "DieselPricePerLitre";
 }

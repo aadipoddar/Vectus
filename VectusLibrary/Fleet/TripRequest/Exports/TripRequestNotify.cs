@@ -1,5 +1,4 @@
 using VectusLibrary.Common;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.TripRequest.Models;
 using VectusLibrary.Utils.MailUtils;
 

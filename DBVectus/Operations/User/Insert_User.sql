@@ -2,7 +2,7 @@
 	@Id INT OUTPUT,
 	@Name VARCHAR(MAX),
 	@Phone VARCHAR(10),
-	@Email VARCHAR(250),
+	@Email VARCHAR(MAX),
 	@Password VARCHAR(MAX),
 	@Accounts BIT,
 	@Fleet BIT,

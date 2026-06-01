@@ -18,6 +18,7 @@ public partial class DashboardAnalysis
 	private List<VehicleDocumentRenewalOverviewModel> _dueDocuments = [];
 
 	private int _warningDays = 30;
+	private int _cacheHours = 12;
 
 	private int _pendingTripRequestsCount = 0;
 
@@ -51,7 +52,7 @@ public partial class DashboardAnalysis
 
 		await LoadFresh();
 
-		var expiry = TimeSpan.FromHours(1);
+		var expiry = TimeSpan.FromHours(_cacheHours);
 		MemoryCache.Set(StorageFileNames.TripRequestsOverviewDataFileName, _tripRequests, expiry);
 		MemoryCache.Set(StorageFileNames.PendingTripRequestsDataFileName, _pendingTripRequests, expiry);
 		MemoryCache.Set(StorageFileNames.RepairsOverviewDataFileName, _repairs, expiry);
@@ -85,6 +86,9 @@ public partial class DashboardAnalysis
 
 			var warningSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.ReportWarningDays);
 			_warningDays = int.TryParse(warningSetting?.Value, out var days) ? days : 30;
+
+			var cacheSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AnalysisCacheHours);
+			_cacheHours = int.TryParse(cacheSetting?.Value, out var hours) && hours > 0 ? hours : 12;
 
 			// Trip requests within current + last month — feeds trip volume KPI and active-vehicle calc.
 			_tripRequests = await CommonData.LoadTableDataByDate<TripRequestOverviewModel>(FleetNames.TripRequestOverview, lastMonthStart, thisMonthEnd);

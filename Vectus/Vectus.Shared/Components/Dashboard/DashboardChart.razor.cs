@@ -4,11 +4,15 @@ using MudBlazor;
 
 using VectusLibrary.Fleet.Repair.Models;
 using VectusLibrary.Fleet.TripRequest.Models;
+using VectusLibrary.Operations.Data;
+using VectusLibrary.Operations.Models;
 
 namespace Vectus.Shared.Components.Dashboard;
 
 public partial class DashboardChart
 {
+	private int _cacheHours = 12;
+
 	private List<TripRequestOverviewModel> _tripRequests = [];
 	private List<RepairOverviewModel> _repairs = [];
 	private List<RepairJobOverviewModel> _repairJobs = [];
@@ -74,7 +78,7 @@ public partial class DashboardChart
 
 		await LoadFresh();
 
-		var expiry = TimeSpan.FromHours(1);
+		var expiry = TimeSpan.FromHours(_cacheHours);
 		MemoryCache.Set(StorageFileNames.TripRequestsYearOverviewDataFileName, _tripRequests, expiry);
 		MemoryCache.Set(StorageFileNames.RepairsYearOverviewDataFileName, _repairs, expiry);
 		MemoryCache.Set(StorageFileNames.RepairJobsYearOverviewDataFileName, _repairJobs, expiry);
@@ -98,6 +102,9 @@ public partial class DashboardChart
 	{
 		try
 		{
+			var cacheSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AnalysisCacheHours);
+			_cacheHours = int.TryParse(cacheSetting?.Value, out var hours) && hours > 0 ? hours : 12;
+
 			// Window: first day of month 11 months ago → end of current month (12 months total).
 			var thisMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 			var windowStart = thisMonthStart.AddMonths(-11);

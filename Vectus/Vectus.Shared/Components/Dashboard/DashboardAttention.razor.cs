@@ -15,6 +15,7 @@ namespace Vectus.Shared.Components.Dashboard;
 public partial class DashboardAttention
 {
 	private int _warningDays = 30;
+	private int _cacheHours = 12;
 
 	private List<VehicleDocumentRenewalOverviewModel> _dueDocuments = [];
 	private List<TripRequestOverviewModel> _pendingTripRequests = [];
@@ -58,12 +59,12 @@ public partial class DashboardAttention
 
 	private async Task LoadData()
 	{
-		if (LoadCachedAttentions())
+		if (LoadCached())
 			return;
 
-		await LoadNewAttentions();
+		await LoadFresh();
 
-		var expiry = TimeSpan.FromHours(1);
+		var expiry = TimeSpan.FromHours(_cacheHours);
 		MemoryCache.Set(StorageFileNames.DueDocumentsDataFileName, _dueDocuments, expiry);
 		MemoryCache.Set(StorageFileNames.PendingTripRequestsDataFileName, _pendingTripRequests, expiry);
 		MemoryCache.Set(StorageFileNames.InGarageRepairsDataFileName, _inGarageRepairs, expiry);
@@ -72,7 +73,7 @@ public partial class DashboardAttention
 		MemoryCache.Set(StorageFileNames.VehicleTypesDataFileName, _vehicleTypes, expiry);
 	}
 
-	private bool LoadCachedAttentions()
+	private bool LoadCached()
 	{
 		if (!MemoryCache.TryGetValue(StorageFileNames.IdleVehiclesDataFileName, out List<VehicleModel> idleVehicles))
 			return false;
@@ -87,12 +88,16 @@ public partial class DashboardAttention
 		return true;
 	}
 
-	private async Task LoadNewAttentions()
+	private async Task LoadFresh()
 	{
 		try
 		{
 			var warningSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.ReportWarningDays);
 			_warningDays = int.TryParse(warningSetting?.Value, out var days) ? days : 30;
+
+			var cacheSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AnalysisCacheHours);
+			_cacheHours = int.TryParse(cacheSetting?.Value, out var hours) && hours > 0 ? hours : 12;
+
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
 			var warningWindowStart = currentDateTime.AddDays(-_warningDays);
 

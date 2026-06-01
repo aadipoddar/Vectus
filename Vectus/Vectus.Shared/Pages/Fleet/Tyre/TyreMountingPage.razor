@@ -191,6 +191,32 @@ else
 							<GridColumn Field="@nameof(TyreMountingModel.DismountingKM)" HeaderText="Dismounting KM" Width="160" Format="N0" TextAlign="TextAlign.Right" />
 							<GridColumn Field="@nameof(TyreMountingModel.MountingDateTime)" HeaderText="Mounting Date" Width="150" Format="dd-MMM-yy" Type="ColumnType.DateTime" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(TyreMountingModel.DismountingDateTime)" HeaderText="Dismounting Date" Width="160" Format="dd-MMM-yy" Type="ColumnType.DateTime" TextAlign="TextAlign.Center" />
+							<GridColumn HeaderText="Distance Covered" Width="160" TextAlign="TextAlign.Right">
+								<Template>
+									@{
+										var item = (context as TyreMountingModel);
+										@(item.DismountingKM.HasValue
+											? $"{(item.DismountingKM.Value - item.MountingKM):N0} KM"
+											: "In Service")
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn HeaderText="Days Served" Width="140" TextAlign="TextAlign.Right">
+								<Template>
+									@{
+										var item = (context as TyreMountingModel);
+										if (item.DismountingDateTime.HasValue)
+										{
+											var days = (item.DismountingDateTime.Value.Date - item.MountingDateTime.Date).Days;
+											@($"{days} {(days == 1 ? "day" : "days")}")
+										}
+										else
+										{
+											@("In Service")
+										}
+									}
+								</Template>
+							</GridColumn>
 							<GridColumn Field="@nameof(TyreMountingModel.Remarks)" HeaderText="Remarks" Width="250" />
 						</GridColumns>
 					</SfGrid>

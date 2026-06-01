@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[Load_User_By_Phone_Email]
-	@PhoneEmail VARCHAR(250)
+	@PhoneEmail VARCHAR(MAX)
 AS
 BEGIN
 	SELECT * FROM [dbo].[User]

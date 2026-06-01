@@ -1,5 +1,4 @@
 using VectusLibrary.Common;
-using VectusLibrary.DataAccess;
 using VectusLibrary.Fleet.Tyre.Models;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Utils.ExportUtils;
@@ -26,6 +25,12 @@ public static class TyreMountingExport
 			tyreMounting.DismountingKM,
 			tyreMounting.MountingDateTime,
 			tyreMounting.DismountingDateTime,
+			DistanceCovered = tyreMounting.DismountingKM.HasValue
+				? $"{tyreMounting.DismountingKM.Value - tyreMounting.MountingKM:N0} KM"
+				: "In Service",
+			DaysServed = tyreMounting.DismountingDateTime.HasValue
+				? $"{(tyreMounting.DismountingDateTime.Value.Date - tyreMounting.MountingDateTime.Date).Days} {((tyreMounting.DismountingDateTime.Value.Date - tyreMounting.MountingDateTime.Date).Days == 1 ? "day" : "days")}"
+				: "In Service",
 			tyreMounting.Remarks
 		});
 
@@ -40,6 +45,8 @@ public static class TyreMountingExport
 			[nameof(TyreMountingModel.DismountingKM)] = new() { DisplayName = "Dismounting KM", Alignment = CellAlignment.Right, Format = "#,##0", IncludeInTotal = false },
 			[nameof(TyreMountingModel.MountingDateTime)] = new() { DisplayName = "Mounting Date", Alignment = CellAlignment.Center, Format = "dd-MMM-yyyy", IncludeInTotal = false },
 			[nameof(TyreMountingModel.DismountingDateTime)] = new() { DisplayName = "Dismounting Date", Alignment = CellAlignment.Center, Format = "dd-MMM-yyyy", IncludeInTotal = false },
+			["DistanceCovered"] = new() { DisplayName = "Distance Covered", Alignment = CellAlignment.Right, IncludeInTotal = false },
+			["DaysServed"] = new() { DisplayName = "Days Served", Alignment = CellAlignment.Right, IncludeInTotal = false },
 			[nameof(TyreMountingModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left, IncludeInTotal = false }
 		};
 
@@ -54,6 +61,8 @@ public static class TyreMountingExport
 			nameof(TyreMountingModel.DismountingKM),
 			nameof(TyreMountingModel.MountingDateTime),
 			nameof(TyreMountingModel.DismountingDateTime),
+			"DistanceCovered",
+			"DaysServed",
 			nameof(TyreMountingModel.Remarks)
 		];
 
