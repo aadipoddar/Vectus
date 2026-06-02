@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vectus Payroll Module — Detailed Specification &amp; Worked Example</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2933; --muted:#67727e;
+    --brand:#1d4ed8; --brand-light:#eaf0fe; --line:#e2e8f0;
+    --earn:#0a7d4d; --earn-bg:#e7f6ee; --ded:#b42318; --ded-bg:#fdecea;
+    --stat:#9a3412; --stat-bg:#fef3e7; --key:#5b21b6; --key-bg:#f1e9fd;
+    --mono:'Cascadia Code','Consolas','SF Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px}
+  header.hero{background:linear-gradient(135deg,#1d4ed8,#0e2a73);color:#fff;
+       padding:42px 40px 36px}
+  header.hero h1{margin:0 0 6px;font-size:30px;letter-spacing:-.4px}
+  header.hero p{margin:2px 0;opacity:.9}
+  .badges{margin-top:16px}
+  .badges span{display:inline-block;background:rgba(255,255,255,.16);
+       border:1px solid rgba(255,255,255,.25);padding:4px 11px;border-radius:20px;
+       font-size:12.5px;margin:0 6px 6px 0}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 80px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;
+       padding:18px 22px;margin:24px 0 30px;columns:2;column-gap:40px}
+  nav.toc h2{margin:0 0 10px;font-size:14px;text-transform:uppercase;
+       letter-spacing:.6px;color:var(--muted);column-span:all}
+  nav.toc a{display:block;padding:3px 0;color:var(--brand);text-decoration:none;
+       font-size:14px;break-inside:avoid}
+  nav.toc a:hover{text-decoration:underline}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+       padding:26px 30px;margin:0 0 26px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  h2.sec{margin:0 0 4px;font-size:22px;color:#0e2a73;display:flex;align-items:center;gap:10px}
+  h2.sec .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;
+       display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  h3{margin:26px 0 8px;font-size:17px;color:#15324f}
+  h4{margin:18px 0 6px;font-size:14.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  p.lead{color:var(--muted);margin:2px 0 14px}
+  table{border-collapse:collapse;width:100%;margin:12px 0 8px;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  thead th{background:#f0f4f9;color:#15324f;font-weight:600;position:sticky}
+  tbody tr:nth-child(even){background:#fafbfd}
+  code{font-family:var(--mono);background:#eef1f6;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:600}
+  .pk{background:var(--key-bg);color:var(--key)}
+  .fk{background:#e6f0ff;color:#1d4ed8}
+  .earn{background:var(--earn-bg);color:var(--earn)}
+  .ded{background:var(--ded-bg);color:var(--ded)}
+  .stat{background:var(--stat-bg);color:var(--stat)}
+  .num-col{text-align:right;font-family:var(--mono)}
+  .callout{border-left:4px solid var(--brand);background:var(--brand-light);
+       padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+  .callout.warn{border-color:#d97706;background:#fff7ed}
+  .callout.ok{border-color:var(--earn);background:var(--earn-bg)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .scroll{overflow-x:auto}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
+  .flow .step{background:var(--brand-light);border:1px solid #cdd9f5;color:#1d3a8a;
+       padding:8px 13px;border-radius:9px;font-size:13px;font-weight:600}
+  .flow .arrow{color:var(--muted);font-weight:700}
+  .payslip{border:1px solid var(--line);border-radius:12px;overflow:hidden;max-width:620px}
+  .payslip .pshead{background:#0e2a73;color:#fff;padding:14px 18px}
+  .payslip .pshead h3{margin:0;color:#fff;font-size:18px}
+  .payslip .pshead small{opacity:.85}
+  .payslip table{margin:0}
+  .total-row td{font-weight:700;background:#f0f4f9 !important}
+  .net-row td{font-weight:700;background:#0e2a73 !important;color:#fff;font-size:15px}
+  caption{caption-side:top;text-align:left;font-weight:600;color:#15324f;padding:6px 0;font-size:14px}
+  .legend span{margin-right:14px;font-size:12.5px}
+  hr.soft{border:none;border-top:1px dashed var(--line);margin:20px 0}
+  .small{font-size:12.5px;color:var(--muted)}
+  @media(max-width:760px){nav.toc{columns:1}.grid2{grid-template-columns:1fr}header.hero{padding:30px 22px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>Vectus Payroll Module</h1>
+  <p>Detailed data-model specification &amp; end-to-end worked example</p>
+  <p class="small" style="opacity:.8">Built on the standard stack — .NET 10 Blazor RCL · Dapper · stored procedures only · SSDT (DBVectus)</p>
+  <div class="badges">
+    <span>Configurable statutory engine</span>
+    <span>Posts journal to Accounting</span>
+    <span>Manual attendance / LOP</span>
+    <span>Soft-delete + audit trail</span>
+    <span>Reusable across projects</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <a href="#overview">1 · Overview &amp; how it fits</a>
+    <a href="#erd">2 · Entities at a glance</a>
+    <a href="#masters">3 · Master tables (column-by-column)</a>
+    <a href="#components">4 · Salary components &amp; structure</a>
+    <a href="#statutory">5 · Statutory config (PF/ESI/PT/TDS)</a>
+    <a href="#processing">6 · Processing tables</a>
+    <a href="#example">7 · End-to-end worked example ★</a>
+    <a href="#engine">8 · Calculation, step by step</a>
+    <a href="#payslip">9 · Generated payslip</a>
+    <a href="#journal">10 · Accounting journal posted</a>
+    <a href="#compliance">11 · Compliance &amp; notes</a>
+  </nav>
+
+  <!-- 1 -->
+  <section id="overview">
+    <h2 class="sec"><span class="num">1</span>Overview &amp; how it fits</h2>
+    <p class="lead">Payroll is a new domain area that mirrors the existing Accounts/Fleet pattern exactly: feature folders of <code>{Models, Data, Exports}</code>, <code>Insert_*</code> upsert procs, a <code>Status</code> soft-delete bit on every table, and an audit row on every mutation.</p>
+    <div class="flow">
+      <span class="step">Setup masters</span><span class="arrow">→</span>
+      <span class="step">Assign salary structure</span><span class="arrow">→</span>
+      <span class="step">Enter attendance</span><span class="arrow">→</span>
+      <span class="step">Process run (engine)</span><span class="arrow">→</span>
+      <span class="step">Review payslips</span><span class="arrow">→</span>
+      <span class="step">Finalize → post journal</span>
+    </div>
+    <div class="callout">
+      <strong>The one big idea:</strong> every pay head (Basic, HRA, PF, ESI, PT…) and every statutory rate is a <em>data row</em>, not code. Adding a new allowance or changing the PF rate next budget is an <code>INSERT</code> — the calculation engine never changes. That is what makes the module reusable in any project.
+    </div>
+    <p class="small legend"><strong>Legend:</strong>
+      <span class="pill pk">PK</span> primary key &nbsp;
+      <span class="pill fk">FK</span> foreign key &nbsp;
+      <span class="pill earn">Earning</span> &nbsp;
+      <span class="pill ded">Deduction</span> &nbsp;
+      <span class="pill stat">Statutory</span>
+    </p>
+  </section>
+
+  <!-- 2 -->
+  <section id="erd">
+    <h2 class="sec"><span class="num">2</span>Entities at a glance</h2>
+    <p class="lead">Three layers: masters describe <em>who</em> and <em>what</em>; configuration describes the <em>rules</em>; processing produces a monthly <em>run</em>.</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Layer</th><th>Table</th><th>Holds</th><th>Key links</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="6"><strong>Masters</strong></td><td><code>Department</code></td><td>Production, Accounts…</td><td>—</td></tr>
+        <tr><td><code>Designation</code></td><td>Fitter, Helper, Manager…</td><td>—</td></tr>
+        <tr><td><code>EmployeeLocation</code></td><td>Work site + state (drives PT)</td><td>→ StateUT</td></tr>
+        <tr><td><code>Employee</code></td><td>Person, bank, statutory IDs</td><td>→ Dept, Desig, Location</td></tr>
+        <tr><td><code>SalaryComponent</code></td><td>Definition of each pay head</td><td>→ StatutoryRule, Ledger</td></tr>
+        <tr><td><code>SalaryStructure</code> + line</td><td>Components &amp; amounts per employee</td><td>→ Employee, SalaryComponent</td></tr>
+        <tr><td rowspan="3"><strong>Config</strong></td><td><code>StatutoryRule</code></td><td>Rule identity (PF-EE, ESI, PT…) + ledger/account</td><td>→ StateUT, Ledger</td></tr>
+        <tr><td><code>StatutoryRate</code></td><td>Effective-dated rates, ceilings, caps, TDS knobs</td><td>→ StatutoryRule</td></tr>
+        <tr><td><code>StatutorySlab</code></td><td>PT / TDS bands</td><td>→ StatutoryRate</td></tr>
+        <tr><td rowspan="4"><strong>Processing</strong></td><td><code>PayrollRun</code></td><td>One month's batch (header)</td><td>→ Company, FinancialYear, FinancialAccounting</td></tr>
+        <tr><td><code>AttendanceInput</code></td><td>Payable / LOP days per employee</td><td>→ PayrollRun, Employee</td></tr>
+        <tr><td><code>PayrollLine</code></td><td>One employee's computed result</td><td>→ PayrollRun, Employee</td></tr>
+        <tr><td><code>PayrollLineDetail</code></td><td>One component amount (payslip line)</td><td>→ PayrollLine, SalaryComponent</td></tr>
+        <tr><td rowspan="2"><strong>Loans /<br>Advances</strong></td><td><code>EmployeeAdvance</code></td><td>An advance/loan issued, with recovery schedule</td><td>→ Employee, FinancialAccounting</td></tr>
+        <tr><td><code>AdvanceRecovery</code></td><td>One installment recovered in a run</td><td>→ EmployeeAdvance, PayrollRun</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="masters">
+    <h2 class="sec"><span class="num">3</span>Master tables — column by column</h2>
+
+    <h3>3.1 Department / Designation / EmployeeLocation</h3>
+    <p class="lead">Three simple lookups with the same shape as the existing <code>AccountType</code> master. <code>EmployeeLocation</code> adds <code>StateUTId</code> because Professional Tax is state-specific.</p>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Req?</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>INT IDENTITY</td><td>auto</td><td>Surrogate key.</td></tr>
+        <tr><td><code>Name</code></td><td>VARCHAR(250)</td><td>yes</td><td>Display name, stored UPPER, unique.</td></tr>
+        <tr><td><code>Code</code></td><td>VARCHAR(10)</td><td>auto</td><td>Generated short code (e.g. <code>DEP0001</code>).</td></tr>
+        <tr><td><code>StateUTId</code> <span class="pill fk">FK</span></td><td>INT</td><td>location only</td><td>→ <code>StateUT</code>; selects the PT slab for employees at this location.</td></tr>
+        <tr><td><code>Status</code></td><td>BIT</td><td>yes</td><td>Soft-delete flag (1 = active).</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>Sample data — masters</caption>
+      <thead><tr><th>Table</th><th>Id</th><th>Code</th><th>Name</th><th>StateUTId</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Department</td><td>1</td><td>DEP0001</td><td>PRODUCTION</td><td>—</td><td>1</td></tr>
+        <tr><td>Department</td><td>2</td><td>DEP0002</td><td>ACCOUNTS</td><td>—</td><td>1</td></tr>
+        <tr><td>Designation</td><td>1</td><td>DSG0001</td><td>FITTER</td><td>—</td><td>1</td></tr>
+        <tr><td>Designation</td><td>2</td><td>DSG0002</td><td>HELPER</td><td>—</td><td>1</td></tr>
+        <tr><td>EmployeeLocation</td><td>1</td><td>LOC0001</td><td>DURGAPUR PLANT</td><td>19 (West Bengal)</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 Employee</h3>
+    <p class="lead">The person. Statutory <code>Is…Applicable</code> flags let you opt individuals in/out of PF/ESI/PT without touching the component definitions.</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Req?</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>INT IDENTITY</td><td>auto</td><td>Surrogate key.</td></tr>
+        <tr><td><code>Code</code></td><td>VARCHAR(10)</td><td>auto</td><td>Generated, e.g. <code>EMP0001</code>.</td></tr>
+        <tr><td><code>Name</code></td><td>VARCHAR(250)</td><td>yes</td><td>Full name.</td></tr>
+        <tr><td><code>DepartmentId</code> <span class="pill fk">FK</span></td><td>INT</td><td>yes</td><td>→ Department.</td></tr>
+        <tr><td><code>DesignationId</code> <span class="pill fk">FK</span></td><td>INT</td><td>yes</td><td>→ Designation.</td></tr>
+        <tr><td><code>LocationId</code> <span class="pill fk">FK</span></td><td>INT</td><td>yes</td><td>→ EmployeeLocation (→ state → PT).</td></tr>
+        <tr><td><code>DateOfJoining</code></td><td>DATE</td><td>yes</td><td>Start date; used for first-month proration.</td></tr>
+        <tr><td><code>DateOfLeaving</code></td><td>DATE</td><td>no</td><td>NULL while active; used for F&amp;F.</td></tr>
+        <tr><td><code>PaymentMode</code></td><td>VARCHAR(10)</td><td>yes</td><td><code>Bank</code> or <code>Cash</code>.</td></tr>
+        <tr><td><code>BankName</code> / <code>BankAccountNo</code> / <code>IFSC</code></td><td>VARCHAR</td><td>bank only</td><td>For the bank-transfer file.</td></tr>
+        <tr><td><code>PANNo</code> / <code>AadhaarNo</code></td><td>VARCHAR</td><td>no</td><td>Tax identity.</td></tr>
+        <tr><td><code>PFUAN</code> / <code>PFNumber</code></td><td>VARCHAR</td><td>no</td><td>EPFO universal account no.</td></tr>
+        <tr><td><code>ESINumber</code></td><td>VARCHAR</td><td>no</td><td>ESIC insurance no.</td></tr>
+        <tr><td><code>IsPFApplicable</code></td><td>BIT</td><td>yes</td><td>Deduct PF for this person?</td></tr>
+        <tr><td><code>IsESIApplicable</code></td><td>BIT</td><td>yes</td><td>Deduct ESI (also gated by wage ceiling)?</td></tr>
+        <tr><td><code>IsPTApplicable</code></td><td>BIT</td><td>yes</td><td>Deduct Professional Tax?</td></tr>
+        <tr><td><code>Phone</code> / <code>Email</code> / <code>Address</code></td><td>VARCHAR</td><td>no</td><td>Contact; validated like Ledger.</td></tr>
+        <tr><td><code>Status</code></td><td>BIT</td><td>yes</td><td>Soft delete.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="scroll">
+    <table>
+      <caption>Sample data — Employee</caption>
+      <thead><tr><th>Id</th><th>Code</th><th>Name</th><th>Dept</th><th>Desig</th><th>Loc</th><th>DOJ</th><th>PayMode</th><th>Bank A/C · IFSC</th><th>PAN</th><th>PF UAN</th><th>PF</th><th>ESI</th><th>PT</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>EMP0001</td><td>RAMESH KUMAR</td><td>1</td><td>1 Fitter</td><td>1</td><td>2024-06-10</td><td>Bank</td><td>SBI 32011… · SBIN0001</td><td>ABCPK1234L</td><td>100200300400</td><td>✔</td><td>✘</td><td>✔</td></tr>
+        <tr><td>2</td><td>EMP0002</td><td>SUNITA DAS</td><td>1</td><td>2 Helper</td><td>1</td><td>2025-02-01</td><td>Bank</td><td>SBI 32044… · SBIN0001</td><td>XYZPD9876K</td><td>100200300555</td><td>✔</td><td>✔</td><td>✔</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small">Note: Ramesh's gross exceeds the ESI wage ceiling, so ESI doesn't apply even though he could be flagged; Sunita is under the ceiling, so ESI applies. The engine enforces this — see §8.</p>
+  </section>
+
+  <!-- 4 -->
+  <section id="components">
+    <h2 class="sec"><span class="num">4</span>Salary components &amp; structure</h2>
+
+    <h3>4.1 SalaryComponent — the definition of each pay head</h3>
+    <p class="lead">This table makes the module generic. Each row says <em>how</em> the amount is found and <em>what statutory bases it feeds</em>.</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>INT</td><td>Surrogate key.</td></tr>
+        <tr><td><code>Code</code> / <code>Name</code></td><td>VARCHAR</td><td>e.g. <code>BASIC</code> / "Basic Pay".</td></tr>
+        <tr><td><code>ComponentType</code></td><td>VARCHAR</td><td><span class="pill earn">Earning</span> or <span class="pill ded">Deduction</span>.</td></tr>
+        <tr><td><code>CalculationType</code></td><td>VARCHAR</td><td><code>Fixed</code> · <code>PercentOfBase</code> · <code>Slab</code> · <code>StatutoryRule</code>.</td></tr>
+        <tr><td><code>BaseComponentCode</code></td><td>VARCHAR</td><td>For <code>PercentOfBase</code> — which head it's a % of (e.g. HRA → BASIC).</td></tr>
+        <tr><td><code>Percentage</code></td><td>DECIMAL(9,4)</td><td>The % when <code>PercentOfBase</code>.</td></tr>
+        <tr><td><code>StatutoryRuleCode</code></td><td>VARCHAR</td><td>Links a deduction to a rule (PF/ESI/PT/TDS).</td></tr>
+        <tr><td><code>IsTaxable</code></td><td>BIT</td><td>Counts toward TDS taxable income.</td></tr>
+        <tr><td><code>AffectsPFBase</code></td><td>BIT</td><td>Included in the PF wage base.</td></tr>
+        <tr><td><code>AffectsESIBase</code></td><td>BIT</td><td>Included in the ESI wage base.</td></tr>
+        <tr><td><code>LedgerId</code> <span class="pill fk">FK</span></td><td>INT</td><td>→ Accounts <code>Ledger</code> this head posts to (for the journal).</td></tr>
+        <tr><td><code>DisplayOrder</code></td><td>INT</td><td>Order on the payslip.</td></tr>
+        <tr><td><code>Status</code></td><td>BIT</td><td>Soft delete.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="scroll">
+    <table>
+      <caption>Sample data — SalaryComponent</caption>
+      <thead><tr><th>Id</th><th>Code</th><th>Type</th><th>CalcType</th><th>Base</th><th>%</th><th>RuleCode</th><th>Taxable</th><th>PF base</th><th>ESI base</th><th>Posts to ledger</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>BASIC</td><td><span class="pill earn">Earning</span></td><td>Fixed</td><td>—</td><td>—</td><td>—</td><td>✔</td><td>✔</td><td>✔</td><td>Salaries &amp; Wages</td></tr>
+        <tr><td>2</td><td>HRA</td><td><span class="pill earn">Earning</span></td><td>PercentOfBase</td><td>BASIC</td><td>40</td><td>—</td><td>✔</td><td>✘</td><td>✔</td><td>Salaries &amp; Wages</td></tr>
+        <tr><td>3</td><td>DA</td><td><span class="pill earn">Earning</span></td><td>PercentOfBase</td><td>BASIC</td><td>15</td><td>—</td><td>✔</td><td>✔</td><td>✔</td><td>Salaries &amp; Wages</td></tr>
+        <tr><td>4</td><td>CONV</td><td><span class="pill earn">Earning</span></td><td>Fixed</td><td>—</td><td>—</td><td>—</td><td>✘</td><td>✘</td><td>✔</td><td>Salaries &amp; Wages</td></tr>
+        <tr><td>5</td><td>PF</td><td><span class="pill ded">Deduction</span></td><td>StatutoryRule</td><td>—</td><td>—</td><td>PF</td><td>—</td><td>—</td><td>—</td><td>PF Payable</td></tr>
+        <tr><td>6</td><td>ESI</td><td><span class="pill ded">Deduction</span></td><td>StatutoryRule</td><td>—</td><td>—</td><td>ESI</td><td>—</td><td>—</td><td>—</td><td>ESI Payable</td></tr>
+        <tr><td>7</td><td>PT</td><td><span class="pill ded">Deduction</span></td><td>Slab</td><td>—</td><td>—</td><td>PT</td><td>—</td><td>—</td><td>—</td><td>PT Payable</td></tr>
+        <tr><td>8</td><td>TDS</td><td><span class="pill ded">Deduction</span></td><td>StatutoryRule</td><td>—</td><td>—</td><td>TDS</td><td>—</td><td>—</td><td>—</td><td>TDS Payable</td></tr>
+        <tr><td>9</td><td>ADV</td><td><span class="pill ded">Deduction</span></td><td>AdvanceRecovery</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Staff Advance</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>4.2 SalaryStructure (header) + SalaryStructureLine (detail)</h3>
+    <p class="lead">Assigns components &amp; fixed amounts to one employee, effective from a date. Multiple structures over time give a salary history; the run picks the one effective for the period.</p>
+    <div class="grid2">
+      <table>
+        <caption>SalaryStructure (header)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>EmployeeId</code> <span class="pill fk">FK</span></td><td>→ Employee.</td></tr>
+          <tr><td><code>EffectiveFrom</code></td><td>Applies from this month onward.</td></tr>
+          <tr><td><code>CTC</code></td><td>Optional annual cost-to-company.</td></tr>
+          <tr><td><code>Status</code></td><td>Soft delete.</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>SalaryStructureLine (detail)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>SalaryStructureId</code> <span class="pill fk">FK</span></td><td>→ header.</td></tr>
+          <tr><td><code>SalaryComponentId</code> <span class="pill fk">FK</span></td><td>→ component.</td></tr>
+          <tr><td><code>Amount</code></td><td>Used when component is <code>Fixed</code>.</td></tr>
+          <tr><td><code>OverridePercentage</code></td><td>Optional per-employee % override.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll">
+    <table>
+      <caption>Sample data — structures effective 2026-04-01</caption>
+      <thead><tr><th>Structure</th><th>Employee</th><th>Component</th><th>CalcType</th><th>Amount entered</th><th>Resolves to (₹/mo)</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="4">1 (CTC ₹4.6L)</td><td rowspan="4">EMP0001 Ramesh</td><td>BASIC</td><td>Fixed</td><td class="num-col">20,000</td><td class="num-col">20,000</td></tr>
+        <tr><td>HRA</td><td>40% of BASIC</td><td class="num-col">—</td><td class="num-col">8,000</td></tr>
+        <tr><td>DA</td><td>15% of BASIC</td><td class="num-col">—</td><td class="num-col">3,000</td></tr>
+        <tr><td>CONV</td><td>Fixed</td><td class="num-col">1,600</td><td class="num-col">1,600</td></tr>
+        <tr><td rowspan="3">2 (CTC ₹2.0L)</td><td rowspan="3">EMP0002 Sunita</td><td>BASIC</td><td>Fixed</td><td class="num-col">9,000</td><td class="num-col">9,000</td></tr>
+        <tr><td>HRA</td><td>40% of BASIC</td><td class="num-col">—</td><td class="num-col">3,600</td></tr>
+        <tr><td>DA</td><td>15% of BASIC</td><td class="num-col">—</td><td class="num-col">1,350</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="statutory">
+    <h2 class="sec"><span class="num">5</span>Statutory configuration (the rules)</h2>
+    <p class="lead">Header/detail: a <code>StatutoryRule</code> is the stable identity; its rates, ceilings and caps live in effective-dated <code>StatutoryRate</code> lines (PT/TDS bands in <code>StatutorySlab</code>, owned by the rate). A budget change = a <strong>new dated line</strong>, never an edit — so old runs still recompute on the old line.</p>
+    <div class="scroll">
+    <table>
+      <caption>StatutoryRule headers joined to their <code>StatutoryRate</code> line effective 2026-04-01. PF is several rules, one per EPFO challan account.</caption>
+      <thead><tr><th>Code</th><th>Name</th><th>Rate</th><th>Of / cap</th><th>A/c</th><th>StateUT</th></tr></thead>
+      <tbody>
+        <tr><td>PF-EE</td><td>PF employee</td><td>12.00%</td><td>PF wage (ceiling ₹15,000)</td><td>A/c 1</td><td>—</td></tr>
+        <tr><td>PF-EPS</td><td>Pension (employer)</td><td>8.33%</td><td>min(PF wage, 15,000), cap ₹1,250</td><td>A/c 10</td><td>—</td></tr>
+        <tr><td>PF-EPF</td><td>EPF employer (derived)</td><td>12% − EPS</td><td>routes &gt;15k excess to EPF</td><td>A/c 1</td><td>—</td></tr>
+        <tr><td>PF-EDLI</td><td>EDLI insurance (employer)</td><td>0.50%</td><td>min(PF wage, 15,000)</td><td>A/c 21</td><td>—</td></tr>
+        <tr><td>PF-ADMIN</td><td>PF admin charges</td><td>0.50%</td><td>PF wage, <strong>min ₹500</strong></td><td>A/c 2</td><td>—</td></tr>
+        <tr><td>PF-INSP</td><td>EDLI admin / inspection</td><td>0.00%</td><td>NIL (un-exempted)</td><td>A/c 22</td><td>—</td></tr>
+        <tr><td>ESI</td><td>Employee State Insurance</td><td>0.75% / 3.25%</td><td>gross, ceiling ₹21,000</td><td>—</td><td>—</td></tr>
+        <tr><td>PT</td><td>Professional Tax (WB)</td><td>slab</td><td>monthly gross</td><td>—</td><td>19 (WB)</td></tr>
+        <tr><td>TDS</td><td>Income Tax (new regime)</td><td>slab</td><td>annual taxable</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small"><strong>Header/detail split:</strong> <code>Code · Name · A/c · Ledger · StateUT</code> sit on the <code>StatutoryRule</code> header (edited in place); <code>Rate · ceiling · cap · the TDS knobs · EffectiveFrom</code> sit on the <code>StatutoryRate</code> line. Changing a rate <strong>adds a new dated line</strong> — the old line stays, so past runs recompute unchanged.</p>
+    <div class="callout"><strong>Two rules the engine enforces beyond the rates:</strong>
+      <strong>(1) 50% wage floor</strong> — under the 2025 Labour Codes, PF wage = MAX(Basic+DA, 50% of gross), so a low basic can't shrink PF.
+      <strong>(2) ESI contribution period</strong> — once covered at a period start (Apr–Sep / Oct–Mar), ESI continues to period end even after gross crosses ₹21,000. For exempted establishments A/c 2 → 0.18% and A/c 22 → 0.005% (inspection charges).</div>
+    <div class="grid2">
+    <table>
+      <caption>StatutorySlab — Professional Tax (West Bengal, monthly)</caption>
+      <thead><tr><th>From ₹</th><th>To ₹</th><th>PT / month</th></tr></thead>
+      <tbody>
+        <tr><td class="num-col">0</td><td class="num-col">10,000</td><td class="num-col">0</td></tr>
+        <tr><td class="num-col">10,001</td><td class="num-col">15,000</td><td class="num-col">110</td></tr>
+        <tr><td class="num-col">15,001</td><td class="num-col">25,000</td><td class="num-col">130</td></tr>
+        <tr><td class="num-col">25,001</td><td class="num-col">40,000</td><td class="num-col">150</td></tr>
+        <tr><td class="num-col">40,001</td><td class="num-col">∞</td><td class="num-col">200</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn" style="align-self:start">
+      <strong>Verify before go-live.</strong> The figures here are realistic placeholders to seed defaults (EPFO 12%, ESI 0.75%/3.25% with ₹21,000 ceiling, WB PT slabs, new-regime TDS under the Income-tax Act 2025). Confirm current values from EPFO/ESIC/WB-PT/Income-tax at implementation, per the project's "use latest docs" rule.
+    </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="processing">
+    <h2 class="sec"><span class="num">6</span>Processing tables</h2>
+    <div class="grid2">
+      <table>
+        <caption>PayrollRun (header)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>CompanyId</code> <span class="pill fk">FK</span></td><td>→ Company.</td></tr>
+          <tr><td><code>FinancialYearId</code> <span class="pill fk">FK</span></td><td>→ FinancialYear.</td></tr>
+          <tr><td><code>Year</code> / <code>Month</code></td><td>Period, e.g. 2026 / 04.</td></tr>
+          <tr><td><code>RunStatus</code></td><td><code>Draft</code> → <code>Processed</code> → <code>Finalized</code>.</td></tr>
+          <tr><td><code>TotalGross/Deductions/Net</code></td><td>Roll-ups.</td></tr>
+          <tr><td><code>FinancialAccountingId</code> <span class="pill fk">FK</span></td><td>The journal voucher created on finalize.</td></tr>
+          <tr><td><code>Status</code></td><td>Soft delete.</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>AttendanceInput (manual entry)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>PayrollRunId</code> <span class="pill fk">FK</span></td><td>→ run.</td></tr>
+          <tr><td><code>EmployeeId</code> <span class="pill fk">FK</span></td><td>→ employee.</td></tr>
+          <tr><td><code>PayableDays</code></td><td>Calendar/working days in month.</td></tr>
+          <tr><td><code>PresentDays</code></td><td>Days actually paid.</td></tr>
+          <tr><td><code>LOPDays</code></td><td>Loss-of-pay days.</td></tr>
+          <tr><td><code>OvertimeHours</code></td><td>Optional OT.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid2">
+      <table>
+        <caption>PayrollLine (one per employee per run)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>PayrollRunId</code> / <code>EmployeeId</code> <span class="pill fk">FK</span></td><td>Owners.</td></tr>
+          <tr><td><code>GrossEarnings</code></td><td>Sum of earnings.</td></tr>
+          <tr><td><code>TotalDeductions</code></td><td>All employee deductions.</td></tr>
+          <tr><td><code>NetPay</code></td><td>Gross − deductions.</td></tr>
+          <tr><td><code>PFWage</code></td><td>PF base after 50% floor + ₹15k cap.</td></tr>
+          <tr><td><code>PFEmployee</code></td><td>Employee 12% (A/c 1).</td></tr>
+          <tr><td><code>PFEmployerEPS/EPF</code></td><td>Employer split — pension (A/c 10) + EPF (A/c 1).</td></tr>
+          <tr><td><code>EDLI</code> / <code>PFAdmin</code></td><td>A/c 21 + A/c 2 (admin, min ₹500).</td></tr>
+          <tr><td><code>ESIEmployee/ESIEmployer</code></td><td>ESI split.</td></tr>
+          <tr><td><code>PT</code> / <code>TDS</code></td><td>Computed statutory.</td></tr>
+          <tr><td><code>TotalEmployerCost</code></td><td>CTC view = gross + all employer contributions.</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>PayrollLineDetail (one per component = payslip line)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>PayrollLineId</code> <span class="pill fk">FK</span></td><td>→ line.</td></tr>
+          <tr><td><code>SalaryComponentId</code> <span class="pill fk">FK</span></td><td>→ component.</td></tr>
+          <tr><td><code>ComponentType</code></td><td>Earning / Deduction (snapshot).</td></tr>
+          <tr><td><code>Amount</code></td><td>The computed figure.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.5 Staff advances / loans</h3>
+    <p class="lead">An advance is <em>not</em> a salary-structure line — it's a separate loan with a principal, a recovery schedule, and an outstanding balance that shrinks each month and stops when cleared. The payroll engine pulls the due installment automatically; it never over-recovers past the outstanding balance.</p>
+    <div class="grid2">
+      <table>
+        <caption>EmployeeAdvance (header — the loan)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>EmployeeId</code> <span class="pill fk">FK</span></td><td>→ Employee.</td></tr>
+          <tr><td><code>AdvanceDate</code></td><td>When it was issued/disbursed.</td></tr>
+          <tr><td><code>Amount</code></td><td>Principal advanced.</td></tr>
+          <tr><td><code>InstallmentAmount</code></td><td>Recovered per month.</td></tr>
+          <tr><td><code>NumberOfInstallments</code></td><td>Planned tenure.</td></tr>
+          <tr><td><code>OutstandingBalance</code></td><td>Principal − recovered so far (live).</td></tr>
+          <tr><td><code>DisbursementVoucherId</code> <span class="pill fk">FK</span></td><td>→ FinancialAccounting (Dr Staff Advance / Cr Bank when issued).</td></tr>
+          <tr><td><code>Reason</code></td><td>Free text.</td></tr>
+          <tr><td><code>Status</code></td><td>Soft delete; auto-closes at zero balance.</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <caption>AdvanceRecovery (detail — one row per month recovered)</caption>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Id</code> <span class="pill pk">PK</span></td><td>Key.</td></tr>
+          <tr><td><code>EmployeeAdvanceId</code> <span class="pill fk">FK</span></td><td>→ the loan.</td></tr>
+          <tr><td><code>PayrollRunId</code> <span class="pill fk">FK</span></td><td>→ the run that recovered it.</td></tr>
+          <tr><td><code>RecoveryDate</code></td><td>Run period.</td></tr>
+          <tr><td><code>Amount</code></td><td>Recovered this run (= installment, capped at outstanding).</td></tr>
+          <tr><td><code>OutstandingAfter</code></td><td>Balance left after this recovery.</td></tr>
+          <tr><td><code>Status</code></td><td>Soft delete (reversed if run is reopened).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">The <code>ADV</code> salary component (§4.1) has <code>CalculationType = AdvanceRecovery</code>. During a run the engine sums each employee's due installments into that one deduction line — so advances flow onto the payslip and into the journal automatically, without ever sitting in the salary structure.</div>
+    <div class="scroll">
+    <table>
+      <caption>Sample data — EmployeeAdvance &amp; its recovery ledger</caption>
+      <thead><tr><th>Advance Id</th><th>Employee</th><th>Date</th><th>Principal ₹</th><th>Installment ₹</th><th>Tenure</th><th>Recovered so far</th><th>Outstanding ₹</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>EMP0001 Ramesh</td><td>2026-03-15</td><td class="num-col">5,000</td><td class="num-col">1,000</td><td>5 months</td><td>1 (Mar 2026)</td><td class="num-col">4,000</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>AdvanceRecovery rows for advance #1</caption>
+      <thead><tr><th>Id</th><th>Run</th><th>RecoveryDate</th><th>Amount ₹</th><th>OutstandingAfter ₹</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>(Mar run)</td><td>2026-03</td><td class="num-col">1,000</td><td class="num-col">4,000</td></tr>
+        <tr><td>2</td><td>#1</td><td>2026-04</td><td class="num-col">1,000</td><td class="num-col">3,000</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="example">
+    <h2 class="sec"><span class="num">7</span>End-to-end worked example ★</h2>
+    <p class="lead">Payroll run for <strong>April 2026</strong>, Jay Shree Steel Durgapur — two employees, full attendance (30/30, no LOP). Follow the same rows through to payslip and journal.</p>
+
+    <h4>Step A — create the run &amp; enter attendance</h4>
+    <table>
+      <thead><tr><th>PayrollRun</th><th>Employee</th><th>PayableDays</th><th>PresentDays</th><th>LOP</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2">#1 · 2026-04 · Draft</td><td>EMP0001 Ramesh</td><td>30</td><td>30</td><td>0</td></tr>
+        <tr><td>EMP0002 Sunita</td><td>30</td><td>30</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Step A2 — advances due this run (pulled automatically)</h4>
+    <table>
+      <thead><tr><th>Employee</th><th>Active advance</th><th>Outstanding before</th><th>Installment due</th><th>Recovered now</th><th>Outstanding after</th></tr></thead>
+      <tbody>
+        <tr><td>EMP0001 Ramesh</td><td>#1 (₹5,000 over 5 mo)</td><td class="num-col">4,000</td><td class="num-col">1,000</td><td class="num-col">1,000</td><td class="num-col">3,000</td></tr>
+        <tr><td>EMP0002 Sunita</td><td>none</td><td class="num-col">0</td><td class="num-col">0</td><td class="num-col">0</td><td class="num-col">0</td></tr>
+      </tbody>
+    </table>
+    <p class="small">The ₹1,000 ADV deduction in Step C comes from here — not from the salary structure. When the outstanding reaches 0, recovery automatically stops.</p>
+
+    <h4>Step B — engine resolves earnings (proration factor = Present ÷ Payable = 1.00)</h4>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Component</th><th>Rule</th><th>EMP0001 Ramesh</th><th>EMP0002 Sunita</th></tr></thead>
+      <tbody>
+        <tr><td>BASIC</td><td>Fixed</td><td class="num-col">20,000</td><td class="num-col">9,000</td></tr>
+        <tr><td>HRA</td><td>40% × BASIC</td><td class="num-col">8,000</td><td class="num-col">3,600</td></tr>
+        <tr><td>DA</td><td>15% × BASIC</td><td class="num-col">3,000</td><td class="num-col">1,350</td></tr>
+        <tr><td>CONV</td><td>Fixed</td><td class="num-col">1,600</td><td class="num-col">0</td></tr>
+        <tr class="total-row"><td colspan="2">Gross earnings</td><td class="num-col">32,600</td><td class="num-col">13,950</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4>Step C — statutory deductions</h4>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Deduction</th><th>Base &amp; rule</th><th>EMP0001 Ramesh</th><th>EMP0002 Sunita</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>PF (employee 12%)</td>
+          <td>PF base = BASIC+DA, capped at ₹15,000</td>
+          <td class="num-col">Ramesh base 23,000 → cap 15,000 → <strong>1,800</strong></td>
+          <td class="num-col">Sunita base 10,350 → <strong>1,242</strong></td>
+        </tr>
+        <tr>
+          <td>ESI (employee 0.75%)</td>
+          <td>Only if gross ≤ ₹21,000</td>
+          <td class="num-col">32,600 &gt; 21,000 → <strong>0</strong> (N/A)</td>
+          <td class="num-col">0.75% × 13,950 → <strong>105</strong></td>
+        </tr>
+        <tr>
+          <td>PT (WB slab on gross)</td>
+          <td>slab lookup</td>
+          <td class="num-col">32,600 → 25,001–40,000 → <strong>150</strong></td>
+          <td class="num-col">13,950 → 10,001–15,000 → <strong>110</strong></td>
+        </tr>
+        <tr>
+          <td>TDS</td>
+          <td>new-regime annualized (sample)</td>
+          <td class="num-col"><strong>2,000</strong></td>
+          <td class="num-col"><strong>0</strong></td>
+        </tr>
+        <tr>
+          <td>ADV (advance recovery)</td>
+          <td>due installment of advance #1 (outstanding 4,000)</td>
+          <td class="num-col"><strong>1,000</strong></td>
+          <td class="num-col"><strong>0</strong></td>
+        </tr>
+        <tr class="total-row"><td colspan="2">Total employee deductions</td><td class="num-col">4,950</td><td class="num-col">1,457</td></tr>
+        <tr class="net-row"><td colspan="2">NET PAY (Gross − deductions)</td><td class="num-col">27,650</td><td class="num-col">12,493</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small">Employer-side (not deducted from employee, but costed &amp; posted) — the employer's 12% PF splits into pension + EPF, plus EDLI &amp; admin:</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Employer contribution</th><th>Rule</th><th>EMP0001 Ramesh</th><th>EMP0002 Sunita</th><th>Total ₹</th></tr></thead>
+      <tbody>
+        <tr><td>EPS (pension, A/c 10)</td><td>8.33% min(PFwage,15k), cap 1,250</td><td class="num-col">1,250</td><td class="num-col">862</td><td class="num-col">2,112</td></tr>
+        <tr><td>EPF employer (A/c 1)</td><td>12% PFwage − EPS</td><td class="num-col">550</td><td class="num-col">380</td><td class="num-col">930</td></tr>
+        <tr><td>EDLI (A/c 21)</td><td>0.5% min(PFwage,15k)</td><td class="num-col">75</td><td class="num-col">52</td><td class="num-col">127</td></tr>
+        <tr><td>PF admin (A/c 2)</td><td>0.5% PFwage, min ₹500 (establishment)</td><td class="num-col" colspan="2" style="text-align:center">127 → floored</td><td class="num-col">500</td></tr>
+        <tr><td>ESI employer</td><td>3.25% of gross (Ramesh N/A)</td><td class="num-col">0</td><td class="num-col">454</td><td class="num-col">454</td></tr>
+        <tr class="total-row"><td colspan="4">Total employer statutory cost</td><td class="num-col">4,123</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small">PF employer cost ₹3,669 (EPS 2,112 + EPF 930 + EDLI 127 + admin 500) + ESI employer 454 = ₹4,123. This is the employer's cost above gross — it flows to the journal (§10), not the payslip.</p>
+
+    <h4>Step D — what gets stored</h4>
+    <div class="scroll">
+    <table>
+      <caption>PayrollLine rows (PF empr = employer 12% = EPS + EPF; EDLI &amp; admin stored separately — see Step C breakdown)</caption>
+      <thead><tr><th>Id</th><th>Run</th><th>Emp</th><th>Gross</th><th>PF emp</th><th>PF empr</th><th>ESI emp</th><th>ESI empr</th><th>PT</th><th>TDS</th><th>Total ded</th><th>Net</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>1</td><td>EMP0001</td><td class="num-col">32,600</td><td class="num-col">1,800</td><td class="num-col">1,800</td><td class="num-col">0</td><td class="num-col">0</td><td class="num-col">150</td><td class="num-col">2,000</td><td class="num-col">4,950</td><td class="num-col">27,650</td></tr>
+        <tr><td>2</td><td>1</td><td>EMP0002</td><td class="num-col">13,950</td><td class="num-col">1,242</td><td class="num-col">1,242</td><td class="num-col">105</td><td class="num-col">454</td><td class="num-col">110</td><td class="num-col">0</td><td class="num-col">1,457</td><td class="num-col">12,493</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small">Each line also writes <code>PayrollLineDetail</code> rows (BASIC, HRA, DA, CONV, PF, ESI, PT, TDS, ADV) — those become the payslip lines in §9.</p>
+  </section>
+
+  <!-- 8 -->
+  <section id="engine">
+    <h2 class="sec"><span class="num">8</span>The calculation engine, step by step</h2>
+    <p class="lead"><code>PayrollCalculationEngine.Compute(...)</code> is a pure, database-free static class — fully portable and unit-testable. Order matters:</p>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Proration factor</td><td><code>PresentDays ÷ PayableDays</code> (here 30/30 = 1.0).</td></tr>
+        <tr><td>2</td><td>Resolve earnings</td><td><code>Fixed</code> straight; <code>PercentOfBase</code> after its base is known (Basic → HRA/DA). Multiply each by the proration factor.</td></tr>
+        <tr><td>3</td><td>Gross</td><td>Sum of earnings.</td></tr>
+        <tr><td>4</td><td>PF</td><td>PF wage = MAX(Σ <code>AffectsPFBase</code>, 50% of gross), capped ₹15,000. Then split: EE 12% · EPS 8.33% (cap ₹1,250) · EPF = 12%−EPS · EDLI 0.5% · admin 0.5% (min ₹500).</td></tr>
+        <tr><td>5</td><td>ESI</td><td>If gross ≤ ₹21,000 <em>or</em> still within the active contribution period: × 0.75% / 3.25%. Else zero.</td></tr>
+        <tr><td>6</td><td>PT</td><td>Slab lookup on gross for the employee's state.</td></tr>
+        <tr><td>7</td><td>TDS</td><td>Taxable earnings annualized → regime slab → ÷12. (Can start as a manual override field.)</td></tr>
+        <tr><td>8</td><td>Advance recovery</td><td>For each active <code>EmployeeAdvance</code> with outstanding &gt; 0, take the due installment capped at the outstanding balance; write an <code>AdvanceRecovery</code> row and reduce <code>OutstandingBalance</code> (auto-closes the loan at zero).</td></tr>
+        <tr><td>9</td><td>Net</td><td>Gross − (employee deductions + PF emp + ESI emp + PT + TDS + advance installments).</td></tr>
+        <tr><td>10</td><td>Emit details</td><td>One <code>PayrollLineDetail</code> per component for full transparency.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">For each <code>StatutoryRule</code> the engine takes the <code>StatutoryRate</code> line (and its slabs) with the latest <code>EffectiveFrom ≤ run period</code> — so a rate change is a new dated line and historical/arrear runs stay correct.</div>
+  </section>
+
+  <!-- 9 -->
+  <section id="payslip">
+    <h2 class="sec"><span class="num">9</span>Generated payslip (EMP0001)</h2>
+    <p class="lead">Rendered from the <code>PayrollLineDetail</code> rows; exported to PDF via <code>ExportUtils</code>.</p>
+    <div class="payslip">
+      <div class="pshead">
+        <h3>Jay Shree Steel — Payslip</h3>
+        <small>April 2026 &nbsp;·&nbsp; RAMESH KUMAR (EMP0001) &nbsp;·&nbsp; Fitter, Production &nbsp;·&nbsp; Durgapur Plant</small>
+      </div>
+      <table>
+        <thead><tr><th>Earnings</th><th class="num-col">Amount ₹</th><th>Deductions</th><th class="num-col">Amount ₹</th></tr></thead>
+        <tbody>
+          <tr><td>Basic</td><td class="num-col">20,000</td><td>PF (employee)</td><td class="num-col">1,800</td></tr>
+          <tr><td>HRA</td><td class="num-col">8,000</td><td>Professional Tax</td><td class="num-col">150</td></tr>
+          <tr><td>DA</td><td class="num-col">3,000</td><td>TDS</td><td class="num-col">2,000</td></tr>
+          <tr><td>Conveyance</td><td class="num-col">1,600</td><td>Advance recovery</td><td class="num-col">1,000</td></tr>
+          <tr><td>&nbsp;</td><td class="num-col"></td><td>ESI</td><td class="num-col">N/A</td></tr>
+          <tr class="total-row"><td>Gross Earnings</td><td class="num-col">32,600</td><td>Total Deductions</td><td class="num-col">4,950</td></tr>
+          <tr class="net-row"><td colspan="3">NET PAY (Bank · SBI 32011…)</td><td class="num-col">27,650</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Payable days 30 / Present 30 / LOP 0 &nbsp;·&nbsp; PF UAN 100200300400 &nbsp;·&nbsp; PAN ABCPK1234L &nbsp;·&nbsp; Employer PF ₹1,800 (EPS 1,250 + EPF 550) + EDLI 75 + admin (info).</p>
+  </section>
+
+  <!-- 10 -->
+  <section id="journal">
+    <h2 class="sec"><span class="num">10</span>Accounting journal posted on Finalize</h2>
+    <p class="lead">On <strong>Finalize</strong>, the run builds one balanced voucher in the existing <code>FinancialAccounting</code> + <code>FinancialAccountingLedger</code> tables (reusing <code>FinancialAccountingData.SaveTransaction</code>). Aggregated for both employees:</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Ledger</th><th>Source</th><th class="num-col">Debit ₹</th><th class="num-col">Credit ₹</th></tr></thead>
+      <tbody>
+        <tr><td>Salaries &amp; Wages (expense)</td><td>Total gross 32,600 + 13,950</td><td class="num-col">46,550</td><td class="num-col"></td></tr>
+        <tr><td>Employer PF cost (expense)</td><td>EPF 930 + EPS 2,112 + EDLI 127 + admin 500</td><td class="num-col">3,669</td><td class="num-col"></td></tr>
+        <tr><td>Employer ESI Contribution (expense)</td><td>0 + 454</td><td class="num-col">454</td><td class="num-col"></td></tr>
+        <tr><td>PF Payable (liability)</td><td>EE 3,042 + employer 3,669 — ties to ECR challan</td><td class="num-col"></td><td class="num-col">6,711</td></tr>
+        <tr><td>ESI Payable (liability)</td><td>emp 105 + employer 454</td><td class="num-col"></td><td class="num-col">559</td></tr>
+        <tr><td>PT Payable (liability)</td><td>150 + 110</td><td class="num-col"></td><td class="num-col">260</td></tr>
+        <tr><td>TDS Payable (liability)</td><td>2,000 + 0</td><td class="num-col"></td><td class="num-col">2,000</td></tr>
+        <tr><td>Staff Advance (asset recovery)</td><td>1,000 + 0</td><td class="num-col"></td><td class="num-col">1,000</td></tr>
+        <tr><td>Salary Payable / Bank (liability)</td><td>net 27,650 + 12,493</td><td class="num-col"></td><td class="num-col">40,143</td></tr>
+        <tr class="total-row"><td colspan="2">Totals</td><td class="num-col">50,673</td><td class="num-col">50,673</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout ok"><strong>Debits = Credits = ₹50,673.</strong> PF Payable ₹6,711 is exactly the EPFO ECR challan total (A/c 1/2/10/21/22) — see <code>PayrollModule.PFEcr.html</code>. The created voucher's <code>Id</code> is written back to <code>PayrollRun.FinancialAccountingId</code>, linking the run to its journal. Reopening the run soft-deletes the voucher and unlocks the run (audited).</div>
+    <p class="small">Employer PF cost ₹3,669 = employer EPF ₹930 + EPS ₹2,112 + EDLI ₹127 + admin ₹500 (A/c 2 floored at its ₹500 minimum). Which ledger each line hits comes from <code>SalaryComponent.LedgerId</code> and a few company-default ledgers (Salary Payable, Bank) — all configurable, no hardcoding.</p>
+  </section>
+
+  <!-- 11 -->
+  <section id="compliance">
+    <h2 class="sec"><span class="num">11</span>Compliance &amp; team-discussion notes</h2>
+    <ul>
+      <li><strong>EPF</strong> — modelled as six sub-rules across EPFO accounts A/c 1/2/10/21/22: EE 12%, EPS 8.33% (cap ₹1,250), EPF (12%−EPS), EDLI 0.5%, admin 0.5% (min ₹500), inspection (A/c 22, NIL un-exempted / 0.005% exempted). Full breakdown in <code>PayrollModule.PFEcr.html</code>.</li>
+      <li><strong>ESI</strong> — 0.75% employee / 3.25% employer; covered while gross ≤ ₹21,000, and the contribution-period rule (Apr–Sep / Oct–Mar) keeps coverage to period-end after a mid-period crossing. Both in the engine (§8 step 5).</li>
+      <li><strong>Professional Tax</strong> — West Bengal slabs (Durgapur). Stored as <code>StatutorySlab</code> rows so other states are just more rows.</li>
+      <li><strong>TDS</strong> — new regime default under the Income-tax Act 2025 (FY 2026-27): std deduction ₹75,000, §87A rebate ₹60,000 (nil to ₹12L), 4% cess — all columns on the TDS <code>StatutoryRate</code> line, never engine literals, so a Budget change is a new dated line. Manual override to start, annualized projection in Phase 3.</li>
+      <li><strong>Labour Codes 2025</strong> — the 50% wage-floor rule is enforced (PF wage = MAX(Basic+DA, 50% of gross)); the per-component <code>AffectsPFBase</code>/<code>AffectsESIBase</code> flags keep any further definition change a config edit.</li>
+      <li><strong>Arrears</strong> — retrospective revisions are computed per origin month with PF/ESI on arrears and §89(1)/Form 10E tagging — see <code>PayrollModule.Arrears.html</code>.</li>
+      <li><strong>Still open for the team:</strong> overtime formula · gratuity &amp; leave encashment in full-and-final · bonus (Payment of Bonus Act) · LWF figures · multi-company posting ledgers.</li>
+    </ul>
+    <div class="callout warn">All statutory figures in this document are realistic placeholders to seed defaults and illustrate the math. Confirm live rates from EPFO / ESIC / WB Professional Tax / Income-tax before going live.</div>
+    <hr class="soft">
+    <p class="small">Companion to <code>docs/PayrollModule.Plan.md</code>, <code>PayrollModule.PFEcr.html</code> &amp; <code>PayrollModule.Arrears.html</code>. Generated for review &amp; team discussion — no code committed yet.</p>
+  </section>
+
+</div>
+</body>
+</html>

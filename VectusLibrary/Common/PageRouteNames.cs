@@ -63,4 +63,8 @@ public static class PageRouteNames
 
 	public const string GarageMaster = "/fleet/garage";
 	#endregion
+
+	#region Payroll
+	public const string DepartmentMaster = "/payroll/masters/department";
+	#endregion
 }

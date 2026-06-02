@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payroll for Absolute Beginners — A Picture Guide</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#fff; --ink:#1f2933; --muted:#5b6675; --line:#e3e9f0;
+    --blue:#2563eb; --blue-bg:#e8f0fe; --green:#0a8a52; --green-bg:#e6f6ed;
+    --red:#d23f31; --red-bg:#fdecea; --amber:#b7791f; --amber-bg:#fff5e1;
+    --purple:#7c3aed; --purple-bg:#f1e9fd; --teal:#0e8f8f; --teal-bg:#e3f6f6;
+    --mono:'Cascadia Code','Consolas',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:16px}
+  header.hero{background:linear-gradient(135deg,#2563eb,#0e2a73);color:#fff;padding:46px 40px 38px}
+  header.hero h1{margin:0 0 8px;font-size:32px}
+  header.hero p{margin:3px 0;opacity:.92;font-size:17px}
+  .hello{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:14px 18px;margin-top:18px;font-size:15px}
+  .wrap{max-width:1060px;margin:0 auto;padding:26px 22px 90px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 24px;margin:24px 0 30px}
+  nav.toc h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:36px}
+  nav.toc li{padding:3px 0;break-inside:avoid}
+  nav.toc a{color:var(--blue);text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 32px;margin:0 0 26px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  h2.sec{margin:0 0 6px;font-size:24px;color:#16306b;display:flex;align-items:center;gap:12px}
+  h2.sec .ico{font-size:26px}
+  h3{margin:24px 0 8px;font-size:19px;color:#173;color:#15324f}
+  p.lead{color:var(--muted);margin:2px 0 16px;font-size:16px}
+  .analogy{border-left:5px solid var(--amber);background:var(--amber-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  .analogy b{color:#92600c}
+  .why{border-left:5px solid var(--green);background:var(--green-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  .note{border-left:5px solid var(--blue);background:var(--blue-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  thead th{background:#eef3fa;color:#15324f}
+  tbody tr:nth-child(even){background:#fafcfe}
+  code{font-family:var(--mono);background:#eef1f6;padding:1px 6px;border-radius:5px;font-size:13.5px}
+  .num{text-align:right;font-family:var(--mono)}
+  /* boxes & flows */
+  .row{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;margin:16px 0}
+  .box{border:2px solid var(--blue);background:var(--blue-bg);border-radius:12px;padding:12px 16px;flex:1;min-width:150px;text-align:center}
+  .box .t{font-weight:700;display:block;font-size:15px}
+  .box .s{font-size:13px;color:var(--muted)}
+  .box.green{border-color:var(--green);background:var(--green-bg)}
+  .box.red{border-color:var(--red);background:var(--red-bg)}
+  .box.purple{border-color:var(--purple);background:var(--purple-bg)}
+  .box.amber{border-color:var(--amber);background:var(--amber-bg)}
+  .box.teal{border-color:var(--teal);background:var(--teal-bg)}
+  .arrow{display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--muted);font-weight:800;padding:0 2px}
+  .vflow{display:flex;flex-direction:column;gap:0;align-items:center;margin:18px 0}
+  .vflow .b{border:2px solid var(--blue);background:var(--blue-bg);border-radius:12px;padding:11px 18px;min-width:280px;text-align:center;font-weight:600}
+  .vflow .down{font-size:24px;color:var(--muted);line-height:1.1}
+  /* ribbon */
+  .ribbon{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+  .ribbon .step{background:var(--blue-bg);border:1px solid #bcd0f7;color:#16306b;border-radius:20px;padding:6px 13px;font-size:13.5px;font-weight:600}
+  .ribbon .step.done{background:var(--green-bg);border-color:#a7dcbe;color:#0a6a3f}
+  /* tree */
+  .tree{margin:16px 0}
+  .tree .root{background:#16306b;color:#fff;border-radius:10px;padding:10px 16px;text-align:center;font-weight:700;max-width:340px;margin:0 auto}
+  .tree .branches{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:14px}
+  .tree .branch{flex:1;min-width:200px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafcfe}
+  .tree .branch h4{margin:0 0 6px;font-size:15px;color:#16306b}
+  .tree .branch ul{margin:0;padding-left:18px;font-size:14px}
+  /* salary bar */
+  .bar{display:flex;height:54px;border-radius:10px;overflow:hidden;margin:14px 0;border:1px solid var(--line);font-size:12px;color:#fff;font-weight:700}
+  .bar .seg{display:flex;align-items:center;justify-content:center;text-align:center;padding:2px}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 0}
+  .legend span{font-size:13px;display:flex;align-items:center;gap:6px}
+  .dot{width:13px;height:13px;border-radius:3px;display:inline-block}
+  /* mock app screen */
+  .screen{border:1px solid #cfd9e6;border-radius:12px;overflow:hidden;margin:16px 0;box-shadow:0 4px 14px rgba(16,24,40,.08)}
+  .screen .bar2{background:#1f2d50;color:#fff;padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:13.5px}
+  .screen .dots{display:flex;gap:5px}
+  .screen .dots i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .screen .body{padding:18px 20px;background:#fff}
+  .field{margin:10px 0}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:3px}
+  .field .inp{border:1.5px solid #cfd9e6;border-radius:8px;padding:9px 12px;background:#fbfcfe;font-size:14.5px}
+  .field .inp.filled{background:#fff;border-color:var(--blue);color:#16306b;font-weight:600}
+  .btn{display:inline-block;background:var(--blue);color:#fff;border-radius:8px;padding:9px 18px;font-weight:700;font-size:14px;margin-top:8px}
+  .btn.green{background:var(--green)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700}
+  .tag.e{background:var(--green-bg);color:var(--green)}
+  .tag.d{background:var(--red-bg);color:var(--red)}
+  .step-head{display:flex;align-items:center;gap:12px;margin:26px 0 6px}
+  .step-head .n{background:var(--blue);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+  .step-head h3{margin:0}
+  .small{font-size:13.5px;color:var(--muted)}
+  .pay{max-width:560px;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0}
+  .pay .ph{background:#16306b;color:#fff;padding:12px 16px}
+  .pay table{margin:0}
+  .pay .tot td{font-weight:700;background:#eef3fa}
+  .pay .net td{font-weight:800;background:#0a8a52;color:#fff;font-size:16px}
+  hr.s{border:none;border-top:1px dashed var(--line);margin:22px 0}
+  @media(max-width:720px){nav.toc ol{columns:1}.grid2{grid-template-columns:1fr}.box{min-width:120px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>🧾 Payroll, Explained Like You're New Here</h1>
+  <p>A picture guide — no jargon, everything explained in plain words.</p>
+  <div class="hello">
+    👋 <b>Hi, and welcome!</b> You don't need to know anything about payroll, Indian tax laws, or even what "PF" means.
+    This page starts from zero. Read it top to bottom. Every new word is explained the moment it appears, with a real-life
+    comparison. Take your time — there's no rush, and nothing here is as scary as it sounds.
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <h2>What we'll cover</h2>
+    <ol>
+      <li><a href="#what">What is "payroll", really?</a></li>
+      <li><a href="#words">The 8 words you'll hear daily</a></li>
+      <li><a href="#flow">Where the money goes (picture)</a></li>
+      <li><a href="#govt">PF, ESI, PT, TDS — the 4 cuts</a></li>
+      <li><a href="#build">How our software is built (3 layers)</a></li>
+      <li><a href="#tools">What tools we used &amp; why</a></li>
+      <li><a href="#blocks">The building blocks (a tree)</a></li>
+      <li><a href="#example">⭐ Full example: day 1 → final report</a></li>
+      <li><a href="#cheat">Cheat sheet &amp; glossary</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="what">
+    <h2 class="sec"><span class="ico">🤔</span>1 · What is "payroll", really?</h2>
+    <p class="lead">Payroll is just this: <b>at the end of every month, work out how much money each worker takes home, and make sure the government gets the bits the law says it must.</b></p>
+    <div class="row">
+      <div class="box green"><span class="t">🏭 Company</span><span class="s">has work to be done</span></div>
+      <div class="arrow">→</div>
+      <div class="box"><span class="t">👷 Employee</span><span class="s">does the work for a month</span></div>
+      <div class="arrow">→</div>
+      <div class="box amber"><span class="t">💰 Salary</span><span class="s">company owes them money</span></div>
+    </div>
+    <p>But the worker doesn't get <i>all</i> of that money in hand. A few small pieces are taken out first — some is the worker's own savings, some is tax for the government. What's left is what actually lands in their bank account.</p>
+    <div class="analogy">🍕 <b>Think of a pizza.</b> The whole pizza is the salary the company promises. Before it reaches the worker, a couple of slices are set aside: one slice goes into the worker's <i>own</i> piggy bank (savings), one or two slices go to the government (tax). The remaining slices are what the worker eats today. Payroll's job is to cut the pizza correctly, every month, for every worker — and never make a mistake, because it's people's money.</p>
+    <div class="why">✅ <b>Why does software do this instead of a person with a calculator?</b> Because a factory can have hundreds of workers, the cuts follow fussy government rules that change, and a single wrong rupee can mean a fine. Software does it the same correct way every time, in seconds.</div>
+  </section>
+
+  <!-- 2 -->
+  <section id="words">
+    <h2 class="sec"><span class="ico">📖</span>2 · The 8 words you'll hear every single day</h2>
+    <p class="lead">Learn these and you'll understand 90% of conversations. Each has a simple meaning.</p>
+    <table>
+      <thead><tr><th>Word</th><th>In plain English</th><th>Everyday comparison</th></tr></thead>
+      <tbody>
+        <tr><td><b>Earning</b></td><td>Money <i>added</i> to the worker's pay.</td><td>Things that <b>grow</b> your pizza.</td></tr>
+        <tr><td><b>Deduction</b></td><td>Money <i>taken out</i> of the pay.</td><td>Slices <b>removed</b> from your pizza.</td></tr>
+        <tr><td><b>Basic</b></td><td>The core part of salary. Most other things are calculated from it.</td><td>The <b>plain base</b> of the pizza.</td></tr>
+        <tr><td><b>HRA</b></td><td>"House Rent Allowance" — extra pay to help with rent. Usually a % of Basic.</td><td>A topping added on.</td></tr>
+        <tr><td><b>DA</b></td><td>"Dearness Allowance" — extra pay to cope with rising prices. Also a % of Basic.</td><td>Another topping.</td></tr>
+        <tr><td><b>Gross</b></td><td><b>All earnings added together</b>, before any cuts.</td><td>The <b>whole pizza</b>.</td></tr>
+        <tr><td><b>Net (Take-home)</b></td><td>What's left <b>after</b> all deductions. The amount that hits the bank.</td><td>The slices you actually eat.</td></tr>
+        <tr><td><b>CTC</b></td><td>"Cost To Company" — the full yearly cost of an employee to the company, including the company's own contributions.</td><td>What the pizza costs the <b>shop</b>, not just you.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">🧮 The one formula that rules everything: <b>Gross (all earnings) − Deductions (all cuts) = Net (take-home)</b>. That's it. Everything else is just <i>how</i> we work out each earning and each cut.</p>
+  </section>
+
+  <!-- 3 -->
+  <section id="flow">
+    <h2 class="sec"><span class="ico">🌊</span>3 · Where the money goes (one picture)</h2>
+    <p class="lead">Here is the journey of one worker's salary, top to bottom. We'll use a real worker, <b>Ramesh</b>, whose gross is <b>₹32,600</b> a month.</p>
+    <div class="vflow">
+      <div class="b" style="border-color:var(--green);background:var(--green-bg)">💚 GROSS = ₹32,600 <span class="small">(Basic 20,000 + HRA 8,000 + DA 3,000 + Conveyance 1,600)</span></div>
+      <div class="down">⬇ now we take out the cuts ⬇</div>
+      <div class="b" style="border-color:var(--red);background:var(--red-bg)">❤️ minus DEDUCTIONS = ₹4,950 <span class="small">(PF 1,800 + Professional Tax 150 + Income Tax 2,000 + Loan repay 1,000)</span></div>
+      <div class="down">⬇ what's left ⬇</div>
+      <div class="b" style="border-color:var(--teal);background:var(--teal-bg)">💙 NET / Take-home = ₹27,650 <span class="small">→ this lands in Ramesh's bank account</span></div>
+    </div>
+    <h3>The same thing as a coloured bar</h3>
+    <p class="small">The full bar is the gross ₹32,600. Each colour is one piece. The big blue piece is what Ramesh actually keeps.</p>
+    <div class="bar">
+      <div class="seg" style="background:#0e8f8f;flex:27650">Take-home 27,650</div>
+      <div class="seg" style="background:#d23f31;flex:2000">Tax 2,000</div>
+      <div class="seg" style="background:#e0683a;flex:1800">PF 1,800</div>
+      <div class="seg" style="background:#7c3aed;flex:1000">Loan 1,000</div>
+      <div class="seg" style="background:#b7791f;flex:150" title="Professional Tax 150"></div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#0e8f8f"></i> Take-home (his)</span>
+      <span><i class="dot" style="background:#d23f31"></i> Income Tax → govt</span>
+      <span><i class="dot" style="background:#e0683a"></i> PF → his savings</span>
+      <span><i class="dot" style="background:#7c3aed"></i> Loan repay → company</span>
+      <span><i class="dot" style="background:#b7791f"></i> Prof. Tax → state</span>
+    </div>
+    <div class="why">✅ <b>Notice:</b> the PF and loan pieces aren't "lost" — PF is Ramesh's own savings for later, and the loan piece is him paying back money he borrowed. Only the tax pieces actually leave for the government.</div>
+  </section>
+
+  <!-- 4 -->
+  <section id="govt">
+    <h2 class="sec"><span class="ico">🏛️</span>4 · PF, ESI, PT, TDS — the four "government cuts"</h2>
+    <p class="lead">India's law says certain amounts must be cut from salary. There are four big ones. Here's each in one friendly line. <b>You do NOT need to memorise the rates</b> — the software stores them.</p>
+    <table>
+      <thead><tr><th>Short name</th><th>Full name</th><th>What it really is</th><th>Who keeps it</th><th>Rough amount</th></tr></thead>
+      <tbody>
+        <tr><td><b>PF</b></td><td>Provident Fund</td><td>Forced <b>savings</b> for the worker's retirement. The company adds a matching amount too.</td><td>The worker (later)</td><td>12% of Basic+DA</td></tr>
+        <tr><td><b>ESI</b></td><td>Employees' State Insurance</td><td>Cheap <b>health insurance</b> for lower-paid workers. Only if salary ≤ ₹21,000.</td><td>Govt health scheme</td><td>0.75% of gross</td></tr>
+        <tr><td><b>PT</b></td><td>Professional Tax</td><td>A small <b>state tax</b> for earning a living. A few rupees, fixed by salary band.</td><td>State govt (West Bengal)</td><td>₹0–₹200</td></tr>
+        <tr><td><b>TDS</b></td><td>Tax Deducted at Source</td><td><b>Income tax</b> collected a little each month instead of one big bill.</td><td>Central govt</td><td>Depends on yearly pay</td></tr>
+      </tbody>
+    </table>
+    <div class="analogy">🐷 <b>PF = piggy bank the law makes you keep.</b> 🏥 <b>ESI = a cheap clinic card for lower earners.</b> 🏙️ <b>PT = a small "you earn here" fee to the state.</b> 🧾 <b>TDS = paying your yearly income tax in 12 small monthly bites.</b></div>
+    <div class="note">🔑 <b>The clever part of our design:</b> these rates (12%, ₹21,000, etc.) are <b>not written into the program</b>. They're saved as <i>settings</i> in the database. So when the government changes a rate next year, someone just edits a setting — <b>no programmer needed</b>. Remember this idea; it's the heart of why the system is "professional."</div>
+  </section>
+
+  <!-- 5 -->
+  <section id="build">
+    <h2 class="sec"><span class="ico">🏗️</span>5 · How our software is built — 3 simple layers</h2>
+    <p class="lead">Every app like ours is a stack of three layers. Picture a <b>restaurant</b>:</p>
+    <div class="vflow">
+      <div class="b" style="border-color:var(--blue);background:var(--blue-bg);min-width:420px">🖥️ <b>Layer 1 — The Screens</b> (what you see &amp; click)<br><span class="small">The dining area &amp; menu. Buttons, forms, tables, the payslip on screen.</span></div>
+      <div class="down">⬇ talks to ⬇</div>
+      <div class="b" style="border-color:var(--purple);background:var(--purple-bg);min-width:420px">🧠 <b>Layer 2 — The Brain / Logic</b> (the rules &amp; the calculator)<br><span class="small">The kitchen &amp; chef. Takes your order, applies the recipes (PF, tax…), works out the numbers.</span></div>
+      <div class="down">⬇ stores in ⬇</div>
+      <div class="b" style="border-color:var(--teal);background:var(--teal-bg);min-width:420px">🗄️ <b>Layer 3 — The Database / Memory</b> (where everything is kept)<br><span class="small">The pantry &amp; record book. Remembers every employee, every month, forever.</span></div>
+    </div>
+    <h3>What each layer is, in baby words</h3>
+    <table>
+      <thead><tr><th>You'll hear…</th><th>It simply means…</th><th>Restaurant comparison</th></tr></thead>
+      <tbody>
+        <tr><td><b>Page / Screen / UI</b></td><td>A window you look at and click.</td><td>The menu &amp; table.</td></tr>
+        <tr><td><b>Component</b></td><td>A small reusable screen-piece (a button, a text box, a dropdown). We build pages by snapping these together.</td><td>Standard plates &amp; cutlery reused at every table.</td></tr>
+        <tr><td><b>Table</b> (database)</td><td>A grid/spreadsheet the computer keeps, e.g. one table holds all employees, one row per employee.</td><td>A page in the record book.</td></tr>
+        <tr><td><b>Stored procedure</b></td><td>A <b>saved instruction</b> in the database that reads or writes those tables. We always go through these (never raw commands) — safer &amp; consistent.</td><td>A fixed recipe card the pantry-keeper follows.</td></tr>
+        <tr><td><b>Engine</b></td><td>The <b>calculator brain</b> that turns "Ramesh, 30 days worked" into "Net ₹27,650". Pure maths, no screens.</td><td>The chef who cooks by the recipes.</td></tr>
+        <tr><td><b>Model</b></td><td>A simple description of <i>one thing's shape</i> — e.g. an Employee has a Name, a Code, a Bank A/c. Matches one database table.</td><td>The blank order form's fields.</td></tr>
+      </tbody>
+    </table>
+    <div class="why">✅ <b>Why three layers and not one big blob?</b> If the tax screen looks ugly, you fix Layer 1 without touching the maths. If a tax rule changes, you fix Layer 2 without touching the screens. Each layer has one job, so changes are safe and easy. This is the single most important idea in how professional apps are built.</div>
+  </section>
+
+  <!-- 6 -->
+  <section id="tools">
+    <h2 class="sec"><span class="ico">🧰</span>6 · The actual tools we used (and why)</h2>
+    <p class="lead">These are the real technologies in our project. Here's each one in one simple sentence — just so the names stop being scary.</p>
+    <table>
+      <thead><tr><th>Tool</th><th>Which layer</th><th>What it does, simply</th><th>Why we picked it</th></tr></thead>
+      <tbody>
+        <tr><td><b>Blazor</b> (C#)</td><td>Screens</td><td>Lets us build the web screens using the same language (C#) as the brain.</td><td>One language everywhere = less to learn, fewer bugs.</td></tr>
+        <tr><td><b>Syncfusion &amp; MudBlazor</b></td><td>Screens</td><td>Ready-made fancy parts — data grids, date pickers, popups — so we don't hand-build them.</td><td>Looks professional instantly; saves weeks.</td></tr>
+        <tr><td><b>C# business logic</b></td><td>Brain</td><td>Where the payroll rules &amp; the calculator engine live.</td><td>Fast, safe, easy to test.</td></tr>
+        <tr><td><b>Dapper</b></td><td>Brain↔DB</td><td>A tiny helper that carries data between the C# brain and the database.</td><td>Simple and quick — no heavy magic.</td></tr>
+        <tr><td><b>SQL Server</b> + <b>stored procedures</b></td><td>Memory</td><td>The database that stores everything, plus the saved "recipe" instructions to read/write it.</td><td>Reliable, and the company already uses it.</td></tr>
+      </tbody>
+    </table>
+    <h3>Two habits we follow everywhere (and why they matter)</h3>
+    <div class="row">
+      <div class="box green" style="text-align:left"><span class="t">🗑️ "Soft delete"</span><span class="s">When you "delete" something, we don't really erase it — we just tick a hidden "inactive" box. So nothing is ever truly lost, and you can bring it back. Money records must never vanish.</span></div>
+      <div class="box purple" style="text-align:left"><span class="t">📝 "Audit trail"</span><span class="s">Every time someone adds or changes anything, we secretly write down <i>who</i> did it, <i>when</i>, and <i>what changed</i>. So if a number looks wrong, we can see its full history.</span></div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="blocks">
+    <h2 class="sec"><span class="ico">🌳</span>7 · The building blocks (a tree)</h2>
+    <p class="lead">Our payroll module is split into four groups. Think of it as a tree: the trunk is "Payroll", and it has four branches.</p>
+    <div class="tree">
+      <div class="root">🧾 PAYROLL MODULE</div>
+      <div class="branches">
+        <div class="branch">
+          <h4>🗂️ 1. Masters <span class="small">(set up once)</span></h4>
+          <ul>
+            <li><b>Employee</b> — the people</li>
+            <li><b>Department</b> — e.g. Production</li>
+            <li><b>Designation</b> — e.g. Fitter</li>
+            <li><b>Location</b> — e.g. Durgapur</li>
+            <li><b>Salary Components</b> — Basic, HRA…</li>
+            <li><b>Salary Structure</b> — each person's pay recipe</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <h4>⚙️ 2. Rules <span class="small">(the law settings)</span></h4>
+          <ul>
+            <li><b>Statutory Rules</b> — PF %, ESI %, tax bands</li>
+            <li>Stored as data, so they're easy to change</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <h4>🔄 3. Processing <span class="small">(every month)</span></h4>
+          <ul>
+            <li><b>Attendance</b> — days worked</li>
+            <li><b>Payroll Run</b> — do the month for everyone</li>
+            <li><b>Advances</b> — loans &amp; their repayment</li>
+            <li><b>Arrears</b> — back-pay for late raises</li>
+          </ul>
+        </div>
+        <div class="branch">
+          <h4>📊 4. Reports <span class="small">(the outputs)</span></h4>
+          <ul>
+            <li><b>Payslip</b> — for each worker</li>
+            <li><b>Salary register</b> — everyone, one sheet</li>
+            <li><b>Bank file</b> — to pay salaries</li>
+            <li><b>Government returns</b> — PF/ESI/PT/tax</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="analogy">🗂️ <b>"Master" = a list you make once and reuse forever</b>, like the Contacts in your phone. You add "Production" as a department <i>once</i>, then every employee just points to it. Set up the masters first; everything else leans on them.</div>
+  </section>
+
+  <!-- 8 -->
+  <section id="example">
+    <h2 class="sec"><span class="ico">⭐</span>8 · Full example — your very first day, start to finish</h2>
+    <p class="lead">Let's actually do it. You just joined, you open the app for the first time, and by the end you'll have paid one employee and made a government report. Here's the whole journey:</p>
+    <div class="ribbon">
+      <span class="step">1 Log in</span>
+      <span class="step">2 Set up masters</span>
+      <span class="step">3 Salary parts</span>
+      <span class="step">4 Law rules</span>
+      <span class="step">5 Add employee</span>
+      <span class="step">6 Pay recipe</span>
+      <span class="step">7 Attendance</span>
+      <span class="step">8 Run &amp; calculate</span>
+      <span class="step">9 Payslip</span>
+      <span class="step">10 Accounting</span>
+      <span class="step">11 Report</span>
+    </div>
+
+    <div class="step-head"><span class="n">1</span><h3>You open the app — the Login screen</h3></div>
+    <p>First thing the app shows is a login box. It just checks <i>who you are</i> and what you're allowed to touch (payroll is sensitive). You type your phone/email and password.</p>
+    <div class="screen">
+      <div class="bar2"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span> Vectus — Login</div>
+      <div class="body" style="max-width:380px;margin:0 auto">
+        <div class="field"><label>Phone or Email</label><div class="inp filled">ramesh.hr@jayshree.com</div></div>
+        <div class="field"><label>Password</label><div class="inp filled">••••••••</div></div>
+        <div class="btn">Log in →</div>
+      </div>
+    </div>
+    <div class="why">✅ <b>Why a login &amp; "roles"?</b> Not everyone should see salaries. The app gives you a <b>role</b> (yours is "Payroll"). If someone without that role tries to open these pages, the app politely sends them away. This is the <code>ValidateUser</code> check on every page.</div>
+
+    <div class="step-head"><span class="n">2</span><h3>Set up your first Masters (the reusable lists)</h3></div>
+    <p>Before adding people, make the little lists they'll point to. You open <b>Department</b> and add "Production". You'll do the same for Designation ("Fitter") and Location ("Durgapur").</p>
+    <div class="screen">
+      <div class="bar2"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span> Masters › Department › Add</div>
+      <div class="body" style="max-width:420px">
+        <div class="field"><label>Department name</label><div class="inp filled">PRODUCTION</div></div>
+        <div class="small">Code <code>DEP0001</code> is filled in automatically.</div>
+        <div class="btn green">💾 Save</div>
+      </div>
+    </div>
+    <p class="small">Behind the scenes, pressing Save sends "PRODUCTION" to a stored procedure, which writes one row into the <b>Department</b> table — and writes an audit note that <i>you</i> created it just now.</p>
+    <div class="row">
+      <div class="box"><span class="t">Department</span><span class="s">PRODUCTION</span></div>
+      <div class="box"><span class="t">Designation</span><span class="s">FITTER</span></div>
+      <div class="box"><span class="t">Location</span><span class="s">DURGAPUR</span></div>
+    </div>
+
+    <div class="step-head"><span class="n">3</span><h3>Define the salary parts (Salary Components)</h3></div>
+    <p>Now tell the system what pieces a salary can have. You add <b>Basic</b>, <b>HRA</b> (= 40% of Basic), <b>DA</b> (= 15% of Basic), and <b>Conveyance</b>. For each you say: is it an <span class="tag e">Earning</span> or a <span class="tag d">Deduction</span>, and how is it worked out?</p>
+    <table>
+      <thead><tr><th>Component</th><th>Type</th><th>How it's calculated</th></tr></thead>
+      <tbody>
+        <tr><td>Basic</td><td><span class="tag e">Earning</span></td><td>A fixed number you type per person</td></tr>
+        <tr><td>HRA</td><td><span class="tag e">Earning</span></td><td>40% of Basic (auto)</td></tr>
+        <tr><td>DA</td><td><span class="tag e">Earning</span></td><td>15% of Basic (auto)</td></tr>
+        <tr><td>Conveyance</td><td><span class="tag e">Earning</span></td><td>A fixed number</td></tr>
+        <tr><td>PF / PT / TDS</td><td><span class="tag d">Deduction</span></td><td>From the law-rule settings</td></tr>
+      </tbody>
+    </table>
+    <div class="why">✅ <b>Why set these up as data?</b> Tomorrow if the boss adds a "Night Shift Allowance", you just add one more row here — you don't call a programmer. The calculator already knows how to handle "a fixed number" or "a % of Basic".</div>
+
+    <div class="step-head"><span class="n">4</span><h3>Check the law rules (Statutory Rules)</h3></div>
+    <p>These are usually pre-filled for you (we "seed" them). You just confirm: PF = 12%, ESI applies under ₹21,000, Professional Tax bands for West Bengal, income-tax bands. You rarely touch this — but it's nice to know <i>this</i> is where the law lives.</p>
+    <div class="note">📌 The rates have a "valid from" date. If a rate changes next April, we add a <b>new</b> dated rate starting then — the old one stays, so old months still use the old rate and history never breaks.</div>
+
+    <div class="step-head"><span class="n">5</span><h3>Add your first Employee — "Ramesh Kumar"</h3></div>
+    <p>The big moment! Open <b>Employee › Add</b> and fill the form. You pick the Department/Designation/Location you made in Step 2 from dropdowns (that's why we made them first).</p>
+    <div class="screen">
+      <div class="bar2"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span> Employee › Add new</div>
+      <div class="body">
+        <div class="grid2">
+          <div class="field"><label>Full name</label><div class="inp filled">RAMESH KUMAR</div></div>
+          <div class="field"><label>Employee code</label><div class="inp">EMP0001 (auto)</div></div>
+          <div class="field"><label>Department</label><div class="inp filled">PRODUCTION ▾</div></div>
+          <div class="field"><label>Designation</label><div class="inp filled">FITTER ▾</div></div>
+          <div class="field"><label>Date of joining</label><div class="inp filled">10-Jun-2024</div></div>
+          <div class="field"><label>Bank account</label><div class="inp filled">SBI ••••32011</div></div>
+          <div class="field"><label>PF number (UAN)</label><div class="inp filled">100200300400</div></div>
+          <div class="field"><label>PAN (tax id)</label><div class="inp filled">ABCPK1234L</div></div>
+        </div>
+        <div class="btn green">💾 Save employee</div>
+      </div>
+    </div>
+    <p class="small">Save writes one row into the <b>Employee</b> table. Ramesh now exists in the system. 🎉</p>
+
+    <div class="step-head"><span class="n">6</span><h3>Give Ramesh his pay recipe (Salary Structure)</h3></div>
+    <p>Now say what Ramesh actually earns. You add a structure "effective from 1 April 2026" and type his Basic; HRA and DA fill in by themselves.</p>
+    <table>
+      <thead><tr><th>Part</th><th>Rule</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Basic</td><td>you type it</td><td class="num">20,000</td></tr>
+        <tr><td>HRA</td><td>40% of Basic</td><td class="num">8,000</td></tr>
+        <tr><td>DA</td><td>15% of Basic</td><td class="num">3,000</td></tr>
+        <tr><td>Conveyance</td><td>fixed</td><td class="num">1,600</td></tr>
+        <tr class="tot" style="font-weight:700;background:#e6f6ed"><td colspan="2">His monthly GROSS</td><td class="num">32,600</td></tr>
+      </tbody>
+    </table>
+
+    <div class="step-head"><span class="n">7</span><h3>Enter Attendance for the month</h3></div>
+    <p>How many days was Ramesh meant to work, and how many did he? For April: 30 payable, 30 present, 0 unpaid days. (If he'd missed unpaid days, his pay would shrink in proportion — that's called "loss of pay".)</p>
+    <div class="row">
+      <div class="box"><span class="t">Payable days</span><span class="s">30</span></div>
+      <div class="box green"><span class="t">Present</span><span class="s">30</span></div>
+      <div class="box red"><span class="t">Unpaid (LOP)</span><span class="s">0</span></div>
+    </div>
+
+    <div class="step-head"><span class="n">8</span><h3>Press "Process" — the brain calculates</h3></div>
+    <p>This is where the <b>engine</b> (the calculator) does its work. It goes step by step. Watch it think:</p>
+    <div class="vflow">
+      <div class="b" style="border-color:var(--green);background:var(--green-bg)">1️⃣ Add earnings → GROSS = 20,000 + 8,000 + 3,000 + 1,600 = <b>₹32,600</b></div>
+      <div class="down">⬇</div>
+      <div class="b" style="border-color:var(--red);background:var(--red-bg)">2️⃣ PF = 12% of Basic+DA. Law caps the base at 15,000 → 12% × 15,000 = <b>₹1,800</b></div>
+      <div class="down">⬇</div>
+      <div class="b" style="border-color:var(--amber);background:var(--amber-bg)">3️⃣ ESI? His gross 32,600 is above ₹21,000 → <b>not applicable</b> (ESI is only for lower earners)</div>
+      <div class="down">⬇</div>
+      <div class="b" style="border-color:var(--amber);background:var(--amber-bg)">4️⃣ Professional Tax for his salary band in West Bengal = <b>₹150</b></div>
+      <div class="down">⬇</div>
+      <div class="b" style="border-color:var(--red);background:var(--red-bg)">5️⃣ Income Tax (TDS) this month = <b>₹2,000</b></div>
+      <div class="down">⬇</div>
+      <div class="b" style="border-color:var(--purple);background:var(--purple-bg)">6️⃣ Loan repayment (he borrowed ₹5,000, pays ₹1,000/month) = <b>₹1,000</b></div>
+      <div class="down">⬇</div>
+      <div class="b" style="border-color:var(--teal);background:var(--teal-bg)">7️⃣ NET = 32,600 − (1,800 + 150 + 2,000 + 1,000) = <b>₹27,650</b> 🎉</div>
+    </div>
+    <div class="why">✅ <b>The ₹15,000 PF cap in plain words:</b> the government says "we'll only count up to ₹15,000 of basic-type pay for PF, even if you earn more." Ramesh's Basic+DA is ₹23,000, but we use ₹15,000. 12% of that = ₹1,800. You don't have to remember this — the engine does.</div>
+
+    <div class="step-head"><span class="n">9</span><h3>See Ramesh's Payslip</h3></div>
+    <p>The same numbers, printed as a neat slip you can give Ramesh. Earnings on the left, deductions on the right, take-home at the bottom.</p>
+    <div class="pay">
+      <div class="ph"><b>Jay Shree Steel — Payslip</b><br><span class="small" style="color:#cdd9f5">Ramesh Kumar (EMP0001) · Fitter · April 2026</span></div>
+      <table>
+        <thead><tr><th>Earnings</th><th class="num">₹</th><th>Deductions</th><th class="num">₹</th></tr></thead>
+        <tbody>
+          <tr><td>Basic</td><td class="num">20,000</td><td>PF (savings)</td><td class="num">1,800</td></tr>
+          <tr><td>HRA</td><td class="num">8,000</td><td>Professional Tax</td><td class="num">150</td></tr>
+          <tr><td>DA</td><td class="num">3,000</td><td>Income Tax (TDS)</td><td class="num">2,000</td></tr>
+          <tr><td>Conveyance</td><td class="num">1,600</td><td>Loan repayment</td><td class="num">1,000</td></tr>
+          <tr class="tot"><td>Gross</td><td class="num">32,600</td><td>Total cuts</td><td class="num">4,950</td></tr>
+          <tr class="net"><td colspan="3">NET PAY to bank</td><td class="num">27,650</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="step-head"><span class="n">10</span><h3>Press "Finalize" — the accounting entry is written</h3></div>
+    <p>Finalizing locks the month (so numbers can't change) and writes one note in the company's money diary (the "accounting journal"). In plain words it records: <i>"We owe salary expense; part is held for the govt, part goes to Ramesh's bank."</i></p>
+    <table>
+      <thead><tr><th>The company's note says…</th><th class="num">Money in (Dr)</th><th class="num">Money owed (Cr)</th></tr></thead>
+      <tbody>
+        <tr><td>Salary expense (the cost of work done)</td><td class="num">32,600</td><td class="num"></td></tr>
+        <tr><td>Held to send to PF office</td><td class="num"></td><td class="num">1,800</td></tr>
+        <tr><td>Held to send to govt (PT + Income tax)</td><td class="num"></td><td class="num">2,150</td></tr>
+        <tr><td>Loan he repaid (back to company)</td><td class="num"></td><td class="num">1,000</td></tr>
+        <tr><td>To pay into Ramesh's bank</td><td class="num"></td><td class="num">27,650</td></tr>
+        <tr class="tot" style="font-weight:700;background:#eef3fa"><td>Both sides match ✓</td><td class="num">32,600</td><td class="num">32,600</td></tr>
+      </tbody>
+    </table>
+    <div class="analogy">⚖️ <b>"Both sides match" is the golden rule of accounting</b> (called double-entry). Every rupee that goes out must be explained by where it went. If the two columns aren't equal, something is wrong. Our app always makes them equal.</div>
+
+    <div class="step-head"><span class="n">11</span><h3>Generate the government report (PF "ECR")</h3></div>
+    <p>Finally, the government's PF office wants a file each month listing how much PF for each worker. The app makes a plain text file (the "ECR") that you upload to the PF website. For Ramesh, one line:</p>
+    <div class="screen">
+      <div class="bar2"><span class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span> ECR_April2026.txt</div>
+      <div class="body" style="font-family:var(--mono);font-size:13px;background:#0e1726;color:#e6edf7;overflow-x:auto">
+        100200300400#~#RAMESH KUMAR#~#32600#~#15000#~#15000#~#15000#~#1800#~#1250#~#550#~#0#~#0
+      </div>
+    </div>
+    <p class="small">The funny <code>#~#</code> just separates the values (the PF website demands that exact format). It lists his PF number, name, wages, and the PF amounts. The app builds this for you — you never type it.</p>
+    <div class="why">🎉 <b>You did it!</b> From an empty screen you set up the lists, added a person, ran their pay, printed a payslip, recorded the accounting, and produced a legal report. That's one full payroll cycle. For 200 employees it's the same steps — the app just repeats the maths for each.</div>
+  </section>
+
+  <!-- 9 -->
+  <section id="cheat">
+    <h2 class="sec"><span class="ico">🪧</span>9 · Cheat sheet — keep this handy</h2>
+    <h3>The one formula</h3>
+    <p style="font-size:18px"><b>GROSS</b> (all earnings) <b>−</b> <b>DEDUCTIONS</b> (all cuts) <b>=</b> <b>NET</b> (take-home)</p>
+    <h3>Mini-glossary</h3>
+    <table>
+      <thead><tr><th>Word</th><th>Remember it as…</th></tr></thead>
+      <tbody>
+        <tr><td>Master</td><td>A reusable list you set up once (like phone Contacts).</td></tr>
+        <tr><td>Component</td><td>One pay part (Basic, HRA, PF…).</td></tr>
+        <tr><td>Structure</td><td>One person's chosen pay parts &amp; amounts.</td></tr>
+        <tr><td>Run</td><td>Doing one month's pay for everyone.</td></tr>
+        <tr><td>Engine</td><td>The calculator brain (pure maths).</td></tr>
+        <tr><td>Gross / Net</td><td>Whole pizza / slices you keep.</td></tr>
+        <tr><td>PF</td><td>Forced retirement savings (12%).</td></tr>
+        <tr><td>ESI</td><td>Health insurance for low earners (≤₹21,000).</td></tr>
+        <tr><td>PT</td><td>Small state "earning" tax.</td></tr>
+        <tr><td>TDS</td><td>Income tax paid monthly in advance.</td></tr>
+        <tr><td>ECR</td><td>The PF report file you upload to govt.</td></tr>
+        <tr><td>Soft delete</td><td>Hide, never truly erase.</td></tr>
+        <tr><td>Audit trail</td><td>A log of who changed what, when.</td></tr>
+        <tr><td>Stored procedure</td><td>A saved database recipe we always go through.</td></tr>
+      </tbody>
+    </table>
+    <h3>What to do on your first real task</h3>
+    <ol>
+      <li>Don't panic — set up <b>Masters first</b> (department, designation, location, components).</li>
+      <li>Add an <b>employee</b>, then their <b>salary structure</b>.</li>
+      <li>Enter <b>attendance</b>, press <b>Process</b>, eyeball the <b>payslip</b>.</li>
+      <li>When it looks right, <b>Finalize</b> and generate <b>reports</b>.</li>
+      <li>If unsure about a number, open the <b>audit trail</b> or ask — every number can be traced.</li>
+    </ol>
+    <div class="note">📚 When you're ready for the grown-up details, the other files go deeper: <code>PayrollModule.Plan.md</code> (the full design), <code>PayrollModule.Spec.html</code> (every table &amp; column), <code>PayrollModule.PFEcr.html</code> (the PF report), and <code>PayrollModule.Arrears.html</code> (back-pay). But this page is all you need to start. You've got this. 💪</div>
+  </section>
+
+</div>
+</body>
+</html>

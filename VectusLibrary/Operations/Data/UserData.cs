@@ -106,7 +106,7 @@ public static class UserData
 		await ValidateTransaction(user);
 
 		var isUpdate = user.Id > 0;
-		var previous = isUpdate 
+		var previous = isUpdate
 			? await CommonData.LoadTableDataById<UserModel>(OperationNames.User, user.Id)
 			: null;
 
@@ -125,28 +125,6 @@ public static class UserData
 			}, transaction);
 			return id;
 		});
-	}
-
-	private static UserModel GetAuditUser(UserModel user)
-	{
-		if (user is null)
-			return null;
-
-		return new()
-		{
-			Id = user.Id,
-			Name = user.Name,
-			Phone = user.Phone,
-			Email = user.Email,
-			Accounts = user.Accounts,
-			Fleet = user.Fleet,
-			Reports = user.Reports,
-			Admin = user.Admin,
-			Remarks = user.Remarks,
-			Status = user.Status,
-			CodeResends = user.CodeResends,
-			FailedAttempts = user.FailedAttempts
-		};
 	}
 
 	public static async Task ResetInsertUser(UserModel user)

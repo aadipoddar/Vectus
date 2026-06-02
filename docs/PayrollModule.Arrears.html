@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arrear Calculation — Method &amp; Worked Example (Vectus Payroll)</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2933; --muted:#67727e;
+    --brand:#1d4ed8; --brand-light:#eaf0fe; --line:#e2e8f0;
+    --earn:#0a7d4d; --earn-bg:#e7f6ee; --ded:#b42318; --ded-bg:#fdecea;
+    --stat:#9a3412; --stat-bg:#fef3e7; --key:#5b21b6; --key-bg:#f1e9fd;
+    --mono:'Cascadia Code','Consolas','SF Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px}
+  header.hero{background:linear-gradient(135deg,#1d4ed8,#0e2a73);color:#fff;padding:40px 40px 32px}
+  header.hero h1{margin:0 0 6px;font-size:28px;letter-spacing:-.4px}
+  header.hero p{margin:2px 0;opacity:.9}
+  .badges{margin-top:14px}
+  .badges span{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:4px 11px;border-radius:20px;font-size:12.5px;margin:0 6px 6px 0}
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 24px 80px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 22px;margin:22px 0 28px}
+  nav.toc h2{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  nav.toc a{display:inline-block;margin:3px 16px 3px 0;color:var(--brand);text-decoration:none;font-size:14px}
+  nav.toc a:hover{text-decoration:underline}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 30px;margin:0 0 24px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  h2.sec{margin:0 0 4px;font-size:21px;color:#0e2a73;display:flex;align-items:center;gap:10px}
+  h2.sec .num{background:var(--brand);color:#fff;width:29px;height:29px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  h4{margin:18px 0 6px;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  p.lead{color:var(--muted);margin:2px 0 14px}
+  table{border-collapse:collapse;width:100%;margin:12px 0 8px;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  thead th{background:#f0f4f9;color:#15324f;font-weight:600}
+  tbody tr:nth-child(even){background:#fafbfd}
+  code{font-family:var(--mono);background:#eef1f6;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .num-col{text-align:right;font-family:var(--mono)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:600}
+  .earn{background:var(--earn-bg);color:var(--earn)}
+  .ded{background:var(--ded-bg);color:var(--ded)}
+  .stat{background:var(--stat-bg);color:var(--stat)}
+  .callout{border-left:4px solid var(--brand);background:var(--brand-light);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0}
+  .callout.warn{border-color:#d97706;background:#fff7ed}
+  .callout.ok{border-color:var(--earn);background:var(--earn-bg)}
+  .scroll{overflow-x:auto}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
+  .flow .step{background:var(--brand-light);border:1px solid #cdd9f5;color:#1d3a8a;padding:8px 13px;border-radius:9px;font-size:13px;font-weight:600}
+  .flow .arrow{color:var(--muted);font-weight:700}
+  caption{caption-side:top;text-align:left;font-weight:600;color:#15324f;padding:6px 0;font-size:14px}
+  .total-row td{font-weight:700;background:#f0f4f9 !important}
+  .grand td{font-weight:700;background:#0e2a73 !important;color:#fff}
+  .small{font-size:12.5px;color:var(--muted)}
+  .legend span{margin-right:14px;font-size:12.5px}
+  @media(max-width:760px){header.hero{padding:28px 20px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>Arrear Calculation</h1>
+  <p>Retrospective salary revisions — method, statutory treatment &amp; worked example</p>
+  <p class="small" style="opacity:.8">Companion to <code>PayrollModule.Plan.md</code>, <code>.Spec.html</code> &amp; <code>.PFEcr.html</code></p>
+  <div class="badges">
+    <span>Per-period recompute</span>
+    <span>PF &amp; ESI on arrears</span>
+    <span>PT on paid-month slab</span>
+    <span>§89(1) / Form 10E</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <h2>Contents</h2>
+    <a href="#what">1 · What arrears are</a>
+    <a href="#method">2 · The method</a>
+    <a href="#example">3 · Worked example</a>
+    <a href="#statutory">4 · Statutory treatment</a>
+    <a href="#run">5 · In the paying run</a>
+    <a href="#tax">6 · §89(1) tax relief</a>
+    <a href="#model">7 · Data model &amp; edge cases</a>
+  </nav>
+
+  <!-- 1 -->
+  <section id="what">
+    <h2 class="sec"><span class="num">1</span>What arrears are</h2>
+    <p class="lead">An <strong>arrear</strong> is back-pay: a salary revision takes effect from a past date, but is processed later — so the already-paid months were short, and the shortfall is paid in the current run.</p>
+    <div class="flow">
+      <span class="step">Increment effective 1-Apr</span><span class="arrow">→</span>
+      <span class="step">Apr &amp; May run at old rate</span><span class="arrow">→</span>
+      <span class="step">Revision approved in Jun</span><span class="arrow">→</span>
+      <span class="step">Engine computes Apr+May shortfall</span><span class="arrow">→</span>
+      <span class="step">Paid as arrears in Jun</span>
+    </div>
+    <p>Common triggers: delayed annual increment, promotion with retrospective effect, DA revision, wage-settlement, or a correction. Arrears can also be <strong>negative</strong> (a retrospective cut → recovery).</p>
+    <p class="small legend"><strong>Legend:</strong>
+      <span class="pill earn">Earning</span>
+      <span class="pill ded">Deduction</span>
+      <span class="pill stat">Statutory</span></p>
+  </section>
+
+  <!-- 2 -->
+  <section id="method">
+    <h2 class="sec"><span class="num">2</span>The method — recompute each past period, take the difference</h2>
+    <p class="lead">The arrear engine is a thin wrapper over the normal calculation engine. It never guesses a lump sum; it re-runs each affected month.</p>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Find the window</td><td>All finalized runs from the new <code>EffectiveFrom</code> up to the current open run.</td></tr>
+        <tr><td>2</td><td>Recompute each month</td><td>Run <code>Compute</code> for that month under the <strong>new</strong> structure, with the <em>same attendance/LOP</em> actually used.</td></tr>
+        <tr><td>3</td><td>Difference</td><td>New "should-have-been" earnings − what was actually paid (from stored <code>PayrollLineDetail</code>) = per-component arrear.</td></tr>
+        <tr><td>4</td><td>Statutory per origin month</td><td>Apply PF / ESI / PT to <em>each month's</em> difference using <strong>that month's</strong> ceilings &amp; rates — the <code>StatutoryRate</code> line effective for that origin period — then sum. (Never on the lump sum — that would break the ₹15,000 / ₹21,000 ceilings.)</td></tr>
+        <tr><td>5</td><td>Pay in current run</td><td>Total arrear earnings + arrear PF/ESI flow into the open run, tagged separately for Form 16.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Why per-period and not on the total?</strong> Statutory ceilings are monthly. Computing PF on a 2-month lump of ₹4,600 vs ₹2,300 × 2 only differs once a ceiling is crossed — but when it does (e.g. PF wage near ₹15,000), the lump-sum method is simply wrong. Per-period is always correct.</div>
+  </section>
+
+  <!-- 3 -->
+  <section id="example">
+    <h2 class="sec"><span class="num">3</span>Worked example — Sunita's retrospective increment</h2>
+    <p class="lead"><strong>EMP0002 Sunita Das</strong> gets an increment <strong>effective 1 Apr 2026</strong>, approved in the <strong>June 2026</strong> run. April &amp; May were paid at the old rate.</p>
+    <div class="scroll">
+    <table>
+      <caption>Old vs new monthly structure</caption>
+      <thead><tr><th>Component</th><th>Rule</th><th>Old (paid)</th><th>New (effective Apr)</th><th>Monthly difference</th></tr></thead>
+      <tbody>
+        <tr><td>BASIC</td><td>Fixed</td><td class="num-col">9,000</td><td class="num-col">11,000</td><td class="num-col">+2,000</td></tr>
+        <tr><td>HRA</td><td>40% of BASIC</td><td class="num-col">3,600</td><td class="num-col">4,400</td><td class="num-col">+800</td></tr>
+        <tr><td>DA</td><td>15% of BASIC</td><td class="num-col">1,350</td><td class="num-col">1,650</td><td class="num-col">+300</td></tr>
+        <tr class="total-row"><td colspan="2">Gross</td><td class="num-col">13,950</td><td class="num-col">17,050</td><td class="num-col">+3,100</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <h4>ArrearDetail rows stored (per origin month)</h4>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Origin period</th><th>Component</th><th>Old</th><th>New</th><th>Difference</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">2026-04 (April)</td><td>BASIC</td><td class="num-col">9,000</td><td class="num-col">11,000</td><td class="num-col">2,000</td></tr>
+        <tr><td>HRA</td><td class="num-col">3,600</td><td class="num-col">4,400</td><td class="num-col">800</td></tr>
+        <tr><td>DA</td><td class="num-col">1,350</td><td class="num-col">1,650</td><td class="num-col">300</td></tr>
+        <tr><td rowspan="3">2026-05 (May)</td><td>BASIC</td><td class="num-col">9,000</td><td class="num-col">11,000</td><td class="num-col">2,000</td></tr>
+        <tr><td>HRA</td><td class="num-col">3,600</td><td class="num-col">4,400</td><td class="num-col">800</td></tr>
+        <tr><td>DA</td><td class="num-col">1,350</td><td class="num-col">1,650</td><td class="num-col">300</td></tr>
+        <tr class="grand"><td colspan="4">Total arrear earnings (Apr + May)</td><td class="num-col">6,200</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="statutory">
+    <h2 class="sec"><span class="num">4</span>Statutory treatment of the ₹6,200 arrears</h2>
+    <p class="lead">PF and ESI <strong>are</strong> payable on arrears, computed per origin month (both months below the ceilings here, so the full difference attracts contribution).</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Head</th><th>Base &amp; rule</th><th>Per month</th><th>× 2 months</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill stat">PF</span> employee 12%</td><td>on Basic+DA diff = ₹2,300</td><td class="num-col">276</td><td class="num-col">552</td></tr>
+        <tr><td><span class="pill stat">PF</span> employer → EPS 8.33%</td><td>on ₹2,300 (&lt; ₹15,000)</td><td class="num-col">192</td><td class="num-col">384</td></tr>
+        <tr><td><span class="pill stat">PF</span> employer → EPF (12% − EPS)</td><td>276 − 192</td><td class="num-col">84</td><td class="num-col">168</td></tr>
+        <tr><td><span class="pill stat">EDLI</span> 0.5%</td><td>on ₹2,300</td><td class="num-col">12</td><td class="num-col">24</td></tr>
+        <tr><td><span class="pill stat">ESI</span> employee 0.75%</td><td>on gross diff ₹3,100 (still &lt; ₹21,000)</td><td class="num-col">24</td><td class="num-col">48</td></tr>
+        <tr><td><span class="pill stat">ESI</span> employer 3.25%</td><td>on ₹3,100</td><td class="num-col">101</td><td class="num-col">202</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <table>
+      <thead><tr><th>Head</th><th>Rule for arrears</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill stat">PT</span> Professional Tax</td><td>Slab is on the <strong>total gross paid in the paying month</strong> (June), arrears included — so arrears can push PT into a higher slab. Not computed per origin month.</td></tr>
+        <tr><td><span class="pill stat">TDS</span></td><td>Arrears are taxable in the <strong>year received</strong> (added to the June projection). Tagged separately so they appear on Form 16 Part B and a §89(1) working — see §6.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><strong>The mistake to avoid:</strong> skipping PF/ESI on arrears. EPFO/ESIC treat arrears as wages of the month paid; missing them invites interest (12% p.a.) and damages. The engine computes them automatically the moment a back-dated structure is saved.</div>
+    <p class="small">Rounding is per origin period (PF nearest rupee, ESI rounded up) — so the per-month figures sum to the totals shown. Admin charges (A/c 2) are establishment-level and added on the challan, not per employee.</p>
+  </section>
+
+  <!-- 5 -->
+  <section id="run">
+    <h2 class="sec"><span class="num">5</span>How it lands in the June run</h2>
+    <p class="lead">Sunita's June payslip carries her new salary <em>plus</em> the arrears as a separate earning, with statutory recomputed on the combined amount.</p>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>June payslip</th><th class="num-col">Current (new rate)</th><th class="num-col">Arrears (Apr–May)</th><th class="num-col">Total paid</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill earn">Gross earnings</span></td><td class="num-col">17,050</td><td class="num-col">6,200</td><td class="num-col">23,250</td></tr>
+        <tr><td><span class="pill ded">PF employee</span></td><td class="num-col">1,518</td><td class="num-col">552</td><td class="num-col">2,070</td></tr>
+        <tr><td><span class="pill ded">ESI employee</span></td><td class="num-col">128</td><td class="num-col">48</td><td class="num-col">176</td></tr>
+        <tr><td><span class="pill ded">Professional Tax</span></td><td class="num-col" colspan="2" style="text-align:center">slab on ₹23,250</td><td class="num-col">130</td></tr>
+        <tr><td><span class="pill ded">TDS</span></td><td class="num-col" colspan="2" style="text-align:center">per projection</td><td class="num-col">0</td></tr>
+        <tr class="grand"><td>Net pay (June)</td><td class="num-col"></td><td class="num-col"></td><td class="num-col">20,874</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small">Of the ₹20,874 net, the arrear portion is ₹6,200 − 552 − 48 = <strong>₹5,600</strong> (before any TDS). The ECR for June shows Sunita's EPF wages as current ₹12,650 + arrear ₹4,600, and the ESI contribution includes the arrear gross — both filed in the month paid.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="tax">
+    <h2 class="sec"><span class="num">6</span>Tax relief — Section 89(1) &amp; Form 10E</h2>
+    <p class="lead">Arrears can push an employee into a higher tax bracket in the receipt year. The law lets them claim relief so they aren't over-taxed for a timing accident.</p>
+    <table>
+      <thead><tr><th>Step</th><th>Section 89(1) relief calculation (employee files Form 10E)</th></tr></thead>
+      <tbody>
+        <tr><td>1–3</td><td>Tax on receipt-year income <strong>with</strong> arrears, minus tax <strong>without</strong> arrears = extra tax now.</td></tr>
+        <tr><td>4–6</td><td>Tax on each origin year <strong>with</strong> its arrears, minus <strong>without</strong> = tax that should have applied then.</td></tr>
+        <tr><td>=</td><td><strong>Relief</strong> = (extra tax now) − (tax that should have applied then).</td></tr>
+      </tbody>
+    </table>
+    <div class="callout ok"><strong>Our responsibility is the data, not the relief.</strong> Payroll tags arrears separately so they print on <strong>Form 16 Part B</strong> and on a §89(1)/Form 10E working sheet. The employee (or their filing) claims the relief and <strong>must file Form 10E before the ITR</strong>, else the relief is disallowed. We never compute the relief into TDS unless the employer chooses to consider it.</div>
+  </section>
+
+  <!-- 7 -->
+  <section id="model">
+    <h2 class="sec"><span class="num">7</span>Data model &amp; edge cases</h2>
+    <h4>Stored as</h4>
+    <table>
+      <thead><tr><th>Table</th><th>Holds</th></tr></thead>
+      <tbody>
+        <tr><td><code>ArrearDetail</code></td><td><code>EmployeeId, OriginYear, OriginMonth, SalaryComponentId, OldAmount, NewAmount, Difference, PaidInPayrollRunId, Status</code> — one row per component per origin month.</td></tr>
+        <tr><td><code>SalaryComponent</code> <code>ARREAR</code></td><td>An earning with <code>CalculationType = Arrear</code> — the payslip line the totals roll into (broken down by origin month).</td></tr>
+        <tr><td><code>PayrollLine</code></td><td>The June line carries the combined gross + arrear statutory (no recomputation downstream).</td></tr>
+      </tbody>
+    </table>
+    <h4>Edge cases handled</h4>
+    <ul>
+      <li><strong>Ceiling crossing</strong> — if an origin month's PF wage was already at ₹15,000, the arrear adds <em>no</em> PF (per-period rule catches this automatically).</li>
+      <li><strong>ESI coverage</strong> — arrears for a month the employee was ESI-covered attract ESI even if they've since crossed ₹21,000; the origin-month rule decides.</li>
+      <li><strong>Negative arrears</strong> — a retrospective cut produces negative differences → a recovery, bounded by the negative-net guard (never drives net below zero; shortfall carries forward).</li>
+      <li><strong>Mid-period joiners / LOP</strong> — recompute uses the <em>actual</em> attendance of each origin month, so LOP months arrear correctly.</li>
+      <li><strong>Already-arreared months</strong> — once an <code>ArrearDetail</code> row is stamped <code>PaidInPayrollRunId</code>, it is never re-paid; re-revising recomputes only the still-unpaid delta.</li>
+      <li><strong>Finalized integrity</strong> — past finalized runs are never edited; arrears are always paid forward in an open run, keeping history immutable.</li>
+    </ul>
+    <div class="callout warn">All figures are illustrative and use the seed statutory rates from the plan. Confirm PF/ESI-on-arrears handling and the current §89(1)/Form 10E procedure at build time (use-latest-docs rule).</div>
+  </section>
+
+</div>
+</body>
+</html>

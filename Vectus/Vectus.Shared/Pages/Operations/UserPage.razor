@@ -97,6 +97,14 @@ else
 
 						<div class="form-field">
 							<div class="checkbox-wrapper">
+								<CustomCheckBox @bind-Value="_transactionUser.Payroll"
+												Label="Payroll"
+												AriaLabel="Payroll permission" />
+							</div>
+						</div>
+
+						<div class="form-field">
+							<div class="checkbox-wrapper">
 								<CustomCheckBox @bind-Value="_transactionUser.Fleet"
 												Label="Fleet"
 												AriaLabel="Fleet permission" />
@@ -151,11 +159,20 @@ else
 							<GridColumn Field="@nameof(UserModel.Name)" HeaderText="Name" Width="220" />
 							<GridColumn Field="@nameof(UserModel.Phone)" HeaderText="Phone" Width="140" />
 							<GridColumn Field="@nameof(UserModel.Email)" HeaderText="Email" Width="220" />
+
 							<GridColumn Field="@nameof(UserModel.Accounts)" HeaderText="Accounts" Width="110" TextAlign="TextAlign.Center">
 								<Template>
 									@{
 										var item = (context as UserModel);
 										<span class="@(item.Accounts ? "grid-credit" : "grid-debit")">@(item.Accounts ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(UserModel.Payroll)" HeaderText="Payroll" Width="110" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as UserModel);
+										<span class="@(item.Payroll ? "grid-credit" : "grid-debit")">@(item.Payroll ? "Yes" : "No")</span>
 									}
 								</Template>
 							</GridColumn>
@@ -183,6 +200,7 @@ else
 									}
 								</Template>
 							</GridColumn>
+
 							<GridColumn Field="@nameof(UserModel.Remarks)" HeaderText="Remarks" Width="220" />
 							<GridColumn Field="@nameof(UserModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>

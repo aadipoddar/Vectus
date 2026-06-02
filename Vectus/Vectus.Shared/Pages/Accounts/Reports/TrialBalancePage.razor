@@ -155,8 +155,7 @@ else
 						<GridAggregates>
 							<GridAggregate>
 								<GridAggregateColumns>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.LedgerName)"
-														 Type="AggregateType.Count">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.LedgerName)" Type="AggregateType.Count">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -182,8 +181,7 @@ else
 											</div>
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningDebit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningDebit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -209,8 +207,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningCredit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.OpeningCredit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -236,8 +233,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Debit)" Type="AggregateType.Sum"
-														 Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Debit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -263,8 +259,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Credit)" Type="AggregateType.Sum"
-														 Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.Credit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -290,8 +285,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingDebit)"
-														 Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingDebit)" Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -317,7 +311,7 @@ else
 											}
 										</GroupCaptionTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingCredit)"
+									<GridAggregateColumn Field="@nameof(TrialBalanceModel.ClosingCredit)" 
 														 Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
@@ -421,8 +415,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(TrialBalanceModel.ClosingCredit)" HeaderText="Closing Credit"
-										Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+							<GridColumn Field="@nameof(TrialBalanceModel.ClosingCredit)" HeaderText="Closing Credit" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 								<Template>
 									@{
 										var item = (context as TrialBalanceModel);

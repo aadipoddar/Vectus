@@ -93,6 +93,10 @@
     <Folder Include="Fleet\Tyre\Insert" />
     <Folder Include="Fleet\Tyre\Table" />
     <Folder Include="Common" />
+    <Folder Include="Payroll" />
+    <Folder Include="Payroll\Masters" />
+    <Folder Include="Payroll\Masters\Insert" />
+    <Folder Include="Payroll\Masters\Table" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Accounts\FinancialAccounting\Insert\Insert_FinancialAccounting.sql" />
@@ -179,6 +183,8 @@
     <Build Include="Common\Load_TableData_By_MasterId.sql" />
     <Build Include="Common\Load_TableData_By_Status.sql" />
     <Build Include="Common\Load_TableData_By_TransactionNo.sql" />
+    <Build Include="Payroll\Masters\Table\Department.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_Department.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

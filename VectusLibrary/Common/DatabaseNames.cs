@@ -153,3 +153,12 @@ public static class FleetNames
 	public static string DeleteTyreMounting => "Delete_TyreMounting";
 	#endregion
 }
+
+public static class PayrollNames
+{
+	#region Masters
+	public static string Department => "Department";
+
+	public static string InsertDepartment => "Insert_Department";
+	#endregion
+}

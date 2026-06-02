@@ -35,6 +35,7 @@ public static class AuthenticationService
 				UserRoles.Fleet => user.Fleet,
 				UserRoles.Reports => user.Reports,
 				UserRoles.Admin => user.Admin,
+				UserRoles.Payroll => user.Payroll,
 				_ => false
 			});
 
