@@ -199,47 +199,6 @@ public partial class TripRequestReport : IAsyncDisposable
 	}
 	#endregion
 
-	#region Exporting
-	private async Task ExportReport(bool isExcel = false)
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await TripRequestReportExport.ExportReport(
-				_transactionOverviews,
-				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
-				DateOnly.FromDateTime(_fromDate),
-				DateOnly.FromDateTime(_toDate),
-				_showAllColumns,
-				_showDeleted,
-				_selectedCompany?.Id > 0 ? _selectedCompany : null,
-				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedRoute?.Id > 0 ? _selectedRoute : null,
-				_selectedSDR?.Id > 0 ? _selectedSDR : null,
-				_selectedRequestStatus
-			);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-	#endregion
-
 	#region Actions
 	private async Task ViewSelectedTransaction()
 	{
@@ -387,6 +346,47 @@ public partial class TripRequestReport : IAsyncDisposable
 	{
 		_confirmAction = null;
 		await _confirmationDialog.HideAsync();
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportReport(bool isExcel = false)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
+
+			var (stream, fileName) = await TripRequestReportExport.ExportReport(
+				_transactionOverviews,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
+				DateOnly.FromDateTime(_fromDate),
+				DateOnly.FromDateTime(_toDate),
+				_showAllColumns,
+				_showDeleted,
+				_selectedCompany?.Id > 0 ? _selectedCompany : null,
+				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
+				_selectedRoute?.Id > 0 ? _selectedRoute : null,
+				_selectedSDR?.Id > 0 ? _selectedSDR : null,
+				_selectedRequestStatus
+			);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
 	}
 	#endregion
 

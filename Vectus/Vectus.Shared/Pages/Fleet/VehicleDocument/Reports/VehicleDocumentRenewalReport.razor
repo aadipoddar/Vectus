@@ -10,8 +10,8 @@
 <MudBlazor.MudHotkey Key=JsKey.F5 OnHotkeyPressed="LoadTransactionOverviews" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadTransactionOverviews" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="@(() => ExportReport(true))" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="@(() => ExportReport())" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport()" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyD KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="DownloadSelectedDocument" Disabled="@_isProcessing" />
 
 @if (_isLoading || _user is null)

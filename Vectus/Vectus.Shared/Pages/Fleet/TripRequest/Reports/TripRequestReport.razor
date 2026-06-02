@@ -13,8 +13,8 @@
 <MudBlazor.MudHotkey Key=JsKey.KeyR KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="LoadTransactionOverviews" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyQ KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDetailsView" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="@(() => ExportReport(true))" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="@(() => ExportReport())" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportReport()" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyO KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="ViewSelectedTransaction" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyA KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="AcceptSelectedTransaction" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyJ KeyModifiers=[JsKeyModifier.AltLeft] OnHotkeyPressed="RejectSelectedTransaction" Disabled="@_isProcessing" />

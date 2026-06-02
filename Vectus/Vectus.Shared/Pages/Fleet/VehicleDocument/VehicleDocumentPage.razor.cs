@@ -148,77 +148,103 @@ public partial class VehicleDocumentPage
 	#endregion
 
 	#region Actions
-	private async Task DeleteTransaction(int id)
+	private async Task EditSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		_vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, selectedRecords[0].Id);
+		if (_vehicleDocument is null)
+		{
+			await _toastNotification.ShowAsync("Error", "Selected Vehicle Document transaction not found for editing.", ToastType.Error);
+			return;
+		}
+
+		_selectedVehicleDocumentType = _vehicleDocumentTypes.FirstOrDefault(vdt => vdt.Id == _vehicleDocument.VehicleDocumentTypeId);
+		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDocument.VehicleId);
+		StateHasChanged();
+		await _sfFirstFocus.FocusAsync();
+	}
+
+	private async Task DeleteRecoverTransaction(int id, bool isRecover)
 	{
 		try
 		{
-			_isProcessing = true;
-
 			if (!_user.Admin)
 				throw new Exception("You do not have permission to perform this action.");
+
+			_isProcessing = true;
+			StateHasChanged();
+
+			await _toastNotification.ShowAsync("Processing", $"{(isRecover ? "Recovering" : "Deleting")} transaction...", ToastType.Info);
 
 			var vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, id)
 				?? throw new Exception("Transaction not found.");
 
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
 
-			vehicleDocument.Status = false;
+			vehicleDocument.Status = isRecover;
 			vehicleDocument.LastModifiedBy = _user.Id;
 			vehicleDocument.LastModifiedAt = currentDateTime;
 			vehicleDocument.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 
-			await VehicleDocumentData.DeleteTransaction(vehicleDocument);
+			if (isRecover) await VehicleDocumentData.RecoverTransaction(vehicleDocument);
+			else await VehicleDocumentData.DeleteTransaction(vehicleDocument);
 
-			await _toastNotification.ShowAsync("Deleted", "Transaction has been deleted successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", $"Transaction {vehicleDocument.TransactionNo} has been {(isRecover ? "recovered" : "deleted")} successfully.", ToastType.Success);
 			ResetPage();
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error While Deleting", ex.Message, ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"An error occurred while {(isRecover ? "recovering" : "deleting")} transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
+			StateHasChanged();
 		}
 	}
 
-	private async Task RecoverTransaction(int id)
+	private async Task DeleteRecoverSelectedItem()
 	{
-		try
-		{
-			_isProcessing = true;
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
 
-			if (!_user.Admin)
-				throw new Exception("You do not have permission to perform this action.");
+		var record = selectedRecords[0];
 
-			var vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, id)
-				?? throw new Exception("Transaction not found.");
+		await ShowConfirmation(record.Status ? "Delete" : "Recover",
+			$"Are you sure you want to {(record.Status ? "delete" : "recover")} transaction {record.TransactionNo}",
+			() => DeleteRecoverTransaction(record.Id, !record.Status));
+	}
 
-			var currentDateTime = await CommonData.LoadCurrentDateTime();
+	private async Task ShowConfirmation(string title, string message, Func<Task> action)
+	{
+		_confirmTitle = title;
+		_confirmMessage = message;
+		_confirmAction = action;
+		StateHasChanged();
+		await _confirmationDialog.ShowAsync();
+	}
 
-			vehicleDocument.Status = true;
-			vehicleDocument.LastModifiedBy = _user.Id;
-			vehicleDocument.LastModifiedAt = currentDateTime;
-			vehicleDocument.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+	private async Task OnConfirmed()
+	{
+		await _confirmationDialog.HideAsync();
+		if (_confirmAction is not null)
+			await _confirmAction();
+		_confirmAction = null;
+	}
 
-			await VehicleDocumentData.RecoverTransaction(vehicleDocument);
-
-			await _toastNotification.ShowAsync("Recovered", "Transaction has been recovered successfully.", ToastType.Success);
-			ResetPage();
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Recovering", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-		}
+	private async Task OnCancelled()
+	{
+		_confirmAction = null;
+		await _confirmationDialog.HideAsync();
 	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel()
+	private async Task ExportMaster(bool isExcel = false)
 	{
 		if (_isProcessing)
 			return;
@@ -229,34 +255,7 @@ public partial class VehicleDocumentPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await VehicleDocumentExport.ExportTransaction(_vehicleDocuments, ReportExportType.Excel);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await VehicleDocumentExport.ExportTransaction(_vehicleDocuments, ReportExportType.PDF);
+			var (stream, fileName) = await VehicleDocumentExport.ExportTransaction(_vehicleDocuments, isExcel ? ReportExportType.Excel : ReportExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -392,8 +391,8 @@ public partial class VehicleDocumentPage
 			case "SaveTransaction": await SaveTransaction(); break;
 			case "UploadDocument": UploadDocument(); break;
 			case "ToggleDeleted": await ToggleDeleted(); break;
-			case "ExportExcel": await ExportExcel(); break;
-			case "ExportPdf": await ExportPdf(); break;
+			case "ExportExcel": await ExportMaster(true); break;
+			case "ExportPdf": await ExportMaster(); break;
 			case "EditSelectedItem": await EditSelectedItem(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
 		}
@@ -407,62 +406,6 @@ public partial class VehicleDocumentPage
 			case "DownloadSelectedDocument": await DownloadSelectedDocument(); break;
 			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
 		}
-	}
-
-	private async Task EditSelectedItem()
-	{
-		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
-		if (selectedRecords.Count == 0)
-			return;
-
-		_vehicleDocument = await CommonData.LoadTableDataById<VehicleDocumentModel>(FleetNames.VehicleDocument, selectedRecords[0].Id);
-		if (_vehicleDocument is null)
-		{
-			await _toastNotification.ShowAsync("Error", "Selected Vehicle Document transaction not found for editing.", ToastType.Error);
-			return;
-		}
-
-		_selectedVehicleDocumentType = _vehicleDocumentTypes.FirstOrDefault(vdt => vdt.Id == _vehicleDocument.VehicleDocumentTypeId);
-		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDocument.VehicleId);
-		StateHasChanged();
-		await _sfFirstFocus.FocusAsync();
-	}
-
-	private async Task DeleteRecoverSelectedItem()
-	{
-		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
-		if (selectedRecords.Count == 0)
-			return;
-
-		var record = selectedRecords[0];
-
-		if (record.Status)
-			await ShowConfirmation("Delete", $"Are you sure you want to delete {record.TransactionNo}", () => DeleteTransaction(record.Id));
-		else
-			await ShowConfirmation("Recover", $"Are you sure you want to recover {record.TransactionNo}", () => RecoverTransaction(record.Id));
-	}
-
-	private async Task ShowConfirmation(string title, string message, Func<Task> action)
-	{
-		_confirmTitle = title;
-		_confirmMessage = message;
-		_confirmAction = action;
-		StateHasChanged();
-		await _confirmationDialog.ShowAsync();
-	}
-
-	private async Task OnConfirmed()
-	{
-		await _confirmationDialog.HideAsync();
-		if (_confirmAction is not null)
-			await _confirmAction();
-		_confirmAction = null;
-	}
-
-	private async Task OnCancelled()
-	{
-		_confirmAction = null;
-		await _confirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()

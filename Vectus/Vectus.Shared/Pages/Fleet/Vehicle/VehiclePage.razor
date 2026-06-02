@@ -8,8 +8,8 @@
 <MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportExcel" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ExportPdf" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster()" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.Insert OnHotkeyPressed="EditSelectedItem" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />

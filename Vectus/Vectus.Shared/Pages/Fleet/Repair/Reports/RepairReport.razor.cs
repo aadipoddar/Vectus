@@ -178,72 +178,6 @@ public partial class RepairReport : IAsyncDisposable
 	}
 	#endregion
 
-	#region Exporting
-	private async Task ExportReport(bool isExcel = false)
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await RepairReportExport.ExportReport(
-				_transactionOverviews,
-				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
-				DateOnly.FromDateTime(_fromDate),
-				DateOnly.FromDateTime(_toDate),
-				_showAllColumns,
-				_showDeleted,
-				_selectedCompany?.Id > 0 ? _selectedCompany : null,
-				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedGarage?.Id > 0 ? _selectedGarage : null
-			);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportSelectedTransaction(bool isExcel = false)
-	{
-		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the invoice...", ToastType.Info);
-
-			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, isExcel ? InvoiceExportType.Excel : InvoiceExportType.PDF);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The invoice has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-	#endregion
-
 	#region Actions
 	private async Task ViewSelectedTransaction()
 	{
@@ -332,6 +266,72 @@ public partial class RepairReport : IAsyncDisposable
 	{
 		_confirmAction = null;
 		await _confirmationDialog.HideAsync();
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportReport(bool isExcel = false)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
+
+			var (stream, fileName) = await RepairReportExport.ExportReport(
+				_transactionOverviews,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
+				DateOnly.FromDateTime(_fromDate),
+				DateOnly.FromDateTime(_toDate),
+				_showAllColumns,
+				_showDeleted,
+				_selectedCompany?.Id > 0 ? _selectedCompany : null,
+				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
+				_selectedGarage?.Id > 0 ? _selectedGarage : null
+			);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportSelectedTransaction(bool isExcel = false)
+	{
+		if (_isProcessing || _sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the invoice...", ToastType.Info);
+
+			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(_sfGrid.SelectedRecords.First().Id, isExcel ? InvoiceExportType.Excel : InvoiceExportType.PDF);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The invoice has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
 	}
 	#endregion
 

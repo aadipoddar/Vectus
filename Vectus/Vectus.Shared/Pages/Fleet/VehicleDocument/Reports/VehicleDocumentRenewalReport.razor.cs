@@ -136,41 +136,6 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 	}
 	#endregion
 
-	#region Exporting
-	private async Task ExportReport(bool isExcel = false)
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await VehicleDocumentRenewalReportExport.ExportReport(
-				_transactionOverviews,
-				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
-				_showAllColumns,
-				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
-				_selectedDocumentType?.Id > 0 ? _selectedDocumentType : null
-			);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-	#endregion
-
 	#region Actions
 	private async Task DownloadSelectedDocument()
 	{
@@ -199,6 +164,41 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 		catch (Exception ex)
 		{
 			await _toastNotification.ShowAsync("Error While Downloading", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportReport(bool isExcel = false)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
+
+			var (stream, fileName) = await VehicleDocumentRenewalReportExport.ExportReport(
+				_transactionOverviews,
+				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
+				_showAllColumns,
+				_selectedVehicle?.Id > 0 ? _selectedVehicle : null,
+				_selectedDocumentType?.Id > 0 ? _selectedDocumentType : null
+			);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
 		}
 		finally
 		{

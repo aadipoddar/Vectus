@@ -112,113 +112,6 @@ public partial class VehicleDriverPage
 	#endregion
 
 	#region Actions
-	private async Task DeleteTransaction(int id)
-	{
-		try
-		{
-			_isProcessing = true;
-
-			if (!_user.Admin)
-				throw new Exception("You do not have permission to perform this action.");
-
-			var vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, id)
-				?? throw new Exception("Transaction not found.");
-
-			await VehicleDriverData.DeleteTransaction(vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
-
-			await _toastNotification.ShowAsync("Deleted", "Transaction has been deleted successfully.", ToastType.Success);
-			ResetPage();
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Deleting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-		}
-	}
-	#endregion
-
-	#region Exporting
-	private async Task ExportExcel()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, ReportExportType.Excel);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task ExportPdf()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, ReportExportType.PDF);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-	#endregion
-
-	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "ExportExcel": await ExportExcel(); break;
-			case "ExportPdf": await ExportPdf(); break;
-			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
-		}
-	}
-
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<VehicleDriverModel> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
-		}
-	}
-
 	private async Task EditSelectedItem()
 	{
 		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
@@ -237,6 +130,41 @@ public partial class VehicleDriverPage
 		_endDateTime = _vehicleDriver.EndDateTime ?? default;
 		StateHasChanged();
 		await _sfFirstFocus.FocusAsync();
+	}
+
+	private async Task DeleteTransaction(int id)
+	{
+		try
+		{
+			if (!_user.Admin)
+				throw new Exception("You do not have permission to perform this action.");
+
+			_isProcessing = true;
+			StateHasChanged();
+
+			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
+
+			var vehicleDriver = await CommonData.LoadTableDataById<VehicleDriverModel>(FleetNames.VehicleDriver, id)
+				?? throw new Exception("Transaction not found.");
+
+			await VehicleDriverData.DeleteTransaction(vehicleDriver, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+
+			var vehicle = _vehicles.FirstOrDefault(v => v.Id == vehicleDriver.VehicleId)?.Code ?? vehicleDriver.VehicleId.ToString();
+			var driver = _drivers.FirstOrDefault(d => d.Id == vehicleDriver.DriverId)?.Name ?? vehicleDriver.DriverId.ToString();
+			var identifier = $"{vehicle} - {driver}";
+
+			await _toastNotification.ShowAsync("Success", $"Transaction {identifier} has been deleted successfully.", ToastType.Success);
+			ResetPage();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error", $"An error occurred while deleting transaction: {ex.Message}", ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
 	}
 
 	private async Task DeleteSelectedItem()
@@ -274,6 +202,59 @@ public partial class VehicleDriverPage
 	{
 		_confirmAction = null;
 		await _confirmationDialog.HideAsync();
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportMaster(bool isExcel = false)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
+
+			var (stream, fileName) = await VehicleDriverExport.ExportMaster(_vehicleDrivers, isExcel ? ReportExportType.Excel : ReportExportType.PDF);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Utilities
+	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
+	{
+		switch (args.Item.Id)
+		{
+			case "NewTransaction": ResetPage(); break;
+			case "SaveTransaction": await SaveTransaction(); break;
+			case "ExportExcel": await ExportMaster(true); break;
+			case "ExportPdf": await ExportMaster(); break;
+			case "EditSelectedItem": await EditSelectedItem(); break;
+			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
+		}
+	}
+
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<VehicleDriverModel> args)
+	{
+		switch (args.Item.Id)
+		{
+			case "EditSelectedItem": await EditSelectedItem(); break;
+			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
+		}
 	}
 
 	private void ResetPage() => PageRefresh.Request();
