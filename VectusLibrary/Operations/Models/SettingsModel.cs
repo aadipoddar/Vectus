@@ -17,6 +17,8 @@ public static class SettingsKeys
 
 	public static string LedgerCodePrefix => "LedgerCodePrefix";
 
+	public static string EmployeeCodePrefix => "EmployeeCodePrefix";
+
 	public static string SDRCodePrefix => "SDRCodePrefix";
 	public static string VehicleTypeCodePrefix => "VehicleTypeCodePrefix";
 	public static string DocumentTypeCodePrefix => "DocumentTypeCodePrefix";

@@ -1,5 +1,5 @@
 @using VectusLibrary.Accounts.Masters.Models
-@using VectusLibrary.Operations.Models
+
 @attribute [Route(PageRouteNames.Settings)]
 
 <PageTitle>Settings - Vectus</PageTitle>
@@ -141,6 +141,13 @@ else
 							<CustomTextField @bind-Value="_ledgerCodePrefix"
 											 Label="Ledger Code Prefix"
 											 Placeholder="e.g., LD"
+											 Required="false" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_employeeCodePrefix"
+											 Label="Employee Code Prefix"
+											 Placeholder="e.g., EMP"
 											 Required="false" />
 						</div>
 

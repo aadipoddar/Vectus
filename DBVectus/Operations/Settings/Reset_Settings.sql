@@ -11,6 +11,8 @@ BEGIN
 
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'LedgerCodePrefix'				, N'LD'		, N'Prefix for Ledger Codes')
 	
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'EmployeeCodePrefix'					, N'EMP'	, N'Prefix for Employee Codes')
+	
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SDRCodePrefix'						, N'SDR'	, N'Prefix for SDR Codes')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'VehicleTypeCodePrefix'				, N'VHTY'	, N'Prefix for Vehicle Type Codes')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'DocumentTypeCodePrefix'				, N'DCTY'	, N'Prefix for Document Type Codes')
@@ -19,7 +21,7 @@ BEGIN
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'DriverCodePrefix'					, N'DR'		, N'Prefix for Driver Codes')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'GarageCodePrefix'					, N'GR'		, N'Prefix for Garage Codes')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'TyreCompanyCodePrefix'				, N'TC'		, N'Prefix for Tyre Company Codes')
-	
+
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'FinancialAccountingTransactionPrefix'	, N'AC'	, N'Prefix for Financial Accounting Transaction Numbers')
 
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'TripRequestTransactionPrefix'			, N'TR'	, N'Prefix for Trip Request Transaction Numbers')

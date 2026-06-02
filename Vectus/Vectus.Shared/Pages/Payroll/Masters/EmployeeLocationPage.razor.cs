@@ -1,0 +1,260 @@
+using Syncfusion.Blazor.Grids;
+
+using Vectus.Shared.Components.Dialog;
+using Vectus.Shared.Components.Input;
+
+using VectusLibrary.Accounts.Masters.Models;
+using VectusLibrary.Operations.Models;
+using VectusLibrary.Payroll.Masters.Data;
+using VectusLibrary.Payroll.Masters.Exports;
+using VectusLibrary.Payroll.Masters.Models;
+using VectusLibrary.Utils.ExportUtils;
+
+namespace Vectus.Shared.Pages.Payroll.Masters;
+
+public partial class EmployeeLocationPage
+{
+	private UserModel _user;
+	private bool _isLoading = true;
+	private bool _isProcessing = false;
+	private bool _showDeleted = false;
+
+	private EmployeeLocationModel _location = new();
+	private StateUTModel _selectedStateUT;
+
+	private List<EmployeeLocationModel> _locations = [];
+	private List<StateUTModel> _stateUTs = [];
+	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
+	[
+		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
+		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
+	];
+
+	private SfGrid<EmployeeLocationModel> _sfGrid;
+	private CustomTextField _sfFirstFocus;
+	private ToastNotification _toastNotification;
+	private ConfirmationDialog _confirmationDialog;
+
+	private string _confirmTitle = string.Empty;
+	private string _confirmMessage = string.Empty;
+	private Func<Task> _confirmAction;
+
+	#region Load Data
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		try
+		{
+			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Payroll]);
+			await LoadData();
+		}
+		catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
+	}
+
+	private async Task LoadData()
+	{
+		_locations = await CommonData.LoadTableData<EmployeeLocationModel>(PayrollNames.EmployeeLocation);
+		_stateUTs = await CommonData.LoadTableData<StateUTModel>(AccountNames.StateUT);
+
+		_stateUTs = [.. _stateUTs.Where(s => s.Status).OrderBy(s => s.Name)];
+		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _location.StateUTId);
+
+		if (!_showDeleted)
+			_locations = [.. _locations.Where(l => l.Status)];
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+
+		_isLoading = false;
+		StateHasChanged();
+
+		if (_sfFirstFocus is not null)
+			await _sfFirstFocus.FocusAsync();
+	}
+	#endregion
+
+	#region Saving
+	private async Task SaveTransaction()
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			if (!_user.Admin)
+				throw new Exception("You do not have permission to perform this action.");
+
+			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
+
+			_location.StateUTId = _selectedStateUT?.Id;
+			await EmployeeLocationData.SaveTransaction(_location, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+
+			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
+			ResetPage();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Saving", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+		}
+	}
+	#endregion
+
+	#region Actions
+	private async Task EditSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		_location = await CommonData.LoadTableDataById<EmployeeLocationModel>(PayrollNames.EmployeeLocation, selectedRecords[0].Id);
+		if (_location is null)
+		{
+			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
+			return;
+		}
+
+		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _location.StateUTId);
+		StateHasChanged();
+		await _sfFirstFocus.FocusAsync();
+
+	}
+	private async Task DeleteRecoverTransaction(int id, bool isRecover)
+	{
+		try
+		{
+			if (!_user.Admin)
+				throw new Exception("You do not have permission to perform this action.");
+
+			_isProcessing = true;
+			StateHasChanged();
+
+			await _toastNotification.ShowAsync("Processing", $"{(isRecover ? "Recovering" : "Deleting")} transaction...", ToastType.Info);
+
+			var location = await CommonData.LoadTableDataById<EmployeeLocationModel>(PayrollNames.EmployeeLocation, id)
+				?? throw new Exception("Transaction not found.");
+
+			if (isRecover) await EmployeeLocationData.RecoverTransaction(location, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			else await EmployeeLocationData.DeleteTransaction(location, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+
+			await _toastNotification.ShowAsync("Success", $"Transaction {location.Name} has been {(isRecover ? "recovered" : "deleted")} successfully.", ToastType.Success);
+			ResetPage();
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error", $"An error occurred while {(isRecover ? "recovering" : "deleting")} transaction: {ex.Message}", ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task DeleteRecoverSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count == 0)
+			return;
+
+		var record = selectedRecords[0];
+
+		await ShowConfirmation(record.Status ? "Delete" : "Recover",
+			$"Are you sure you want to {(record.Status ? "delete" : "recover")} transaction {record.Name}",
+			() => DeleteRecoverTransaction(record.Id, !record.Status));
+	}
+
+	private async Task ShowConfirmation(string title, string message, Func<Task> action)
+	{
+		_confirmTitle = title;
+		_confirmMessage = message;
+		_confirmAction = action;
+		StateHasChanged();
+		await _confirmationDialog.ShowAsync();
+	}
+
+	private async Task OnConfirmed()
+	{
+		await _confirmationDialog.HideAsync();
+		if (_confirmAction is not null)
+			await _confirmAction();
+		_confirmAction = null;
+	}
+
+	private async Task OnCancelled()
+	{
+		_confirmAction = null;
+		await _confirmationDialog.HideAsync();
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportMaster(bool isExcel = false)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
+
+			var (stream, fileName) = await EmployeeLocationExport.ExportMaster(_locations, isExcel ? ReportExportType.Excel : ReportExportType.PDF);
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Utilities
+	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
+	{
+		switch (args.Item.Id)
+		{
+			case "NewTransaction": ResetPage(); break;
+			case "SaveTransaction": await SaveTransaction(); break;
+			case "ToggleDeleted": await ToggleDeleted(); break;
+			case "ExportExcel": await ExportMaster(true); break;
+			case "ExportPdf": await ExportMaster(); break;
+			case "EditSelectedItem": await EditSelectedItem(); break;
+			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
+		}
+	}
+
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<EmployeeLocationModel> args)
+	{
+		switch (args.Item.Id)
+		{
+			case "EditSelectedItem": await EditSelectedItem(); break;
+			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
+		}
+	}
+
+	private async Task ToggleDeleted()
+	{
+		_showDeleted = !_showDeleted;
+		await LoadData();
+	}
+
+	private void ResetPage() => PageRefresh.Request();
+	#endregion
+}

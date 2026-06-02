@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace VectusLibrary.Common;
 
@@ -88,4 +89,16 @@ public static class Helper
 		}
 		catch { return false; }
 	}
+
+	// PAN: 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F).
+	public static bool ValidatePAN(this string pan) =>
+		!string.IsNullOrWhiteSpace(pan) && Regex.IsMatch(pan.Trim(), "^[A-Za-z]{5}[0-9]{4}[A-Za-z]$");
+
+	// Aadhaar: 12 digits, first digit 2-9 (never starts with 0 or 1).
+	public static bool ValidateAadhaar(this string aadhaar) =>
+		!string.IsNullOrWhiteSpace(aadhaar) && Regex.IsMatch(aadhaar.Trim().RemoveSpace(), "^[2-9][0-9]{11}$");
+
+	// IFSC: 4 letters, 0, then 6 alphanumerics (e.g. SBIN0001234).
+	public static bool ValidateIFSC(this string ifsc) =>
+		!string.IsNullOrWhiteSpace(ifsc) && Regex.IsMatch(ifsc.Trim(), "^[A-Za-z]{4}0[A-Za-z0-9]{6}$");
 }

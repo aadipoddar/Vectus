@@ -85,14 +85,27 @@ re-check `_user.Admin` before mutating actions.
 
 ### 3.1 Masters
 
-**Department / Designation / EmployeeLocation** — simple `(Id, Name, Code, Status)` masters,
-identical shape to `AccountType`. Location optionally carries `StateUTId` (drives PT slab).
+**Department / Designation / EmployeeLocation** — simple `(Id, Name, Remarks, Status)` masters,
+identical shape to `AccountType` (which carries **no `Code`** — `Name` is `UNIQUE` and these are
+pure dropdown lookups, so a code would be dead weight; the implemented `Department` follows this).
+Location optionally carries `StateUTId` (drives PT slab).
+
+> **`Code` policy (decided).** Not every master needs a `Code`. A code only earns its place when
+> (a) people refer to the record by that code in the real world / on documents, or (b) other code
+> resolves the record by that string. So:
+> - **Department / Designation / Location** — **no `Code`** (pure lookups; `Name` is unique).
+> - **Employee** — **auto-generated `Code`** (`EMP0001`, via `GenerateCodes` like `Driver`): a real
+>   external identifier printed on payslips, the bank/NEFT file, PF ECR, ESI returns and Form 16.
+> - **SalaryComponent / StatutoryRule** — **meaningful mnemonic `Code`** (`BASIC`, `HRA`, `PF-EE`,
+>   `ESI`, `ADV`, `ARREAR`), *not* a sequential auto-number: the calculation engine resolves
+>   components/rules by these exact strings (`BaseComponentCode`, `StatutoryRuleCode`), so the code is
+>   structural, not cosmetic.
 
 **Employee** (`Employee` table)
 | Column | Type | Notes |
 |---|---|---|
 | Id | INT IDENTITY PK | |
-| Code | VARCHAR(10) UNIQUE | generated via `GenerateCodes` (e.g. `EMP0001`) |
+| Code | VARCHAR(10) UNIQUE | auto-generated via `GenerateCodes` (e.g. `EMP0001`) — external identifier on payslip / bank file / ECR / Form 16 |
 | Name | VARCHAR(250) | |
 | DepartmentId / DesignationId / LocationId | INT FK | |
 | DateOfJoining | DATE | |
@@ -111,7 +124,8 @@ identical shape to `AccountType`. Location optionally carries `StateUTId` (drive
 **SalaryComponent** (`SalaryComponent` table) — the heart of the configurability
 | Column | Type | Notes |
 |---|---|---|
-| Id, Name, Code | | |
+| Id, Name | | |
+| Code | VARCHAR | meaningful mnemonic (`BASIC`, `HRA`, `ADV`, `ARREAR`) — the engine resolves components by this string, so it's user/seed-defined, not auto-numbered |
 | ComponentType | VARCHAR | `Earning` / `Deduction` |
 | CalculationType | VARCHAR | `Fixed` / `PercentOfBase` / `Slab` / `StatutoryRule` / `AdvanceRecovery` / `Arrear` |
 | BaseComponentCode | VARCHAR NULL | for `PercentOfBase` (e.g. HRA = 40% of BASIC) |
@@ -135,7 +149,8 @@ effective-dated set of numbers; **slabs** are that rate's PT/TDS bands. A rate c
 their own period's line. (The `StatutoryRulePage` adds a dated line instead of overwriting — the one
 way it differs from a vanilla master; everything else is the standard CRUD shape.)
 - `StatutoryRule` (header — the identity, doesn't change per budget): `Id, Code, Name,
-  ContributionAccount NULL, RoundingMode, LedgerId NULL, StateUTId NULL, Status`.
+  ContributionAccount NULL, RoundingMode, LedgerId NULL, StateUTId NULL, Status`. `Code` is a
+  meaningful mnemonic (`PF-EE`, `PF-EPS`, `ESI`, `PT`, `TDS`) the engine and ECR resolve by — not auto-numbered.
   - `ContributionAccount` is the EPF challan A/c (`A/c 1`/`2`/`10`/`21`/`22`) for the ECR export.
   - `RoundingMode` = `Nearest` (PF) / `Up` (ESI) / `None`.
   - `LedgerId` is the accounts ledger this rule posts to (PF Payable, ESI Payable…) — see §5.

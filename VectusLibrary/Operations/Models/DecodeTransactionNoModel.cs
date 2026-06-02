@@ -19,7 +19,9 @@ public enum CodeType
 
 	Repair,
 
-	Garage
+	Garage,
+
+	Employee
 }
 
 public class DecodeTransactionNoModel

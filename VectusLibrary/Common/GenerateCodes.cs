@@ -10,6 +10,7 @@ using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
+using VectusLibrary.Payroll.Masters.Models;
 
 namespace VectusLibrary.Common;
 
@@ -22,6 +23,7 @@ public static class GenerateCodes
 		{
 			switch (type)
 			{
+				#region Accounts
 				case CodeType.FinancialAccounting:
 					var accounting = await CommonData.LoadTableDataByTransactionNo<FinancialAccountingModel>(AccountNames.FinancialAccounting, code, sqlDataAccessTransaction);
 					isDuplicate = accounting is not null;
@@ -30,7 +32,16 @@ public static class GenerateCodes
 					var ledger = await CommonData.LoadTableDataByCode<LedgerModel>(AccountNames.Ledger, code, sqlDataAccessTransaction);
 					isDuplicate = ledger is not null;
 					break;
+				#endregion
 
+				#region Payroll
+				case CodeType.Employee:
+					var employee = await CommonData.LoadTableDataByCode<EmployeeModel>(PayrollNames.Employee, code, sqlDataAccessTransaction);
+					isDuplicate = employee is not null;
+					break;
+				#endregion
+
+				#region Fleet
 				case CodeType.VehicleDocumentType:
 					var vehicleDocumentType = await CommonData.LoadTableDataByCode<VehicleDocumentTypeModel>(FleetNames.VehicleDocumentType, code, sqlDataAccessTransaction);
 					isDuplicate = vehicleDocumentType is not null;
@@ -76,6 +87,7 @@ public static class GenerateCodes
 					var tyreCompany = await CommonData.LoadTableDataByCode<TyreCompanyModel>(FleetNames.TyreCompany, code, sqlDataAccessTransaction);
 					isDuplicate = tyreCompany is not null;
 					break;
+				#endregion
 			}
 
 			if (!isDuplicate)
@@ -140,6 +152,31 @@ public static class GenerateCodes
 		}
 
 		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Ledger, sqlDataAccessTransaction);
+	}
+	#endregion
+
+	#region Payroll
+	public static async Task<string> GenerateEmployeeCode(SqlDataAccessTransaction sqlDataAccessTransaction = null)
+	{
+		var items = await CommonData.LoadTableData<EmployeeModel>(PayrollNames.Employee, sqlDataAccessTransaction);
+		var itemPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.EmployeeCodePrefix, sqlDataAccessTransaction)).Value;
+
+		var lastItem = items.OrderByDescending(e => e.Id).FirstOrDefault();
+		if (lastItem is not null)
+		{
+			var lastItemCode = lastItem.Code;
+			if (lastItemCode.StartsWith(itemPrefix))
+			{
+				var lastNumberPart = lastItemCode[itemPrefix.Length..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{itemPrefix}{nextNumber:D5}", 5, CodeType.Employee, sqlDataAccessTransaction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{itemPrefix}00001", 5, CodeType.Employee, sqlDataAccessTransaction);
 	}
 	#endregion
 

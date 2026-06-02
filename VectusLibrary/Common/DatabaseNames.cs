@@ -77,6 +77,21 @@ public static class AccountNames
 	#endregion
 }
 
+public static class PayrollNames
+{
+	#region Masters
+	public static string Department => "Department";
+	public static string Designation => "Designation";
+	public static string EmployeeLocation => "EmployeeLocation";
+	public static string Employee => "Employee";
+
+	public static string InsertDepartment => "Insert_Department";
+	public static string InsertDesignation => "Insert_Designation";
+	public static string InsertEmployeeLocation => "Insert_EmployeeLocation";
+	public static string InsertEmployee => "Insert_Employee";
+	#endregion
+}
+
 public static class FleetNames
 {
 	#region Garage
@@ -151,14 +166,5 @@ public static class FleetNames
 	public static string InsertTyreMounting => "Insert_TyreMounting";
 
 	public static string DeleteTyreMounting => "Delete_TyreMounting";
-	#endregion
-}
-
-public static class PayrollNames
-{
-	#region Masters
-	public static string Department => "Department";
-
-	public static string InsertDepartment => "Insert_Department";
 	#endregion
 }

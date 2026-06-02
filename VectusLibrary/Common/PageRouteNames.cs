@@ -33,6 +33,13 @@ public static class PageRouteNames
 	public const string StateUTMaster = "/accounts/masters/state-ut";
 	#endregion
 
+	#region Payroll
+	public const string DepartmentMaster = "/payroll/masters/department";
+	public const string DesignationMaster = "/payroll/masters/designation";
+	public const string EmployeeLocationMaster = "/payroll/masters/employee-location";
+	public const string EmployeeMaster = "/payroll/masters/employee";
+	#endregion
+
 	#region Fleet
 	public const string SDRMaster = "/fleet/sdr";
 	public const string VehicleMaster = "/fleet/vehicle";
@@ -62,9 +69,5 @@ public static class PageRouteNames
 	public const string RepairJobReport = "/fleet/reports/repair-job";
 
 	public const string GarageMaster = "/fleet/garage";
-	#endregion
-
-	#region Payroll
-	public const string DepartmentMaster = "/payroll/masters/department";
 	#endregion
 }

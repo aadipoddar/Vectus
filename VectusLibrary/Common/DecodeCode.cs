@@ -14,6 +14,8 @@ using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Fleet.VehicleDocument.Exports;
 using VectusLibrary.Fleet.VehicleDocument.Models;
 using VectusLibrary.Operations.Models;
+using VectusLibrary.Payroll.Masters.Exports;
+using VectusLibrary.Payroll.Masters.Models;
 using VectusLibrary.Utils.ExportUtils;
 
 namespace VectusLibrary.Common;
@@ -34,6 +36,7 @@ public static class DecodeCode
 
 		switch (decodeTransactionNoModel.CodeType)
 		{
+			#region Accounts
 			case CodeType.FinancialAccounting:
 				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByTransactionNo<FinancialAccountingModel>(AccountNames.FinancialAccounting, transactionNo);
 				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.FinancialAccounting}/{(decodeTransactionNoModel.TransactionModel as FinancialAccountingModel).Id}";
@@ -47,7 +50,19 @@ public static class DecodeCode
 				if (pdf) decodeTransactionNoModel.PDFStream = await LedgerExport.ExportMaster(ledgers, ReportExportType.PDF);
 				if (excel) decodeTransactionNoModel.ExcelStream = await LedgerExport.ExportMaster(ledgers, ReportExportType.Excel);
 				break;
+			#endregion
 
+			#region Payroll
+			case CodeType.Employee:
+				var employees = await CommonData.LoadTableData<EmployeeModel>(PayrollNames.Employee);
+				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<EmployeeModel>(PayrollNames.Employee, transactionNo);
+				decodeTransactionNoModel.PageRouteName = $"{PageRouteNames.EmployeeMaster}";
+				if (pdf) decodeTransactionNoModel.PDFStream = await EmployeeExport.ExportMaster(employees, ReportExportType.PDF);
+				if (excel) decodeTransactionNoModel.ExcelStream = await EmployeeExport.ExportMaster(employees, ReportExportType.Excel);
+				break;
+			#endregion
+
+			#region Fleet
 			case CodeType.VehicleType:
 				var vehicleTypes = await CommonData.LoadTableData<VehicleTypeModel>(FleetNames.VehicleType);
 				decodeTransactionNoModel.TransactionModel = await CommonData.LoadTableDataByCode<VehicleTypeModel>(FleetNames.VehicleType, transactionNo);
@@ -112,6 +127,7 @@ public static class DecodeCode
 				if (pdf) decodeTransactionNoModel.PDFStream = await GarageExport.ExportMaster(garages, ReportExportType.PDF);
 				if (excel) decodeTransactionNoModel.ExcelStream = await GarageExport.ExportMaster(garages, ReportExportType.Excel);
 				break;
+			#endregion
 
 			default:
 				break;

@@ -34,6 +34,7 @@ public partial class SettingsPage
 
 	// Code Prefixes
 	private string _ledgerCodePrefix = string.Empty;
+	private string _employeeCodePrefix = string.Empty;
 	private string _sdrCodePrefix = string.Empty;
 	private string _vehicleTypeCodePrefix = string.Empty;
 	private string _documentTypeCodePrefix = string.Empty;
@@ -129,6 +130,9 @@ public partial class SettingsPage
 
 		s = await SettingsData.LoadSettingsByKey(SettingsKeys.LedgerCodePrefix);
 		_ledgerCodePrefix = s?.Value ?? string.Empty;
+
+		s = await SettingsData.LoadSettingsByKey(SettingsKeys.EmployeeCodePrefix);
+		_employeeCodePrefix = s?.Value ?? string.Empty;
 
 		s = await SettingsData.LoadSettingsByKey(SettingsKeys.SDRCodePrefix);
 		_sdrCodePrefix = s?.Value ?? string.Empty;
@@ -301,6 +305,7 @@ public partial class SettingsPage
 			await UpdateSetting(SettingsKeys.CodeExpiryMinutes, _codeExpiryMinutes.ToString(), Desc(SettingsKeys.CodeExpiryMinutes));
 
 			await UpdateSetting(SettingsKeys.LedgerCodePrefix, _ledgerCodePrefix, Desc(SettingsKeys.LedgerCodePrefix));
+			await UpdateSetting(SettingsKeys.EmployeeCodePrefix, _employeeCodePrefix, Desc(SettingsKeys.EmployeeCodePrefix));
 			await UpdateSetting(SettingsKeys.SDRCodePrefix, _sdrCodePrefix, Desc(SettingsKeys.SDRCodePrefix));
 			await UpdateSetting(SettingsKeys.VehicleTypeCodePrefix, _vehicleTypeCodePrefix, Desc(SettingsKeys.VehicleTypeCodePrefix));
 			await UpdateSetting(SettingsKeys.DocumentTypeCodePrefix, _documentTypeCodePrefix, Desc(SettingsKeys.DocumentTypeCodePrefix));
