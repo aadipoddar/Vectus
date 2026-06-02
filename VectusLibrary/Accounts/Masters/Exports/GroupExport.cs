@@ -10,13 +10,11 @@ public static class GroupExport
         IEnumerable<GroupModel> groupData,
         ReportExportType exportType)
     {
-        var natures = await CommonData.LoadTableData<NatureModel>(AccountNames.Nature);
-
         var enrichedData = groupData.Select(group => new
         {
             group.Id,
             group.Name,
-            Nature = natures.FirstOrDefault(n => n.Id == group.NatureId)?.Name,
+            group.Nature,
             group.Remarks,
             Status = group.Status ? "Active" : "Deleted"
         });
@@ -25,7 +23,7 @@ public static class GroupExport
         {
             [nameof(GroupModel.Id)] = new() { DisplayName = "ID", Alignment = CellAlignment.Center, IncludeInTotal = false },
             [nameof(GroupModel.Name)] = new() { DisplayName = "Group Name", Alignment = CellAlignment.Left, IsRequired = true },
-            ["Nature"] = new() { DisplayName = "Nature", Alignment = CellAlignment.Left },
+            [nameof(GroupModel.Nature)] = new() { DisplayName = "Nature", Alignment = CellAlignment.Left },
             [nameof(GroupModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = CellAlignment.Left },
             [nameof(GroupModel.Status)] = new() { DisplayName = "Status", Alignment = CellAlignment.Center, IncludeInTotal = false }
         };
@@ -34,7 +32,7 @@ public static class GroupExport
         [
             nameof(GroupModel.Id),
             nameof(GroupModel.Name),
-            "Nature",
+            nameof(GroupModel.Nature),
             nameof(GroupModel.Remarks),
             nameof(GroupModel.Status)
         ];

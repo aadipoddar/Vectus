@@ -1,9 +1,8 @@
 ﻿CREATE TABLE [dbo].[Group]
 (
-	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [Name] VARCHAR(250) NOT NULL UNIQUE, 
-    [NatureId] INT NOT NULL, 
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY,
+    [Name] VARCHAR(250) NOT NULL UNIQUE,
+    [Nature] VARCHAR(50) NOT NULL,
     [Remarks] VARCHAR(MAX) NULL,
-    [Status] BIT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_Group_ToNature] FOREIGN KEY ([NatureId]) REFERENCES [dbo].[Nature]([Id])
+    [Status] BIT NOT NULL DEFAULT 1
 )

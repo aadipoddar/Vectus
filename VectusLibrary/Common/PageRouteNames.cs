@@ -38,6 +38,8 @@ public static class PageRouteNames
 	public const string DesignationMaster = "/payroll/masters/designation";
 	public const string EmployeeLocationMaster = "/payroll/masters/employee-location";
 	public const string EmployeeMaster = "/payroll/masters/employee";
+	public const string SalaryComponentMaster = "/payroll/masters/salary-component";
+	public const string SalaryStructureMaster = "/payroll/masters/salary-structure";
 	#endregion
 
 	#region Fleet

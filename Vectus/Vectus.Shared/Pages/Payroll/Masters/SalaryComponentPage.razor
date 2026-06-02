@@ -1,0 +1,294 @@
+@using VectusLibrary.Payroll.Masters.Models
+
+@attribute [Route(PageRouteNames.SalaryComponentMaster)]
+
+<PageTitle>Salary Component Management - Vectus</PageTitle>
+
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Insert OnHotkeyPressed="EditSelectedItem" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Salary Component Management">
+			<LeftContent>
+				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
+					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
+					<MenuItems>
+						<MenuItem Text="File" IconCss="e-icons e-folder">
+							<MenuItems>
+								<MenuItem Text="New (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="@(_showDeleted ? "Hide Deleted (Ctrl + Delete)" : "Show Deleted (Ctrl + Delete)")" IconCss="e-icons e-trash" Id="ToggleDeleted" Disabled="@_isProcessing" />
+								<MenuItem Separator="true" />
+								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
+								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Transaction" IconCss="e-icons e-chart">
+							<MenuItems>
+								<MenuItem Text="Edit (Insert)" IconCss="e-icons e-edit" Id="EditSelectedItem" Disabled="@_isProcessing" />
+								<MenuItem Text="Delete / Recover (Del)" IconCss="e-icons e-trash" Id="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+					</MenuItems>
+				</SfMenu>
+			</LeftContent>
+		</Header>
+
+		<div class="page-container">
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<line x1="12" y1="1" x2="12" y2="23" />
+							<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+						</svg>
+						<h2 class="section-title">Component Details</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
+						<div class="form-field">
+							<CustomTextField @ref="_sfFirstFocus"
+											 @bind-Value="_component.Code"
+											 Label="Code (Ctrl + F)"
+											 Placeholder="e.g. BASIC, HRA, PF-EE"
+											 MaxLength="20" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_component.Name"
+											 Label="Name"
+											 Placeholder="Enter Component Name" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="string"
+												@bind-Value="_component.ComponentType"
+												DataSource="@SalaryComponentOptions.ComponentTypes"
+												Placeholder="Select Component Type"
+												Label="Component Type" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="string"
+												@bind-Value="_component.CalculationType"
+												DataSource="@SalaryComponentOptions.CalculationTypes"
+												Placeholder="Select Calculation Type"
+												Label="Calculation Type" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="int"
+												@bind-Value="_component.DisplayOrder"
+												Label="Display Order"
+												Placeholder="0"
+												Format="N0"
+												Required="false"
+												Min="0" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<rect x="4" y="2" width="16" height="20" rx="2" />
+							<line x1="8" y1="6" x2="16" y2="6" />
+							<line x1="8" y1="10" x2="16" y2="10" />
+							<line x1="8" y1="14" x2="12" y2="14" />
+						</svg>
+						<h2 class="section-title">Calculation Setup</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
+						<div class="form-field">
+							<CustomTextField @bind-Value="_component.BaseComponentCode"
+											 Label="Base Component Code"
+											 Placeholder="e.g. BASIC (for % of base)"
+											 Required="false"
+											 MaxLength="20" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="decimal?"
+												@bind-Value="_component.Percentage"
+												Label="Percentage"
+												Placeholder="e.g. 40"
+												Format="N4"
+												Required="false"
+												AdornmentText="%" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_component.StatutoryRuleCode"
+											 Label="Statutory Rule Code"
+											 Placeholder="e.g. PF-EE, ESI, PT"
+											 Required="false"
+											 MaxLength="20" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+						</svg>
+						<h2 class="section-title">Statutory Treatment</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
+						<div class="form-field">
+							<div class="checkbox-wrapper">
+								<CustomCheckBox @bind-Value="_component.IsTaxable"
+												Label="Taxable"
+												AriaLabel="Mark whether this component is taxable (feeds TDS)" />
+							</div>
+						</div>
+
+						<div class="form-field">
+							<div class="checkbox-wrapper">
+								<CustomCheckBox @bind-Value="_component.IsPerquisite"
+												Label="Perquisite"
+												AriaLabel="Mark whether this component is a perquisite (Form 12BA / 16)" />
+							</div>
+						</div>
+
+						<div class="form-field">
+							<div class="checkbox-wrapper">
+								<CustomCheckBox @bind-Value="_component.AffectsPFBase"
+												Label="Affects PF Base"
+												AriaLabel="Mark whether this component forms part of the PF wage base" />
+							</div>
+						</div>
+
+						<div class="form-field">
+							<div class="checkbox-wrapper">
+								<CustomCheckBox @bind-Value="_component.AffectsESIBase"
+												Label="Affects ESI Base"
+												AriaLabel="Mark whether this component forms part of the ESI wage base" />
+							</div>
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_component.Remarks"
+											 Label="Remarks"
+											 Placeholder="Enter Remarks"
+											 Required="false"
+											 Lines="2" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M9 11l3 3L22 4" />
+							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+						</svg>
+						<h2 class="section-title">Salary Components List</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfGrid" DataSource="@_components" AllowPaging="true" AllowSorting="true"
+							AllowFiltering="true" AllowResizing="true" CssClass="professional-grid"
+							Toolbar="@(new List<string>() { "Search" })" ContextMenuItems="@_gridContextMenuItems">
+						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
+						<GridEvents TValue="SalaryComponentModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(SalaryComponentModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(SalaryComponentModel.Code)" HeaderText="Code" Width="120" />
+							<GridColumn Field="@nameof(SalaryComponentModel.Name)" HeaderText="Component Name" Width="220" />
+							<GridColumn Field="@nameof(SalaryComponentModel.ComponentType)" HeaderText="Type" Width="120" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(SalaryComponentModel.CalculationType)" HeaderText="Calculation" Width="150" />
+							<GridColumn Field="@nameof(SalaryComponentModel.BaseComponentCode)" HeaderText="Base Component" Width="150" />
+							<GridColumn Field="@nameof(SalaryComponentModel.Percentage)" HeaderText="Percentage" Width="130" Format="N4" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(SalaryComponentModel.StatutoryRuleCode)" HeaderText="Statutory Rule" Width="140" />
+							<GridColumn Field="@nameof(SalaryComponentModel.IsTaxable)" HeaderText="Taxable" Width="110" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as SalaryComponentModel);
+										<span class="@(item.IsTaxable ? "grid-credit" : "grid-debit")">@(item.IsTaxable ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(SalaryComponentModel.IsPerquisite)" HeaderText="Perquisite" Width="120" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as SalaryComponentModel);
+										<span class="@(item.IsPerquisite ? "grid-credit" : "grid-debit")">@(item.IsPerquisite ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(SalaryComponentModel.AffectsPFBase)" HeaderText="PF Base" Width="110" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as SalaryComponentModel);
+										<span class="@(item.AffectsPFBase ? "grid-credit" : "grid-debit")">@(item.AffectsPFBase ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(SalaryComponentModel.AffectsESIBase)" HeaderText="ESI Base" Width="110" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as SalaryComponentModel);
+										<span class="@(item.AffectsESIBase ? "grid-credit" : "grid-debit")">@(item.AffectsESIBase ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(SalaryComponentModel.DisplayOrder)" HeaderText="Order" Width="100" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(SalaryComponentModel.Remarks)" HeaderText="Remarks" Width="220" />
+							<GridColumn Field="@nameof(SalaryComponentModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+								<Template>
+									@{
+										var item = (context as SalaryComponentModel);
+										<span class="@(item.Status ? string.Empty : "grid-debit")">@(item.Status ? "Active" : "Deleted")</span>
+									}
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<ConfirmationDialog @ref="_confirmationDialog" Title="@_confirmTitle" Message="@_confirmMessage"
+					OnConfirm="OnConfirmed" OnCancel="OnCancelled" />
+
+<ToastNotification @ref="_toastNotification" />
+
+<NavigationLock ConfirmExternalNavigation="@_isProcessing" />

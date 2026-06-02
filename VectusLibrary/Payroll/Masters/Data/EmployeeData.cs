@@ -56,8 +56,10 @@ public static class EmployeeData
 		item.PFNumber = string.IsNullOrWhiteSpace(item.PFNumber) ? null : item.PFNumber.Trim();
 		item.ESINumber = string.IsNullOrWhiteSpace(item.ESINumber) ? null : item.ESINumber.Trim();
 		item.Phone = string.IsNullOrWhiteSpace(item.Phone) ? null : item.Phone.Trim();
-		item.Email = string.IsNullOrWhiteSpace(item.Email) ? null : item.Email.Trim();
+		item.PersonalEmail = string.IsNullOrWhiteSpace(item.PersonalEmail) ? null : item.PersonalEmail.Trim();
+		item.WorkEmail = string.IsNullOrWhiteSpace(item.WorkEmail) ? null : item.WorkEmail.Trim();
 		item.Address = string.IsNullOrWhiteSpace(item.Address) ? null : item.Address.Trim();
+		item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? null : item.Remarks.Trim();
 		item.DateOfLeaving = item.DateOfLeaving == default(DateTime) ? null : item.DateOfLeaving;
 		item.ESICoveredUpto = item.ESICoveredUpto == default(DateTime) ? null : item.ESICoveredUpto;
 		item.Status = true;
@@ -95,8 +97,11 @@ public static class EmployeeData
 		if (item.Phone is not null && !item.Phone.ValidatePhoneNumber())
 			throw new Exception("Invalid phone number format. Please enter a valid 10-digit phone number.");
 
-		if (item.Email is not null && !item.Email.ValidateEmail())
-			throw new Exception("Invalid email format. Please enter a valid email address.");
+		if (item.PersonalEmail is not null && !item.PersonalEmail.ValidateEmail())
+			throw new Exception("Invalid personal email format. Please enter a valid email address.");
+
+		if (item.WorkEmail is not null && !item.WorkEmail.ValidateEmail())
+			throw new Exception("Invalid work email format. Please enter a valid email address.");
 
 		if (item.Id == 0)
 			item.Code = await GenerateCodes.GenerateEmployeeCode();

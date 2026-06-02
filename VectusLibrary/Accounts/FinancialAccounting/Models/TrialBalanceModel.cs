@@ -7,7 +7,6 @@ public class TrialBalanceModel
     public string LedgerName { get; set; }
     public int GroupId { get; set; }
     public string GroupName { get; set; }
-    public int NatureId { get; set; }
     public string NatureName { get; set; }
     public int AccountTypeId { get; set; }
     public string AccountTypeName { get; set; }

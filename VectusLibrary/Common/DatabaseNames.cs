@@ -58,7 +58,6 @@ public static class AccountNames
 	#region Masters
 	public static string Company => "Company";
 	public static string Group => "Group";
-	public static string Nature => "Nature";
 	public static string AccountType => "AccountType";
 	public static string StateUT => "StateUT";
 	public static string Ledger => "Ledger";
@@ -84,11 +83,17 @@ public static class PayrollNames
 	public static string Designation => "Designation";
 	public static string EmployeeLocation => "EmployeeLocation";
 	public static string Employee => "Employee";
+	public static string SalaryComponent => "SalaryComponent";
+	public static string SalaryStructure => "SalaryStructure";
+	public static string SalaryStructureLine => "SalaryStructureLine";
 
 	public static string InsertDepartment => "Insert_Department";
 	public static string InsertDesignation => "Insert_Designation";
 	public static string InsertEmployeeLocation => "Insert_EmployeeLocation";
 	public static string InsertEmployee => "Insert_Employee";
+	public static string InsertSalaryComponent => "Insert_SalaryComponent";
+	public static string InsertSalaryStructure => "Insert_SalaryStructure";
+	public static string InsertSalaryStructureLine => "Insert_SalaryStructureLine";
 	#endregion
 }
 

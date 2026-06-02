@@ -114,7 +114,7 @@ else
 						<GridColumns>
 							<GridColumn Field="@nameof(EmployeeLocationModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(EmployeeLocationModel.Name)" HeaderText="Employee Location Name" Width="280" />
-							<GridColumn HeaderText="State/UT" Width="220">
+							<GridColumn Field="@nameof(EmployeeLocationModel.StateUTId)" HeaderText="State/UT" Width="220">
 								<Template>
 									@{
 										var item = (context as EmployeeLocationModel);

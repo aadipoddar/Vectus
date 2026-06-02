@@ -240,6 +240,11 @@ private async Task DoThing()
 	}
 }
 ```
+
+**`SaveTransaction` omits the trailing `StateHasChanged()`** in its `finally` (just
+`_isProcessing = false;`): its success path ends in `ResetPage()` (full re-render) and
+its error path's toast already re-renders, so it is redundant there. Delete/Recover/
+Export keep the `StateHasChanged()`. Match the canonical `GroupPage`.
  
 ### 3.6 Toasts
  
@@ -595,8 +600,12 @@ public static class XxxData
  
 `InsertXxx` (header) + `InsertXxxLine` helpers; `ConvertCartToLines(cart, masterId)`;
 `SaveTransaction(header, lines)` runs one transaction: upsert header → (for edits)
-replace lines → insert each line → write audit; return header id. The audit
-`RecordNo` is the transaction's natural key.
+**soft-delete the existing lines** — load them by `MasterId`, set `Status = false`,
+re-run the line upsert — then insert the new line set → write audit; return header id.
+Lines are not hard-deleted on edit; they stay as `Status = 0` rows and the generic
+`Load_TableData_By_MasterId` reader returns only the active set (see
+`FinancialAccountingData`). The audit `RecordNo` is the
+transaction's natural key.
  
 ### 10.3 Reads
  
@@ -623,9 +632,17 @@ namespace, property names matching table columns exactly (Dapper maps by name),
 ordered to mirror the table. Transactional tables carry `int Id`, `bool Status`, and
 audit columns (`CreatedBy/At/FromPlatform`, `LastModifiedBy/At/FromPlatform`,
 `TransactionNo`, `TransactionDateTime`). Add an `XxxOverviewModel` (matching the
-`*_Overview` view) and, for cart pages, an `XxxCartModel`. Keep `DateOnly`/`TimeOnly`
-where the column is a date/time. Respect the project's `<Nullable>` setting — don't
-sprinkle `string?` in a nullable-disabled project.
+`*_Overview` view) and, for cart pages, an `XxxCartModel`.
+
+- **Nullability:** annotate optional columns with `?` (`string?`, `decimal?`,
+  `DateTime?`) **even though `<Nullable>` is disabled** — that is the house style
+  (`LedgerModel`, `FinancialYearModel`). Match the column; don't add or strip `?` against it.
+- **Dates:** a pure date/period column is `DateOnly` (`TimeOnly` for time), e.g.
+  `FinancialYearModel.StartDate`. But a date **edited via the `CustomDatePicker`
+  wrapper** must be `DateTime`/`DateTime?` — the component binds `DateTime` — so
+  form-entered dates (transaction / voucher dates) are `DateTime`, not `DateOnly`.
+- **Line/detail models:** name the parent FK property (and column) `MasterId`, not
+  `<Header>Id`, so the generic `Load_TableData_By_MasterId` reader resolves it.
  
 ---
  

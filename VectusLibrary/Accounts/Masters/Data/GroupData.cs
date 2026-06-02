@@ -45,14 +45,15 @@ public static class GroupData
 	private static async Task ValidateTransaction(GroupModel item)
 	{
 		item.Name = item.Name?.Trim().ToUpper() ?? string.Empty;
+		item.Nature = item.Nature?.Trim();
 		item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? null : item.Remarks.Trim();
 		item.Status = true;
 
 		if (string.IsNullOrWhiteSpace(item.Name))
 			throw new Exception("Group name is required. Please enter a valid group name.");
 
-		if (item.NatureId <= 0)
-			throw new Exception("Nature is required. Please select a nature.");
+		if (string.IsNullOrWhiteSpace(item.Nature) || Array.IndexOf(AccountNatureOptions.Natures, item.Nature) < 0)
+			throw new Exception("Nature is required. Please select a valid nature.");
 
 		var allGroups = await CommonData.LoadTableData<GroupModel>(AccountNames.Group);
 

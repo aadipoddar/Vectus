@@ -23,8 +23,10 @@ CREATE PROCEDURE [dbo].[Insert_Employee]
 	@ContributeOnHigherPFWage BIT,
 	@ESICoveredUpto DATE,
 	@Phone VARCHAR(10),
-	@Email VARCHAR(250),
+	@PersonalEmail VARCHAR(250),
+	@WorkEmail VARCHAR(250),
 	@Address VARCHAR(MAX),
+	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
 BEGIN
@@ -55,8 +57,10 @@ BEGIN
 			[ContributeOnHigherPFWage],
 			[ESICoveredUpto],
 			[Phone],
-			[Email],
+			[PersonalEmail],
+			[WorkEmail],
 			[Address],
+			[Remarks],
 			[Status]
 		)
 		VALUES
@@ -84,8 +88,10 @@ BEGIN
 			@ContributeOnHigherPFWage,
 			@ESICoveredUpto,
 			@Phone,
-			@Email,
+			@PersonalEmail,
+			@WorkEmail,
 			@Address,
+			@Remarks,
 			@Status
 		);
 		SET @Id = SCOPE_IDENTITY();
@@ -118,8 +124,10 @@ BEGIN
 			[ContributeOnHigherPFWage] = @ContributeOnHigherPFWage,
 			[ESICoveredUpto] = @ESICoveredUpto,
 			[Phone] = @Phone,
-			[Email] = @Email,
+			[PersonalEmail] = @PersonalEmail,
+			[WorkEmail] = @WorkEmail,
 			[Address] = @Address,
+			[Remarks] = @Remarks,
 			[Status] = @Status
 		WHERE
 			[Id] = @Id;

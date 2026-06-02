@@ -121,6 +121,44 @@ else
 											  ShowFinancialYear="false"
 											  AddNewRoute="@(null)" />
 						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_employee.Phone"
+											 Label="Phone"
+											 Placeholder="Enter Phone"
+											 Required="false"
+											 MaxLength="10" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_employee.PersonalEmail"
+											 Label="Personal Email"
+											 Placeholder="Enter Personal Email"
+											 Required="false" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_employee.WorkEmail"
+											 Label="Work Email"
+											 Placeholder="Enter Work Email"
+											 Required="false" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_employee.Address"
+											 Label="Address"
+											 Placeholder="Enter Address"
+											 Required="false"
+											 Lines="2" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_employee.Remarks"
+											 Label="Remarks"
+											 Placeholder="Enter Remarks"
+											 Required="false"
+											 Lines="2" />
+						</div>
 					</div>
 				</div>
 			</div>
@@ -281,45 +319,6 @@ else
 						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
 							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 							 stroke-linejoin="round">
-							<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.74a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z" />
-						</svg>
-						<h2 class="section-title">Contact Details</h2>
-					</div>
-				</div>
-				<div class="section-body">
-					<div class="form-grid">
-						<div class="form-field">
-							<CustomTextField @bind-Value="_employee.Phone"
-											 Label="Phone"
-											 Placeholder="Enter Phone"
-											 Required="false"
-											 MaxLength="10" />
-						</div>
-
-						<div class="form-field">
-							<CustomTextField @bind-Value="_employee.Email"
-											 Label="Email"
-											 Placeholder="Enter Email"
-											 Required="false" />
-						</div>
-
-						<div class="form-field">
-							<CustomTextField @bind-Value="_employee.Address"
-											 Label="Address"
-											 Placeholder="Enter Address"
-											 Required="false"
-											 Lines="2" />
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="section-card">
-				<div class="section-header">
-					<div class="section-title-wrapper">
-						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-							 stroke-linejoin="round">
 							<path d="M9 11l3 3L22 4" />
 							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
 						</svg>
@@ -337,7 +336,7 @@ else
 							<GridColumn Field="@nameof(EmployeeModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(EmployeeModel.Code)" HeaderText="Code" Width="120" />
 							<GridColumn Field="@nameof(EmployeeModel.Name)" HeaderText="Employee Name" Width="220" />
-							<GridColumn HeaderText="Department" Width="160">
+							<GridColumn Field="@nameof(EmployeeModel.DepartmentId)" HeaderText="Department" Width="160">
 								<Template>
 									@{
 										var item = (context as EmployeeModel);
@@ -345,7 +344,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn HeaderText="Designation" Width="160">
+							<GridColumn Field="@nameof(EmployeeModel.DesignationId)" HeaderText="Designation" Width="160">
 								<Template>
 									@{
 										var item = (context as EmployeeModel);
@@ -353,7 +352,7 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn HeaderText="Location" Width="160">
+							<GridColumn Field="@nameof(EmployeeModel.EmployeeLocationId)" HeaderText="Location" Width="160">
 								<Template>
 									@{
 										var item = (context as EmployeeModel);
@@ -362,9 +361,13 @@ else
 								</Template>
 							</GridColumn>
 							<GridColumn Field="@nameof(EmployeeModel.DateOfJoining)" HeaderText="Date of Joining" Width="140" Format="dd-MM-yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(EmployeeModel.DateOfLeaving)" HeaderText="Date of Leaving" Width="140" Format="dd-MM-yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(EmployeeModel.PaymentMode)" HeaderText="Payment Mode" Width="130" TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(EmployeeModel.PFUAN)" HeaderText="PF UAN" Width="150" />
-							<GridColumn HeaderText="Aadhaar" Width="140">
+							<GridColumn Field="@nameof(EmployeeModel.BankName)" HeaderText="Bank Name" Width="160" />
+							<GridColumn Field="@nameof(EmployeeModel.BankAccountNo)" HeaderText="Bank Account No" Width="160" />
+							<GridColumn Field="@nameof(EmployeeModel.IFSC)" HeaderText="IFSC" Width="130" />
+							<GridColumn Field="@nameof(EmployeeModel.PANNo)" HeaderText="PAN No" Width="130" />
+							<GridColumn HeaderText="Aadhaar" Width="150">
 								<Template>
 									@{
 										var item = (context as EmployeeModel);
@@ -372,7 +375,55 @@ else
 									}
 								</Template>
 							</GridColumn>
+							<GridColumn Field="@nameof(EmployeeModel.PFUAN)" HeaderText="PF UAN" Width="150" />
+							<GridColumn Field="@nameof(EmployeeModel.PFNumber)" HeaderText="PF Number" Width="150" />
+							<GridColumn Field="@nameof(EmployeeModel.ESINumber)" HeaderText="ESI Number" Width="150" />
+							<GridColumn Field="@nameof(EmployeeModel.ESICoveredUpto)" HeaderText="ESI Covered Upto" Width="150" Format="dd-MM-yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(EmployeeModel.IsPFApplicable)" HeaderText="PF Applicable" Width="130" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as EmployeeModel);
+										<span class="@(item.IsPFApplicable ? "grid-credit" : "grid-debit")">@(item.IsPFApplicable ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(EmployeeModel.IsESIApplicable)" HeaderText="ESI Applicable" Width="130" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as EmployeeModel);
+										<span class="@(item.IsESIApplicable ? "grid-credit" : "grid-debit")">@(item.IsESIApplicable ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(EmployeeModel.IsPTApplicable)" HeaderText="PT Applicable" Width="130" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as EmployeeModel);
+										<span class="@(item.IsPTApplicable ? "grid-credit" : "grid-debit")">@(item.IsPTApplicable ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(EmployeeModel.IsLWFApplicable)" HeaderText="LWF Applicable" Width="130" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as EmployeeModel);
+										<span class="@(item.IsLWFApplicable ? "grid-credit" : "grid-debit")">@(item.IsLWFApplicable ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(EmployeeModel.ContributeOnHigherPFWage)" HeaderText="Higher PF Wage" Width="140" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as EmployeeModel);
+										<span class="@(item.ContributeOnHigherPFWage ? "grid-credit" : "grid-debit")">@(item.ContributeOnHigherPFWage ? "Yes" : "No")</span>
+									}
+								</Template>
+							</GridColumn>
 							<GridColumn Field="@nameof(EmployeeModel.Phone)" HeaderText="Phone" Width="140" />
+							<GridColumn Field="@nameof(EmployeeModel.PersonalEmail)" HeaderText="Personal Email" Width="200" />
+							<GridColumn Field="@nameof(EmployeeModel.WorkEmail)" HeaderText="Work Email" Width="200" />
+							<GridColumn Field="@nameof(EmployeeModel.Address)" HeaderText="Address" Width="220" />
+							<GridColumn Field="@nameof(EmployeeModel.Remarks)" HeaderText="Remarks" Width="220" />
 							<GridColumn Field="@nameof(EmployeeModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
 									@{

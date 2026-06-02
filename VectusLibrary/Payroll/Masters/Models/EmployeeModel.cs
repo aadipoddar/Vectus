@@ -33,8 +33,11 @@ public class EmployeeModel
 	public DateTime? ESICoveredUpto { get; set; }
 
 	public string? Phone { get; set; }
-	public string? Email { get; set; }
+	public string? PersonalEmail { get; set; }
+	public string? WorkEmail { get; set; }
 	public string? Address { get; set; }
+
+	public string? Remarks { get; set; }
 
 	public bool Status { get; set; }
 }

@@ -3,31 +3,32 @@ using Syncfusion.Blazor.Grids;
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
-using VectusLibrary.Accounts.Masters.Data;
-using VectusLibrary.Accounts.Masters.Exports;
-using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Models;
+using VectusLibrary.Payroll.Masters.Data;
+using VectusLibrary.Payroll.Masters.Exports;
+using VectusLibrary.Payroll.Masters.Models;
 using VectusLibrary.Utils.ExportUtils;
 
-namespace Vectus.Shared.Pages.Accounts.Masters;
+namespace Vectus.Shared.Pages.Payroll.Masters;
 
-public partial class GroupPage
+public partial class SalaryComponentPage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showDeleted = false;
 
-	private GroupModel _group = new();
+	private SalaryComponentModel _component = new() { ComponentType = "Earning", CalculationType = "Fixed" };
 
-	private List<GroupModel> _groups = [];
+	private List<SalaryComponentModel> _components = [];
+
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
 		new() { Text = "Edit (Insert)", Id = "EditSelectedItem", IconCss = "e-icons e-edit", Target = ".e-content" },
 		new() { Text = "Delete / Recover (Del)", Id = "DeleteRecoverSelectedItem", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private SfGrid<GroupModel> _sfGrid;
+	private SfGrid<SalaryComponentModel> _sfGrid;
 	private CustomTextField _sfFirstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
@@ -44,7 +45,7 @@ public partial class GroupPage
 
 		try
 		{
-			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Accounts]);
+			_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, VibrationService, [UserRoles.Payroll]);
 			await LoadData();
 		}
 		catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
@@ -52,10 +53,12 @@ public partial class GroupPage
 
 	private async Task LoadData()
 	{
-		_groups = await CommonData.LoadTableData<GroupModel>(AccountNames.Group);
+		_components = await CommonData.LoadTableData<SalaryComponentModel>(PayrollNames.SalaryComponent);
 
 		if (!_showDeleted)
-			_groups = [.. _groups.Where(g => g.Status)];
+			_components = [.. _components.Where(c => c.Status)];
+
+		_components = [.. _components.OrderBy(c => c.DisplayOrder).ThenBy(c => c.Code)];
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -84,7 +87,7 @@ public partial class GroupPage
 
 			await _toastNotification.ShowAsync("Processing", "Please wait while the transaction is being saved...", ToastType.Info);
 
-			await GroupData.SaveTransaction(_group, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			await SalaryComponentData.SaveTransaction(_component, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
 			await _toastNotification.ShowAsync("Saved", "Transaction has been saved successfully.", ToastType.Success);
 			ResetPage();
@@ -107,8 +110,8 @@ public partial class GroupPage
 		if (selectedRecords.Count == 0)
 			return;
 
-		_group = await CommonData.LoadTableDataById<GroupModel>(AccountNames.Group, selectedRecords[0].Id);
-		if (_group is null)
+		_component = await CommonData.LoadTableDataById<SalaryComponentModel>(PayrollNames.SalaryComponent, selectedRecords[0].Id);
+		if (_component is null)
 		{
 			await _toastNotification.ShowAsync("Error while Editing", "Transaction Not Found.", ToastType.Error);
 			return;
@@ -130,13 +133,13 @@ public partial class GroupPage
 
 			await _toastNotification.ShowAsync("Processing", $"{(isRecover ? "Recovering" : "Deleting")} transaction...", ToastType.Info);
 
-			var group = await CommonData.LoadTableDataById<GroupModel>(AccountNames.Group, id)
+			var component = await CommonData.LoadTableDataById<SalaryComponentModel>(PayrollNames.SalaryComponent, id)
 				?? throw new Exception("Transaction not found.");
 
-			if (isRecover) await GroupData.RecoverTransaction(group, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
-			else await GroupData.DeleteTransaction(group, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			if (isRecover) await SalaryComponentData.RecoverTransaction(component, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
+			else await SalaryComponentData.DeleteTransaction(component, _user.Id, FormFactor.GetFormFactor() + FormFactor.GetPlatform());
 
-			await _toastNotification.ShowAsync("Success", $"Transaction {group.Name} has been {(isRecover ? "recovered" : "deleted")} successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", $"Transaction {component.Name} has been {(isRecover ? "recovered" : "deleted")} successfully.", ToastType.Success);
 			ResetPage();
 		}
 		catch (Exception ex)
@@ -199,7 +202,7 @@ public partial class GroupPage
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await GroupExport.ExportMaster(_groups, isExcel ? ReportExportType.Excel : ReportExportType.PDF);
+			var (stream, fileName) = await SalaryComponentExport.ExportMaster(_components, isExcel ? ReportExportType.Excel : ReportExportType.PDF);
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
@@ -231,7 +234,7 @@ public partial class GroupPage
 		}
 	}
 
-	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<GroupModel> args)
+	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<SalaryComponentModel> args)
 	{
 		switch (args.Item.Id)
 		{

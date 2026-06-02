@@ -120,7 +120,6 @@
     <Build Include="Accounts\Masters\Table\FinancialYear.sql" />
     <Build Include="Accounts\Masters\Table\Group.sql" />
     <Build Include="Accounts\Masters\Table\Ledger.sql" />
-    <Build Include="Accounts\Masters\Table\Nature.sql" />
     <Build Include="Accounts\Masters\Table\StateUT.sql" />
     <Build Include="Accounts\Masters\Table\Voucher.sql" />
     <Build Include="Operations\AuditTrail\AuditTrail.sql" />
@@ -187,10 +186,16 @@
     <Build Include="Payroll\Masters\Table\Designation.sql" />
     <Build Include="Payroll\Masters\Table\EmployeeLocation.sql" />
     <Build Include="Payroll\Masters\Table\Employee.sql" />
+    <Build Include="Payroll\Masters\Table\SalaryComponent.sql" />
+    <Build Include="Payroll\Masters\Table\SalaryStructure.sql" />
+    <Build Include="Payroll\Masters\Table\SalaryStructureLine.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_Department.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_Designation.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_EmployeeLocation.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_Employee.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_SalaryComponent.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_SalaryStructure.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_SalaryStructureLine.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

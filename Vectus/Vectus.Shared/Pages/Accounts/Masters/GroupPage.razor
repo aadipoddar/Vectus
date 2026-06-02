@@ -69,13 +69,11 @@ else
 						</div>
 
 						<div class="form-field">
-							<CustomAutoComplete T="NatureModel"
-												Value="_selectedNature"
-												DataSource="@_natures"
+							<CustomAutoComplete T="string"
+												@bind-Value="_group.Nature"
+												DataSource="@AccountNatureOptions.Natures"
 												Placeholder="Select Nature"
-												Label="Nature"
-												ValueChanged="OnNatureChanged"
-												FieldValue="@nameof(NatureModel.Name)" />
+												Label="Nature" />
 						</div>
 
 						<div class="form-field">
@@ -109,21 +107,11 @@ else
 						<GridEvents TValue="GroupModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(GroupModel.Id)" HeaderText="ID" Width="80"
-										TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(GroupModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(GroupModel.Name)" HeaderText="Group Name" Width="250" />
-							<GridColumn HeaderText="Nature" Width="200">
-								<Template>
-									@{
-										var item = (context as GroupModel);
-										var nature = _natures.FirstOrDefault(n => n.Id == item.NatureId);
-										<span>@(nature?.Name ?? "N/A")</span>
-									}
-								</Template>
-							</GridColumn>
+							<GridColumn Field="@nameof(GroupModel.Nature)" HeaderText="Nature" Width="200" />
 							<GridColumn Field="@nameof(GroupModel.Remarks)" HeaderText="Remarks" Width="350" />
-							<GridColumn Field="@nameof(GroupModel.Status)" HeaderText="Status" Width="110"
-										TextAlign="TextAlign.Center" Visible="_showDeleted">
+							<GridColumn Field="@nameof(GroupModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
 								<Template>
 									@{
 										var item = (context as GroupModel);

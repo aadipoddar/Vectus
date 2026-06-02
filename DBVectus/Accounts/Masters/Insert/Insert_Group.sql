@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Group]
 	@Id INT OUTPUT,
 	@Name VARCHAR(250),
-	@NatureId INT,
+	@Nature VARCHAR(50),
 	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
@@ -11,14 +11,14 @@ BEGIN
 		INSERT INTO [dbo].[Group]
 		(
 			[Name],
-			[NatureId],
+			[Nature],
 			[Remarks],
 			[Status]
 		)
 		VALUES
 		(
 			@Name,
-			@NatureId,
+			@Nature,
 			@Remarks,
 			@Status
 		);
@@ -30,7 +30,7 @@ BEGIN
 		UPDATE [dbo].[Group]
 		SET
 			[Name] = @Name,
-			[NatureId] = @NatureId,
+			[Nature] = @Nature,
 			[Remarks] = @Remarks,
 			[Status] = @Status
 		WHERE

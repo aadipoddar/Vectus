@@ -1,0 +1,270 @@
+@using VectusLibrary.Payroll.Masters.Models
+
+@attribute [Route(PageRouteNames.SalaryStructureMaster)]
+
+<PageTitle>Salary Structure Management - Vectus</PageTitle>
+
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyG KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfComponentAutoComplete.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Enter KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="AddItemToCart" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Insert OnHotkeyPressed="EditSelectedItem" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Salary Structure Management">
+			<LeftContent>
+				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
+					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
+					<MenuItems>
+						<MenuItem Text="File" IconCss="e-icons e-folder">
+							<MenuItems>
+								<MenuItem Text="New (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="@(_showDeleted ? "Hide Deleted (Ctrl + Delete)" : "Show Deleted (Ctrl + Delete)")" IconCss="e-icons e-trash" Id="ToggleDeleted" Disabled="@_isProcessing" />
+								<MenuItem Separator="true" />
+								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
+								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Transaction" IconCss="e-icons e-chart">
+							<MenuItems>
+								<MenuItem Text="Edit (Insert)" IconCss="e-icons e-edit" Id="EditSelectedItem" Disabled="@_isProcessing" />
+								<MenuItem Text="Delete / Recover (Del)" IconCss="e-icons e-trash" Id="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+					</MenuItems>
+				</SfMenu>
+			</LeftContent>
+		</Header>
+
+		<div class="page-container">
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+							<polyline points="14 2 14 8 20 8" />
+							<line x1="16" y1="13" x2="8" y2="13" />
+							<line x1="16" y1="17" x2="8" y2="17" />
+						</svg>
+						<h2 class="section-title">Structure Details</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
+						<div class="form-field">
+							<CustomAutoComplete @ref="_sfFirstFocus" T="EmployeeModel"
+												@bind-Value="_selectedEmployee"
+												DataSource="@_employees"
+												Placeholder="Select Employee"
+												Label="Employee (Ctrl + F)"
+												FieldValue="@nameof(EmployeeModel.Name)"
+												AddNewRoute="@PageRouteNames.EmployeeMaster" />
+						</div>
+
+						<div class="form-field">
+							<CustomDatePicker @bind-Value="_structure.EffectiveFrom"
+											  Label="Effective From"
+											  ShowFinancialYear="false"
+											  AddNewRoute="@(null)" />
+						</div>
+
+						<div class="form-field">
+							<CustomNumericField T="decimal?"
+												@bind-Value="_structure.CTC"
+												Label="CTC (Annual)"
+												Placeholder="0.00"
+												Required="false"
+												Min="0" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_structure.Remarks"
+											 Label="Remarks"
+											 Placeholder="Enter Remarks"
+											 Required="false"
+											 Lines="2" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<line x1="12" y1="5" x2="12" y2="19" />
+							<line x1="5" y1="12" x2="19" y2="12" />
+						</svg>
+						<h2 class="section-title">Add Component</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="cart-input-row">
+						<div class="cart-field cart-field-wide">
+							<CustomAutoComplete @ref="_sfComponentAutoComplete" T="SalaryComponentModel"
+												Value="_selectedComponent"
+												DataSource="@_components"
+												Placeholder="Select Component"
+												Label="Component (Ctrl + G)"
+												ValueChanged="OnComponentChanged" OpenOnFocus="false"
+												FieldValue="@nameof(SalaryComponentModel.Name)"
+												AddNewRoute="@PageRouteNames.SalaryComponentMaster" />
+						</div>
+
+						<div class="cart-field">
+							<CustomNumericField T="decimal?"
+												@bind-Value="_selectedCart.Amount"
+												Min="0"
+												Label="Amount"
+												Placeholder="0.00"
+												Required="false" />
+						</div>
+
+						<div class="cart-field">
+							<CustomNumericField T="decimal?"
+												@bind-Value="_selectedCart.OverridePercentage"
+												Min="0"
+												Format="N4"
+												Label="Override %"
+												Placeholder="0"
+												Required="false" />
+						</div>
+
+						<div class="cart-field">
+							<IconButton Icon="IconType.Add" Variant="ButtonVariant.Add" Text="Add" Title="Add Component"
+										OnClick="AddItemToCart" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M3 3h7a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H3V3z" />
+							<path d="M14 3h7v17h-7V3z" />
+						</svg>
+						<h2 class="section-title">Components</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfCartGrid" DataSource="_cart" AllowTextWrap="true" AllowPaging="false"
+							AllowSorting="true" AllowResizing="true" AllowFiltering="true" GridLines="GridLine.Horizontal"
+							CssClass="professional-grid" ContextMenuItems="@_cartGridContextMenuItems">
+						<GridEvents TValue="SalaryStructureLineCartModel" ContextMenuItemClicked="OnCartGridContextMenuItemClicked" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+						<GridAggregates>
+							<GridAggregate>
+								<GridAggregateColumns>
+									<GridAggregateColumn Field="SalaryComponentName" Type="AggregateType.Count">
+										<FooterTemplate>
+											@{
+												var aggregate = (context as AggregateTemplateContext);
+											}
+											<div class="aggregate-label">
+												<strong>Total Components: @aggregate.Count</strong>
+											</div>
+										</FooterTemplate>
+									</GridAggregateColumn>
+									<GridAggregateColumn Field="Amount" Type="AggregateType.Sum">
+										<FooterTemplate>
+											@{
+												var aggregate = (context as AggregateTemplateContext);
+												var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+											}
+											<div class="aggregate-value">
+												<strong>@sum.ToString("N2")</strong>
+											</div>
+										</FooterTemplate>
+									</GridAggregateColumn>
+								</GridAggregateColumns>
+							</GridAggregate>
+						</GridAggregates>
+						<GridColumns>
+							<GridColumn Field="SalaryComponentCode" HeaderText="Code" Width="120" />
+							<GridColumn Field="SalaryComponentName" HeaderText="Component" Width="220" />
+							<GridColumn Field="ComponentType" HeaderText="Type" Width="120" TextAlign="TextAlign.Center" />
+							<GridColumn Field="CalculationType" HeaderText="Calculation" Width="150" />
+							<GridColumn Field="Amount" HeaderText="Amount" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+							<GridColumn Field="OverridePercentage" HeaderText="Override %" Width="130" TextAlign="TextAlign.Right" Format="N4" />
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M9 11l3 3L22 4" />
+							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+						</svg>
+						<h2 class="section-title">Salary Structures List</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfGrid" DataSource="@_structures" AllowPaging="true" AllowSorting="true"
+							AllowFiltering="true" AllowResizing="true" CssClass="professional-grid"
+							Toolbar="@(new List<string>() { "Search" })" ContextMenuItems="@_gridContextMenuItems">
+						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
+						<GridEvents TValue="SalaryStructureModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(SalaryStructureModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(SalaryStructureModel.EmployeeId)" HeaderText="Employee" Width="240">
+								<Template>
+									@{
+										var item = (context as SalaryStructureModel);
+										<span>@(_employees.FirstOrDefault(e => e.Id == item.EmployeeId)?.Name ?? "N/A")</span>
+									}
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(SalaryStructureModel.EffectiveFrom)" HeaderText="Effective From" Width="150" Format="dd-MM-yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(SalaryStructureModel.CTC)" HeaderText="CTC (Annual)" Width="150" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(SalaryStructureModel.Remarks)" HeaderText="Remarks" Width="280" />
+							<GridColumn Field="@nameof(SalaryStructureModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+								<Template>
+									@{
+										var item = (context as SalaryStructureModel);
+										<span class="@(item.Status ? string.Empty : "grid-debit")">@(item.Status ? "Active" : "Deleted")</span>
+									}
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<ConfirmationDialog @ref="_confirmationDialog" Title="@_confirmTitle" Message="@_confirmMessage"
+					OnConfirm="OnConfirmed" OnCancel="OnCancelled" />
+
+<ToastNotification @ref="_toastNotification" />
+
+<NavigationLock ConfirmExternalNavigation="@_isProcessing" />

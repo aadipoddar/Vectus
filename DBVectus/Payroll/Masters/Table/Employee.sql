@@ -24,7 +24,12 @@ CREATE TABLE [dbo].[Employee]
     [ContributeOnHigherPFWage] BIT NOT NULL DEFAULT 0,
     [ESICoveredUpto] DATE NULL,
     [Phone] VARCHAR(10) NULL,
-    [Email] VARCHAR(250) NULL,
+    [PersonalEmail] VARCHAR(250) NULL,
+    [WorkEmail] VARCHAR(250) NULL,
     [Address] VARCHAR(MAX) NULL,
+    [Remarks] VARCHAR(MAX) NULL,
     [Status] BIT NOT NULL DEFAULT 1,
+    CONSTRAINT [FK_Employee_ToDepartment] FOREIGN KEY ([DepartmentId]) REFERENCES [Department]([Id]),
+    CONSTRAINT [FK_Employee_ToDesignation] FOREIGN KEY ([DesignationId]) REFERENCES [Designation]([Id]),
+    CONSTRAINT [FK_Employee_ToEmployeeLocation] FOREIGN KEY ([EmployeeLocationId]) REFERENCES [EmployeeLocation]([Id])
 )
