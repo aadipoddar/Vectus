@@ -86,6 +86,9 @@ public static class PayrollNames
 	public static string SalaryComponent => "SalaryComponent";
 	public static string SalaryStructure => "SalaryStructure";
 	public static string SalaryStructureLine => "SalaryStructureLine";
+	public static string StatutoryRule => "StatutoryRule";
+	public static string StatutoryRate => "StatutoryRate";
+	public static string StatutorySlab => "StatutorySlab";
 
 	public static string InsertDepartment => "Insert_Department";
 	public static string InsertDesignation => "Insert_Designation";
@@ -94,6 +97,9 @@ public static class PayrollNames
 	public static string InsertSalaryComponent => "Insert_SalaryComponent";
 	public static string InsertSalaryStructure => "Insert_SalaryStructure";
 	public static string InsertSalaryStructureLine => "Insert_SalaryStructureLine";
+	public static string InsertStatutoryRule => "Insert_StatutoryRule";
+	public static string InsertStatutoryRate => "Insert_StatutoryRate";
+	public static string InsertStatutorySlab => "Insert_StatutorySlab";
 	#endregion
 }
 

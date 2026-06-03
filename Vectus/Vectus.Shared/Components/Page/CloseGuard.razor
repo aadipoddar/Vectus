@@ -1,0 +1,11 @@
+@implements IDisposable
+
+<NavigationLock ConfirmExternalNavigation="Block" />
+
+@code {
+	[Parameter] public bool Block { get; set; }
+	[Parameter] public string Message { get; set; } = "A task is still running. Close anyway?";
+
+	protected override void OnParametersSet() => WindowCloseGuard.Set(this, Block, Message);
+	public void Dispose() => WindowCloseGuard.Clear(this);
+}

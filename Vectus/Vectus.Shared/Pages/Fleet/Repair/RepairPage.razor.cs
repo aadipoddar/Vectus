@@ -526,8 +526,11 @@ public partial class RepairPage
 				await SaveAndViewService.SaveAndView(excelFileName, excelStream);
 			}
 
-			await ResetPage();
 			await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully.", ToastType.Success);
+
+			if (Id.HasValue && Id.Value > 0)
+				await AuthenticationService.CloseWindowOrTab(FormFactor, JSRuntime);
+			await ResetPage();
 		}
 		catch (Exception ex)
 		{

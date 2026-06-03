@@ -231,7 +231,10 @@ public partial class TripRequestPage
 
 			await TripRequestData.SaveTransaction(_tripRequest);
 
-			await _toastNotification.ShowAsync("Success", $"Trip Request transaction '{_tripRequest.TransactionNo}' has been saved successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully.", ToastType.Success);
+
+			if (Id.HasValue && Id.Value > 0)
+				await AuthenticationService.CloseWindowOrTab(FormFactor, JSRuntime);
 			ResetPage();
 		}
 		catch (Exception ex)

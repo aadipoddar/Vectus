@@ -438,7 +438,7 @@ else
 
 <ToastNotification @ref="_toastNotification" />
 
-<NavigationLock ConfirmExternalNavigation="@_isProcessing" />
+<CloseGuard Block="_isProcessing" />
 
 <style>
 	.dual-grid-container {

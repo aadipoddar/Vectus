@@ -189,6 +189,9 @@
     <Build Include="Payroll\Masters\Table\SalaryComponent.sql" />
     <Build Include="Payroll\Masters\Table\SalaryStructure.sql" />
     <Build Include="Payroll\Masters\Table\SalaryStructureLine.sql" />
+    <Build Include="Payroll\Masters\Table\StatutoryRule.sql" />
+    <Build Include="Payroll\Masters\Table\StatutoryRate.sql" />
+    <Build Include="Payroll\Masters\Table\StatutorySlab.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_Department.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_Designation.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_EmployeeLocation.sql" />
@@ -196,6 +199,9 @@
     <Build Include="Payroll\Masters\Insert\Insert_SalaryComponent.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_SalaryStructure.sql" />
     <Build Include="Payroll\Masters\Insert\Insert_SalaryStructureLine.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_StatutoryRule.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_StatutoryRate.sql" />
+    <Build Include="Payroll\Masters\Insert\Insert_StatutorySlab.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureVectus.publish.xml" />

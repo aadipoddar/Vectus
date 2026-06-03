@@ -64,4 +64,13 @@ public static class AuthenticationService
 		else
 			NavigationManager.NavigateTo(route);
 	}
+
+	public static Func<bool> CloseCurrentWindow { get; set; }
+	public static async Task CloseWindowOrTab(IFormFactor FormFactor, IJSRuntime JSRuntime)
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("window.close");
+		else
+			CloseCurrentWindow?.Invoke();
+	}
 }

@@ -43,6 +43,10 @@ public static class MauiProgram
 			.AddMudServices()
 			.AddMauiBlazorWebView();
 
+#if WINDOWS
+		builder.UseWindowCloseGuard();
+#endif
+
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
 		builder.Logging.AddDebug();

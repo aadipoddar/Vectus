@@ -27,12 +27,12 @@ public partial class SettingsPage
 
 	// Login Settings
 	private bool _enableLoginWithCode = true;
-	private int _maxLoginAttempts = 5;
 	private bool _enableUsersToResetPassword = true;
+	private int _maxLoginAttempts = 5;
 	private int _codeResendLimit = 3;
 	private int _codeExpiryMinutes = 10;
 
-	// Code Prefixes
+	// Master Code Prefixes
 	private string _ledgerCodePrefix = string.Empty;
 	private string _employeeCodePrefix = string.Empty;
 	private string _sdrCodePrefix = string.Empty;
@@ -66,14 +66,14 @@ public partial class SettingsPage
 	private VoucherModel _selectedDefaultVoucher;
 	private List<VoucherModel> _vouchers = [];
 
+	// Fuel & Mileage
+	private decimal _truckMileageKmPerLitre = 0;
+	private decimal _dieselPricePerLitre = 0;
+
 	// Report Settings
 	private int _autoRefreshReportTimer = 5;
 	private int _reportWarningDays = 30;
 	private int _analysisCacheHours = 12;
-
-	// Fuel & Mileage
-	private decimal _truckMileageKmPerLitre = 0;
-	private decimal _dieselPricePerLitre = 0;
 
 	#endregion
 
@@ -113,89 +113,59 @@ public partial class SettingsPage
 
 	private async Task LoadAllSettings()
 	{
-		var s = await SettingsData.LoadSettingsByKey(SettingsKeys.EnableLoginWithCode);
-		_enableLoginWithCode = !bool.TryParse(s?.Value, out var v1) || v1;
+		var map = (await CommonData.LoadTableData<SettingsModel>(OperationNames.Settings) ?? [])
+			.ToDictionary(s => s.Key, s => s.Value);
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.MaxLoginAttempts);
-		_maxLoginAttempts = int.TryParse(s?.Value, out var v2) ? v2 : 5;
+		string Str(string key) => map.TryGetValue(key, out var v) ? v : null;
+		int Int(string key, int fallback) => int.TryParse(Str(key), out var v) ? v : fallback;
+		bool Bool(string key, bool fallback) => bool.TryParse(Str(key), out var v) ? v : fallback;
+		decimal Dec(string key, decimal fallback) => decimal.TryParse(Str(key), out var v) ? v : fallback;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.EnableUsersToResetPassword);
-		_enableUsersToResetPassword = !bool.TryParse(s?.Value, out var v3) || v3;
+		// Primary Configuration
+		_primaryCompanyLinkingId = Str(SettingsKeys.PrimaryCompanyLinkingId) ?? string.Empty;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.CodeResendLimit);
-		_codeResendLimit = int.TryParse(s?.Value, out var v4) ? v4 : 3;
+		// Login Settings
+		_enableLoginWithCode = Bool(SettingsKeys.EnableLoginWithCode, true);
+		_enableUsersToResetPassword = Bool(SettingsKeys.EnableUsersToResetPassword, true);
+		_maxLoginAttempts = Int(SettingsKeys.MaxLoginAttempts, 5);
+		_codeResendLimit = Int(SettingsKeys.CodeResendLimit, 3);
+		_codeExpiryMinutes = Int(SettingsKeys.CodeExpiryMinutes, 10);
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.CodeExpiryMinutes);
-		_codeExpiryMinutes = int.TryParse(s?.Value, out var v5) ? v5 : 10;
+		// Master Code Prefixes
+		_ledgerCodePrefix = Str(SettingsKeys.LedgerCodePrefix) ?? string.Empty;
+		_employeeCodePrefix = Str(SettingsKeys.EmployeeCodePrefix) ?? string.Empty;
+		_sdrCodePrefix = Str(SettingsKeys.SDRCodePrefix) ?? string.Empty;
+		_vehicleTypeCodePrefix = Str(SettingsKeys.VehicleTypeCodePrefix) ?? string.Empty;
+		_documentTypeCodePrefix = Str(SettingsKeys.DocumentTypeCodePrefix) ?? string.Empty;
+		_driverCodePrefix = Str(SettingsKeys.DriverCodePrefix) ?? string.Empty;
+		_locationCodePrefix = Str(SettingsKeys.LocationCodePrefix) ?? string.Empty;
+		_routeCodePrefix = Str(SettingsKeys.RouteCodePrefix) ?? string.Empty;
+		_garageCodePrefix = Str(SettingsKeys.GarageCodePrefix) ?? string.Empty;
+		_tyreCompanyCodePrefix = Str(SettingsKeys.TyreCompanyCodePrefix) ?? string.Empty;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.LedgerCodePrefix);
-		_ledgerCodePrefix = s?.Value ?? string.Empty;
+		// Transaction Prefixes
+		_financialAccountingTransactionPrefix = Str(SettingsKeys.FinancialAccountingTransactionPrefix) ?? string.Empty;
+		_tripRequestTransactionPrefix = Str(SettingsKeys.TripRequestTransactionPrefix) ?? string.Empty;
+		_repairTransactionPrefix = Str(SettingsKeys.RepairTransactionPrefix) ?? string.Empty;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.EmployeeCodePrefix);
-		_employeeCodePrefix = s?.Value ?? string.Empty;
+		// Ledger Linking
+		_cashLedgerId = Str(SettingsKeys.CashLedgerId) ?? string.Empty;
+		_gstLedgerId = Str(SettingsKeys.GSTLedgerId) ?? string.Empty;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.SDRCodePrefix);
-		_sdrCodePrefix = s?.Value ?? string.Empty;
+		// Bank Reconciliation
+		_bankAccountTypeId = Str(SettingsKeys.BankAccountTypeId) ?? string.Empty;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.VehicleTypeCodePrefix);
-		_vehicleTypeCodePrefix = s?.Value ?? string.Empty;
+		// Default Values
+		_defaultSelectedVoucherId = Str(SettingsKeys.DefaultSelectedVoucherId) ?? string.Empty;
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.DocumentTypeCodePrefix);
-		_documentTypeCodePrefix = s?.Value ?? string.Empty;
+		// Fuel & Mileage
+		_truckMileageKmPerLitre = Dec(SettingsKeys.TruckMileageKmPerLitre, 0);
+		_dieselPricePerLitre = Dec(SettingsKeys.DieselPricePerLitre, 0);
 
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.DriverCodePrefix);
-		_driverCodePrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.LocationCodePrefix);
-		_locationCodePrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.RouteCodePrefix);
-		_routeCodePrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.GarageCodePrefix);
-		_garageCodePrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.TyreCompanyCodePrefix);
-		_tyreCompanyCodePrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.FinancialAccountingTransactionPrefix);
-		_financialAccountingTransactionPrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.TripRequestTransactionPrefix);
-		_tripRequestTransactionPrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.RepairTransactionPrefix);
-		_repairTransactionPrefix = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.PrimaryCompanyLinkingId);
-		_primaryCompanyLinkingId = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId);
-		_cashLedgerId = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
-		_gstLedgerId = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.BankAccountTypeId);
-		_bankAccountTypeId = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.DefaultSelectedVoucherId);
-		_defaultSelectedVoucherId = s?.Value ?? string.Empty;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
-		_autoRefreshReportTimer = int.TryParse(s?.Value, out var v6) ? v6 : 5;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.ReportWarningDays);
-		_reportWarningDays = int.TryParse(s?.Value, out var vrw) ? vrw : 30;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.AnalysisCacheHours);
-		_analysisCacheHours = int.TryParse(s?.Value, out var vac) ? vac : 12;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.TruckMileageKmPerLitre);
-		_truckMileageKmPerLitre = decimal.TryParse(s?.Value, out var v7) ? v7 : 0;
-
-		s = await SettingsData.LoadSettingsByKey(SettingsKeys.DieselPricePerLitre);
-		_dieselPricePerLitre = decimal.TryParse(s?.Value, out var v8) ? v8 : 0;
+		// Report Settings
+		_autoRefreshReportTimer = Int(SettingsKeys.AutoRefreshReportTimer, 5);
+		_reportWarningDays = Int(SettingsKeys.ReportWarningDays, 30);
+		_analysisCacheHours = Int(SettingsKeys.AnalysisCacheHours, 12);
 	}
 
 	private async Task LoadCompanies()
@@ -298,12 +268,17 @@ public partial class SettingsPage
 			var settings = await CommonData.LoadTableData<SettingsModel>(OperationNames.Settings);
 			string Desc(string key) => settings.FirstOrDefault(s => s.Key == key)?.Description ?? string.Empty;
 
+			// Primary Configuration
+			await UpdateSetting(SettingsKeys.PrimaryCompanyLinkingId, _primaryCompanyLinkingId, Desc(SettingsKeys.PrimaryCompanyLinkingId));
+
+			// Login Settings
 			await UpdateSetting(SettingsKeys.EnableLoginWithCode, _enableLoginWithCode.ToString().ToLower(), Desc(SettingsKeys.EnableLoginWithCode));
-			await UpdateSetting(SettingsKeys.MaxLoginAttempts, _maxLoginAttempts.ToString(), Desc(SettingsKeys.MaxLoginAttempts));
 			await UpdateSetting(SettingsKeys.EnableUsersToResetPassword, _enableUsersToResetPassword.ToString().ToLower(), Desc(SettingsKeys.EnableUsersToResetPassword));
+			await UpdateSetting(SettingsKeys.MaxLoginAttempts, _maxLoginAttempts.ToString(), Desc(SettingsKeys.MaxLoginAttempts));
 			await UpdateSetting(SettingsKeys.CodeResendLimit, _codeResendLimit.ToString(), Desc(SettingsKeys.CodeResendLimit));
 			await UpdateSetting(SettingsKeys.CodeExpiryMinutes, _codeExpiryMinutes.ToString(), Desc(SettingsKeys.CodeExpiryMinutes));
 
+			// Master Code Prefixes
 			await UpdateSetting(SettingsKeys.LedgerCodePrefix, _ledgerCodePrefix, Desc(SettingsKeys.LedgerCodePrefix));
 			await UpdateSetting(SettingsKeys.EmployeeCodePrefix, _employeeCodePrefix, Desc(SettingsKeys.EmployeeCodePrefix));
 			await UpdateSetting(SettingsKeys.SDRCodePrefix, _sdrCodePrefix, Desc(SettingsKeys.SDRCodePrefix));
@@ -315,21 +290,29 @@ public partial class SettingsPage
 			await UpdateSetting(SettingsKeys.GarageCodePrefix, _garageCodePrefix, Desc(SettingsKeys.GarageCodePrefix));
 			await UpdateSetting(SettingsKeys.TyreCompanyCodePrefix, _tyreCompanyCodePrefix, Desc(SettingsKeys.TyreCompanyCodePrefix));
 
+			// Transaction Prefixes
 			await UpdateSetting(SettingsKeys.FinancialAccountingTransactionPrefix, _financialAccountingTransactionPrefix, Desc(SettingsKeys.FinancialAccountingTransactionPrefix));
 			await UpdateSetting(SettingsKeys.TripRequestTransactionPrefix, _tripRequestTransactionPrefix, Desc(SettingsKeys.TripRequestTransactionPrefix));
 			await UpdateSetting(SettingsKeys.RepairTransactionPrefix, _repairTransactionPrefix, Desc(SettingsKeys.RepairTransactionPrefix));
 
-			await UpdateSetting(SettingsKeys.PrimaryCompanyLinkingId, _primaryCompanyLinkingId, Desc(SettingsKeys.PrimaryCompanyLinkingId));
+			// Ledger Linking
 			await UpdateSetting(SettingsKeys.CashLedgerId, _cashLedgerId, Desc(SettingsKeys.CashLedgerId));
 			await UpdateSetting(SettingsKeys.GSTLedgerId, _gstLedgerId, Desc(SettingsKeys.GSTLedgerId));
+
+			// Bank Reconciliation
 			await UpdateSetting(SettingsKeys.BankAccountTypeId, _bankAccountTypeId, Desc(SettingsKeys.BankAccountTypeId));
+
+			// Default Values
 			await UpdateSetting(SettingsKeys.DefaultSelectedVoucherId, _defaultSelectedVoucherId, Desc(SettingsKeys.DefaultSelectedVoucherId));
+
+			// Fuel & Mileage
+			await UpdateSetting(SettingsKeys.TruckMileageKmPerLitre, _truckMileageKmPerLitre.ToString(), Desc(SettingsKeys.TruckMileageKmPerLitre));
+			await UpdateSetting(SettingsKeys.DieselPricePerLitre, _dieselPricePerLitre.ToString(), Desc(SettingsKeys.DieselPricePerLitre));
+
+			// Report Settings
 			await UpdateSetting(SettingsKeys.AutoRefreshReportTimer, _autoRefreshReportTimer.ToString(), Desc(SettingsKeys.AutoRefreshReportTimer));
 			await UpdateSetting(SettingsKeys.ReportWarningDays, _reportWarningDays.ToString(), Desc(SettingsKeys.ReportWarningDays));
 			await UpdateSetting(SettingsKeys.AnalysisCacheHours, _analysisCacheHours.ToString(), Desc(SettingsKeys.AnalysisCacheHours));
-
-			await UpdateSetting(SettingsKeys.TruckMileageKmPerLitre, _truckMileageKmPerLitre.ToString(), Desc(SettingsKeys.TruckMileageKmPerLitre));
-			await UpdateSetting(SettingsKeys.DieselPricePerLitre, _dieselPricePerLitre.ToString(), Desc(SettingsKeys.DieselPricePerLitre));
 
 			await _toastNotification.ShowAsync("Saved", "Settings saved successfully.", ToastType.Success);
 		}
@@ -422,5 +405,6 @@ public partial class SettingsPage
 				break;
 		}
 	}
+
 	#endregion
 }

@@ -252,4 +252,4 @@ else
 
 <ToastNotification @ref="_toastNotification" />
 
-<NavigationLock ConfirmExternalNavigation="@(_isProcessing || _dirtyLineIds.Count > 0)" />
+<CloseGuard Block="@(_isProcessing || _dirtyLineIds.Count > 0)" />

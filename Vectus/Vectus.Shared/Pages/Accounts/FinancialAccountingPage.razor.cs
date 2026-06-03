@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
+using Syncfusion.Blazor.Grids;
+
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
@@ -11,8 +13,6 @@ using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
-
-using Syncfusion.Blazor.Grids;
 
 namespace Vectus.Shared.Pages.Accounts;
 
@@ -632,8 +632,11 @@ public partial class FinancialAccountingPage
 				await SaveAndViewService.SaveAndView(excelFileName, excelStream);
 			}
 
-			await ResetPage();
 			await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully.", ToastType.Success);
+
+			if (Id.HasValue && Id.Value > 0)
+				await AuthenticationService.CloseWindowOrTab(FormFactor, JSRuntime);
+			await ResetPage();
 		}
 		catch (Exception ex)
 		{

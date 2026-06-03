@@ -1,0 +1,323 @@
+@using VectusLibrary.Accounts.Masters.Models
+@using VectusLibrary.Payroll.Masters.Models
+
+@attribute [Route(PageRouteNames.StatutoryRuleMaster)]
+
+<PageTitle>Statutory Rule Management - Vectus</PageTitle>
+
+<MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Enter KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="AddRateToCart" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyE KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster(true)" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyP KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => ExportMaster()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ToggleDeleted" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Insert OnHotkeyPressed="EditSelectedItem" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+
+@if (_isLoading || _user is null)
+{
+	<LoadingScreen />
+}
+else
+{
+	<div class="page-shell">
+		<Header Title="Statutory Rule Management">
+			<LeftContent>
+				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
+					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
+					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
+					<MenuItems>
+						<MenuItem Text="File" IconCss="e-icons e-folder">
+							<MenuItems>
+								<MenuItem Text="New (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveTransaction" Disabled="@_isProcessing" />
+								<MenuItem Text="@(_showDeleted ? "Hide Deleted (Ctrl + Delete)" : "Show Deleted (Ctrl + Delete)")" IconCss="e-icons e-trash" Id="ToggleDeleted" Disabled="@_isProcessing" />
+								<MenuItem Separator="true" />
+								<MenuItem Text="Export Excel (Ctrl + E)" IconCss="e-icons e-export-excel" Id="ExportExcel" Disabled="@_isProcessing" />
+								<MenuItem Text="Export PDF (Ctrl + P)" IconCss="e-icons e-export-pdf" Id="ExportPdf" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+						<MenuItem Text="Transaction" IconCss="e-icons e-chart">
+							<MenuItems>
+								<MenuItem Text="Edit (Insert)" IconCss="e-icons e-edit" Id="EditSelectedItem" Disabled="@_isProcessing" />
+								<MenuItem Text="Delete / Recover (Del)" IconCss="e-icons e-trash" Id="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+							</MenuItems>
+						</MenuItem>
+					</MenuItems>
+				</SfMenu>
+			</LeftContent>
+		</Header>
+
+		<div class="page-container">
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+						</svg>
+						<h2 class="section-title">Rule Details</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
+						<div class="form-field">
+							<CustomTextField @ref="_sfFirstFocus"
+											 @bind-Value="_rule.Code"
+											 Label="Code (Ctrl + F)"
+											 Placeholder="e.g. PF-EE, ESI, PT, TDS"
+											 MaxLength="20" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_rule.Name"
+											 Label="Name"
+											 Placeholder="Enter Rule Name" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="string"
+												@bind-Value="_rule.RoundingMode"
+												DataSource="@StatutoryRuleOptions.RoundingModes"
+												Placeholder="Select Rounding Mode"
+												Label="Rounding Mode" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="string"
+												@bind-Value="_rule.ContributionAccount"
+												DataSource="@StatutoryRuleOptions.ContributionAccounts"
+												Placeholder="e.g. A/c 1 (PF only)"
+												Label="ECR Contribution A/c"
+												Required="false" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="LedgerModel"
+												@bind-Value="_selectedLedger"
+												DataSource="@_ledgers"
+												Placeholder="Select Posting Ledger"
+												Label="Posting Ledger"
+												Required="false"
+												FieldValue="@nameof(LedgerModel.Name)"
+												AddNewRoute="@PageRouteNames.LedgerMaster" />
+						</div>
+
+						<div class="form-field">
+							<CustomAutoComplete T="StateUTModel"
+												@bind-Value="_selectedStateUT"
+												DataSource="@_stateUTs"
+												Placeholder="Select State/UT (PT only)"
+												Label="State/UT"
+												Required="false"
+												FieldValue="@nameof(StateUTModel.Name)"
+												AddNewRoute="@PageRouteNames.StateUTMaster" />
+						</div>
+
+						<div class="form-field">
+							<CustomTextField @bind-Value="_rule.Remarks"
+											 Label="Remarks"
+											 Placeholder="Enter Remarks"
+											 Required="false"
+											 Lines="2" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+							<line x1="16" y1="2" x2="16" y2="6" />
+							<line x1="8" y1="2" x2="8" y2="6" />
+							<line x1="3" y1="10" x2="21" y2="10" />
+						</svg>
+						<h2 class="section-title">Add Rate (Effective-Dated)</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="cart-input-row">
+						<div class="cart-field">
+							<CustomDatePicker @bind-Value="_rateInput.EffectiveFrom"
+											  Label="Effective From"
+											  ShowFinancialYear="false"
+											  AddNewRoute="@(null)" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.EmployeeRate" Label="Employee Rate" Placeholder="e.g. 12" Format="N4" Required="false" Min="0" AdornmentText="%" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.EmployerRate" Label="Employer Rate" Placeholder="e.g. 13" Format="N4" Required="false" Min="0" AdornmentText="%" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.WageCeiling" Label="Wage Ceiling" Placeholder="e.g. 15000" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.MaxAmount" Label="Max Amount" Placeholder="e.g. 1250" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.MinAmount" Label="Min Amount" Placeholder="e.g. 500" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.MinBasePercentOfGross" Label="Min Base % of Gross" Placeholder="e.g. 50" Format="N4" Required="false" Min="0" AdornmentText="%" />
+						</div>
+					</div>
+
+					<div class="cart-input-row">
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.StandardDeduction" Label="Std Deduction (TDS)" Placeholder="e.g. 75000" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.RebateAmount" Label="Rebate Amount (TDS)" Placeholder="e.g. 60000" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.RebateIncomeLimit" Label="Rebate Income Limit (TDS)" Placeholder="e.g. 1200000" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_rateInput.CessPercent" Label="Cess % (TDS)" Placeholder="e.g. 4" Format="N4" Required="false" Min="0" AdornmentText="%" />
+						</div>
+						<div class="cart-field">
+							<IconButton Icon="IconType.Add" Variant="ButtonVariant.Add" Text="Add Rate" Title="Add Effective-Dated Rate (Ctrl + Enter)" OnClick="AddRateToCart" />
+						</div>
+					</div>
+
+					<hr class="form-divider" />
+
+					<span class="field-label">Slab Bands — applies to PT / TDS rates only (optional)</span>
+
+					<div class="cart-input-row">
+						<div class="cart-field">
+							<CustomNumericField T="decimal" @bind-Value="_slabInput.FromAmount" Label="From Amount" Placeholder="0.00" Format="N2" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_slabInput.ToAmount" Label="To Amount" Placeholder="blank = no limit" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_slabInput.FixedAmount" Label="Fixed Amount" Placeholder="e.g. 130" Format="N2" Required="false" Min="0" />
+						</div>
+						<div class="cart-field">
+							<CustomNumericField T="decimal?" @bind-Value="_slabInput.Rate" Label="Rate" Placeholder="e.g. 5" Format="N4" Required="false" Min="0" AdornmentText="%" />
+						</div>
+						<div class="cart-field">
+							<IconButton Icon="IconType.Add" Variant="ButtonVariant.Add" Text="Add Band" Title="Add Slab Band" OnClick="AddSlabToCart" />
+						</div>
+					</div>
+
+					@if (_slabs.Count > 0)
+					{
+						<div class="grid-body">
+							<SfGrid @ref="_sfSlabGrid" DataSource="_slabs" AllowPaging="false" AllowSorting="true" AllowResizing="true"
+									GridLines="GridLine.Horizontal" CssClass="professional-grid" ContextMenuItems="@_slabGridContextMenuItems">
+								<GridEvents TValue="StatutorySlabCartModel" ContextMenuItemClicked="OnSlabGridContextMenuItemClicked" />
+								<GridColumns>
+									<GridColumn Field="@nameof(StatutorySlabCartModel.FromAmount)" HeaderText="From" Width="140" Format="N2" TextAlign="TextAlign.Right" />
+									<GridColumn Field="@nameof(StatutorySlabCartModel.ToAmount)" HeaderText="To" Width="140" Format="N2" TextAlign="TextAlign.Right" />
+									<GridColumn Field="@nameof(StatutorySlabCartModel.FixedAmount)" HeaderText="Fixed Amount" Width="150" Format="N2" TextAlign="TextAlign.Right" />
+									<GridColumn Field="@nameof(StatutorySlabCartModel.Rate)" HeaderText="Rate %" Width="130" Format="N4" TextAlign="TextAlign.Right" />
+								</GridColumns>
+							</SfGrid>
+						</div>
+					}
+				</div>
+			</div>
+
+			<div class="two-column-layout-equal">
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M3 3h7a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H3V3z" />
+							<path d="M14 3h7v17h-7V3z" />
+						</svg>
+						<h2 class="section-title">Effective-Dated Rates</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfRateGrid" DataSource="_rateCart" AllowTextWrap="true" AllowPaging="false"
+							AllowSorting="true" AllowResizing="true" GridLines="GridLine.Horizontal"
+							CssClass="professional-grid" ContextMenuItems="@_rateGridContextMenuItems">
+						<GridEvents TValue="StatutoryRateCartModel" ContextMenuItemClicked="OnRateGridContextMenuItemClicked" />
+						<GridColumns>
+							<GridColumn Field="@nameof(StatutoryRateCartModel.EffectiveFrom)" HeaderText="Effective From" Width="140" Format="dd-MM-yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.EmployeeRate)" HeaderText="Emp %" Width="110" Format="N4" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.EmployerRate)" HeaderText="Empr %" Width="110" Format="N4" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.WageCeiling)" HeaderText="Ceiling" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.MaxAmount)" HeaderText="Max" Width="110" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.MinAmount)" HeaderText="Min" Width="110" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.MinBasePercentOfGross)" HeaderText="Min Base %" Width="120" Format="N4" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.StandardDeduction)" HeaderText="Std Ded" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.RebateAmount)" HeaderText="Rebate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.RebateIncomeLimit)" HeaderText="Rebate Limit" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(StatutoryRateCartModel.CessPercent)" HeaderText="Cess %" Width="110" Format="N4" TextAlign="TextAlign.Right" />
+							<GridColumn HeaderText="Bands" Width="90" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var item = (context as StatutoryRateCartModel);
+										<span>@(item.Slabs.Count)</span>
+									}
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+							 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							 stroke-linejoin="round">
+							<path d="M9 11l3 3L22 4" />
+							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+						</svg>
+						<h2 class="section-title">Statutory Rules List</h2>
+					</div>
+				</div>
+				<div class="section-body grid-body">
+					<SfGrid @ref="_sfGrid" DataSource="@_rules" AllowPaging="true" AllowSorting="true"
+							AllowFiltering="true" AllowResizing="true" CssClass="professional-grid"
+							Toolbar="@(new List<string>() { "Search" })" ContextMenuItems="@_gridContextMenuItems">
+						<GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
+						<GridEvents TValue="StatutoryRuleModel" ContextMenuItemClicked="OnGridContextMenuItemClicked" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(StatutoryRuleModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(StatutoryRuleModel.Code)" HeaderText="Code" Width="130" />
+							<GridColumn Field="@nameof(StatutoryRuleModel.Name)" HeaderText="Rule Name" Width="240" />
+							<GridColumn Field="@nameof(StatutoryRuleModel.ContributionAccount)" HeaderText="ECR A/c" Width="120" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(StatutoryRuleModel.RoundingMode)" HeaderText="Rounding" Width="120" TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(StatutoryRuleModel.Remarks)" HeaderText="Remarks" Width="240" />
+							<GridColumn Field="@nameof(StatutoryRuleModel.Status)" HeaderText="Status" Width="110" TextAlign="TextAlign.Center" Visible="_showDeleted">
+								<Template>
+									@{
+										var item = (context as StatutoryRuleModel);
+										<span class="@(item.Status ? string.Empty : "grid-debit")">@(item.Status ? "Active" : "Deleted")</span>
+									}
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+			</div>
+		</div>
+
+		<Footer />
+	</div>
+}
+
+<ConfirmationDialog @ref="_confirmationDialog" Title="@_confirmTitle" Message="@_confirmMessage"
+					OnConfirm="OnConfirmed" OnCancel="OnCancelled" />
+
+<ToastNotification @ref="_toastNotification" />
+
+<CloseGuard Block="_isProcessing" />
