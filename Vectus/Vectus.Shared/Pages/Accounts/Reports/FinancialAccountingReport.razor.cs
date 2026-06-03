@@ -322,37 +322,6 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccounting, FormFactor, JSRuntime, NavigationManager); break;
-			case "Refresh": await LoadTransactionOverviews(); break;
-			case "ToggleDeleted": await ToggleDeleted(); break;
-			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportReport(); break;
-			case "ExportExcel": await ExportReport(true); break;
-			case "ViewSelected": await ViewSelectedTransaction(); break;
-			case "DownloadSelectedPdf": await ExportSelectedTransaction(); break;
-			case "DownloadSelectedExcel": await ExportSelectedTransaction(true); break;
-			case "DeleteRecoverSelected": await DeleteRecoverSelectedTransaction(); break;
-			case "LedgerReport": await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "TrialBalance": await AuthenticationService.NavigateToRoute(PageRouteNames.TrialBalanceReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "ProfitLoss": await AuthenticationService.NavigateToRoute(PageRouteNames.ProfitAndLossReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "BalanceSheet": await AuthenticationService.NavigateToRoute(PageRouteNames.BalanceSheetReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "PeriodToday": await HandleDatesChanged(DateRangeType.Today); break;
-			case "PeriodPreviousDay": await HandleDatesChanged(DateRangeType.Yesterday); break;
-			case "PeriodNextDay": await HandleDatesChanged(DateRangeType.NextDay); break;
-			case "PeriodCurrentMonth": await HandleDatesChanged(DateRangeType.CurrentMonth); break;
-			case "PeriodPreviousMonth": await HandleDatesChanged(DateRangeType.PreviousMonth); break;
-			case "PeriodNextMonth": await HandleDatesChanged(DateRangeType.NextMonth); break;
-			case "PeriodCurrentFinancialYear": await HandleDatesChanged(DateRangeType.CurrentFinancialYear); break;
-			case "PeriodPreviousFinancialYear": await HandleDatesChanged(DateRangeType.PreviousFinancialYear); break;
-			case "PeriodNextFinancialYear": await HandleDatesChanged(DateRangeType.NextFinancialYear); break;
-			case "PeriodAllTime": await HandleDatesChanged(DateRangeType.AllTime); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<FinancialAccountingOverviewModel> args)
 	{
 		switch (args.Item.Id)

@@ -20,25 +20,16 @@
 else
 {
 	<div class="page-shell">
-		<Header Title="Trip Request Entry">
+		<Header Title="@(_tripRequest.Id > 0 ? $"Edit Trip Request {_tripRequest.TransactionNo}" : "Create Trip Request")">
 			<LeftContent>
-				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
-					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
-					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
-					<MenuItems>
-						<MenuItem Text="File" IconCss="e-icons e-folder">
-							<MenuItems>
-								<MenuItem Text="New Transaction (Ctrl + N)" IconCss="e-icons e-plus" Id="NewTransaction" Disabled="@_isProcessing" />
-								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveTransaction" Disabled="@_isProcessing" />
-							</MenuItems>
-						</MenuItem>
-						<MenuItem Text="Open" IconCss="e-icons e-folder-open">
-							<MenuItems>
-								<MenuItem Text="Trip Request Report (Ctrl + H)" Id="TripRequestReport" Disabled="@_isProcessing" />
-							</MenuItems>
-						</MenuItem>
-					</MenuItems>
-				</SfMenu>
+				<MudBlazor.MudMenu Label="File" Dense="true" Disabled="_isProcessing">
+					<MudBlazor.MudMenuItem Label="New Transaction (Ctrl + N)" OnClick="ResetPage" />
+					<MudBlazor.MudMenuItem Label="Save (Ctrl + S)" OnClick="SaveTransaction" />
+				</MudBlazor.MudMenu>
+
+				<MudBlazor.MudMenu Label="Open" Dense="true" Disabled="_isProcessing">
+					<MudBlazor.MudMenuItem Label="Trip Request Report (Ctrl + H)" OnClick="() => AuthenticationService.NavigateToRoute(PageRouteNames.TripRequestReport, FormFactor, JSRuntime, NavigationManager)" />
+				</MudBlazor.MudMenu>
 			</LeftContent>
 		</Header>
 

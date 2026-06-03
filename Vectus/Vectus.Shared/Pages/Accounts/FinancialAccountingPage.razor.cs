@@ -800,24 +800,6 @@ public partial class FinancialAccountingPage
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": await ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "SavePdfInvoice": await SaveTransaction(savePDF: true); break;
-			case "SaveExcelInvoice": await SaveTransaction(saveExcel: true); break;
-			case "ExportPdfInvoice": await ExportPdfInvoice(); break;
-			case "ExportExcelInvoice": await ExportExcelInvoice(); break;
-			case "TransactionHistory": await AuthenticationService.NavigateToRoute(PageRouteNames.FinancialAccountingReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "ItemReport": await AuthenticationService.NavigateToRoute(PageRouteNames.AccountingLedgerReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "TrialBalance": await AuthenticationService.NavigateToRoute(PageRouteNames.TrialBalanceReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "ProfitLoss": await AuthenticationService.NavigateToRoute(PageRouteNames.ProfitAndLossReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "BalanceSheet": await AuthenticationService.NavigateToRoute(PageRouteNames.BalanceSheetReport, FormFactor, JSRuntime, NavigationManager); break;
-		}
-	}
-
 	private async Task OnCartGridContextMenuItemClicked(ContextMenuClickEventArgs<FinancialAccountingLedgerCartModel> args)
 	{
 		switch (args.Item.Id)

@@ -15,18 +15,10 @@ else
 	<div class="page-shell">
 		<Header Title="System Settings">
 			<LeftContent>
-				<SfMenu TValue="Syncfusion.Blazor.Navigations.MenuItem">
-					<MenuAnimationSettings Effect="Syncfusion.Blazor.Navigations.MenuEffect.SlideDown" Duration="300" Easing="ease" />
-					<MenuEvents TValue="Syncfusion.Blazor.Navigations.MenuItem" ItemSelected="OnMenuSelected" />
-					<MenuItems>
-						<MenuItem Text="File" IconCss="e-icons e-folder">
-							<MenuItems>
-								<MenuItem Text="Save (Ctrl + S)" IconCss="e-icons e-save" Id="SaveSettings" Disabled="@_isProcessing" />
-								<MenuItem Text="Reset to Defaults (Ctrl + R)" IconCss="e-icons e-reset" Id="ResetSettings" Disabled="@_isProcessing" />
-							</MenuItems>
-						</MenuItem>
-					</MenuItems>
-				</SfMenu>
+				<MudBlazor.MudMenu Label="File" Dense="true" Disabled="_isProcessing">
+					<MudBlazor.MudMenuItem Label="Save (Ctrl + S)" OnClick="SaveSettings" />
+					<MudBlazor.MudMenuItem Label="Reset to Defaults (Ctrl + R)" OnClick="ShowResetConfirmation" />
+				</MudBlazor.MudMenu>
 			</LeftContent>
 		</Header>
 

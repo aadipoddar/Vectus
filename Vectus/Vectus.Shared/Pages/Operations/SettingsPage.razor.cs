@@ -390,21 +390,4 @@ public partial class SettingsPage
 	}
 
 	#endregion
-
-	#region Utilities
-
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "SaveSettings":
-				await SaveSettings();
-				break;
-			case "ResetSettings":
-				await ShowResetConfirmation();
-				break;
-		}
-	}
-
-	#endregion
 }

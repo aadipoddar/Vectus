@@ -10,7 +10,7 @@ public partial class App
 		{
 			MainThread.BeginInvokeOnMainThread(() =>
 			{
-				var window = new Window(new MainPage(route)) { Title = "Strada" };
+				var window = new Window(new MainPage(route)) { Title = "Vectus" };
 				Current?.OpenWindow(window);
 				MaximizeWindow(window);
 			});

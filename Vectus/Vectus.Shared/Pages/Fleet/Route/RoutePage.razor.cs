@@ -290,21 +290,6 @@ public partial class RoutePage
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "ToggleDeleted": await ToggleDeleted(); break;
-			case "ExportExcel": await ExportMaster(true); break;
-			case "ExportPdf": await ExportMaster(); break;
-			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
-			case "OpenInMaps": await OpenInMaps(); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<RouteModel> args)
 	{
 		switch (args.Item.Id)

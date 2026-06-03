@@ -1,3 +1,5 @@
+using Syncfusion.Blazor.Grids;
+
 using Vectus.Shared.Components.Dialog;
 using Vectus.Shared.Components.Input;
 
@@ -6,8 +8,6 @@ using VectusLibrary.Accounts.Masters.Exports;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Operations.Models;
 using VectusLibrary.Utils.ExportUtils;
-
-using Syncfusion.Blazor.Grids;
 
 namespace Vectus.Shared.Pages.Accounts.Masters;
 
@@ -224,20 +224,6 @@ public partial class CompanyPage
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "ToggleDeleted": await ToggleDeleted(); break;
-			case "ExportExcel": await ExportMaster(true); break;
-			case "ExportPdf": await ExportMaster(); break;
-			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteRecoverSelectedItem": await DeleteRecoverSelectedItem(); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<CompanyModel> args)
 	{
 		switch (args.Item.Id)

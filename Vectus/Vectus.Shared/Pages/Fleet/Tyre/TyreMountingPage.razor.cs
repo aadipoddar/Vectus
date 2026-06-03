@@ -230,19 +230,6 @@ public partial class TyreMountingPage
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "ExportExcel": await ExportMaster(true); break;
-			case "ExportPdf": await ExportMaster(); break;
-			case "EditSelectedItem": await EditSelectedItem(); break;
-			case "DeleteSelectedItem": await DeleteSelectedItem(); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<TyreMountingModel> args)
 	{
 		switch (args.Item.Id)

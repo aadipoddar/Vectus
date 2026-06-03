@@ -249,16 +249,6 @@ public partial class TripRequestPage
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "TripRequestReport": await AuthenticationService.NavigateToRoute(PageRouteNames.TripRequestReport, FormFactor, JSRuntime, NavigationManager); break;
-		}
-	}
-
 	private void ResetPage() => PageRefresh.Request();
 	#endregion
 }

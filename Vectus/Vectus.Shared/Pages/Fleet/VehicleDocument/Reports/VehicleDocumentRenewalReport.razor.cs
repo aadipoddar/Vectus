@@ -209,21 +209,6 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.VehicleDocument, FormFactor, JSRuntime, NavigationManager); break;
-			case "Refresh": await LoadTransactionOverviews(); break;
-			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportReport(); break;
-			case "ExportExcel": await ExportReport(true); break;
-			case "VehicleDocument": await AuthenticationService.NavigateToRoute(PageRouteNames.VehicleDocument, FormFactor, JSRuntime, NavigationManager); break;
-			case "VehicleDocumentType": await AuthenticationService.NavigateToRoute(PageRouteNames.VehicleDocumentTypeMaster, FormFactor, JSRuntime, NavigationManager); break;
-			case "DownloadSelectedDocument": await DownloadSelectedDocument(); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<VehicleDocumentRenewalOverviewModel> args)
 	{
 		switch (args.Item.Id)

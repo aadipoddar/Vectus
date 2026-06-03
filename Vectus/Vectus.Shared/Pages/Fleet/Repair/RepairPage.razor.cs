@@ -608,21 +608,6 @@ public partial class RepairPage
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": await ResetPage(); break;
-			case "SaveTransaction": await SaveTransaction(); break;
-			case "SavePdfInvoice": await SaveTransaction(savePDF: true); break;
-			case "SaveExcelInvoice": await SaveTransaction(saveExcel: true); break;
-			case "ExportPdfInvoice": await ExportPdfInvoice(); break;
-			case "ExportExcelInvoice": await ExportExcelInvoice(); break;
-			case "RepairReport": await AuthenticationService.NavigateToRoute(PageRouteNames.RepairReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "RepairJobReport": await AuthenticationService.NavigateToRoute(PageRouteNames.RepairJobReport, FormFactor, JSRuntime, NavigationManager); break;
-		}
-	}
-
 	private async Task OnCartGridContextMenuItemClicked(ContextMenuClickEventArgs<RepairJobCartModel> args)
 	{
 		switch (args.Item.Id)

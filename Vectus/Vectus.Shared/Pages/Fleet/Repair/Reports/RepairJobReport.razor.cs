@@ -38,8 +38,8 @@ public partial class RepairJobReport : IAsyncDisposable
 	private List<CompanyModel> _companies = [];
 	private List<VehicleModel> _vehicles = [];
 	private List<GarageModel> _garages = [];
-	private List<RepairJobOverviewModel> _jobOverviews = [];
-	private List<RepairJobOverviewModel> _allJobOverviews = [];
+	private List<RepairJobOverviewModel> _transactionOverviews = [];
+	private List<RepairJobOverviewModel> _allTransactionOverviews = [];
 
 	private readonly List<ContextMenuItemModel> _gridContextMenuItems =
 	[
@@ -75,7 +75,7 @@ public partial class RepairJobReport : IAsyncDisposable
 	private async Task InitializePage()
 	{
 		await LoadData();
-		await LoadJobOverviews();
+		await LoadTransactionOverviews();
 		await StartAutoRefresh();
 
 		_isLoading = false;
@@ -99,7 +99,7 @@ public partial class RepairJobReport : IAsyncDisposable
 		_garages = [.. _garages.OrderBy(s => s.Name)];
 	}
 
-	private async Task LoadJobOverviews()
+	private async Task LoadTransactionOverviews()
 	{
 		if (_isProcessing)
 			return;
@@ -110,7 +110,7 @@ public partial class RepairJobReport : IAsyncDisposable
 			StateHasChanged();
 			await _toastNotification.ShowAsync("Loading", "Fetching repair jobs...", ToastType.Info);
 
-			_allJobOverviews = await CommonData.LoadTableDataByDate<RepairJobOverviewModel>(
+			_allTransactionOverviews = await CommonData.LoadTableDataByDate<RepairJobOverviewModel>(
 				FleetNames.RepairJobOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MinValue));
@@ -130,14 +130,14 @@ public partial class RepairJobReport : IAsyncDisposable
 
 	private async Task ApplyFilters()
 	{
-		var query = _allJobOverviews.AsEnumerable();
+		var query = _allTransactionOverviews.AsEnumerable();
 
 		if (!_showDeleted) query = query.Where(t => t.MasterStatus);
 		if (_selectedCompany?.Id > 0) query = query.Where(t => t.CompanyId == _selectedCompany.Id);
 		if (_selectedVehicle?.Id > 0) query = query.Where(t => t.VehicleId == _selectedVehicle.Id);
 		if (_selectedGarage?.Id > 0) query = query.Where(t => t.GarageId == _selectedGarage.Id);
 
-		_jobOverviews = [.. query.OrderBy(t => t.TransactionDateTime).ThenBy(t => t.TransactionNo)];
+		_transactionOverviews = [.. query.OrderBy(t => t.TransactionDateTime).ThenBy(t => t.TransactionNo)];
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -149,14 +149,14 @@ public partial class RepairJobReport : IAsyncDisposable
 	private async Task HandleDatesChanged(DateRangeType dateRangeType)
 	{
 		(_fromDate, _toDate) = await FinancialYearData.GetDateRange(dateRangeType, _fromDate, _toDate);
-		await LoadJobOverviews();
+		await LoadTransactionOverviews();
 	}
 
 	private async Task OnDateRangeChanged(MudBlazor.DateRange range)
 	{
 		_fromDate = range?.Start ?? _fromDate;
 		_toDate = range?.End ?? _toDate;
-		await LoadJobOverviews();
+		await LoadTransactionOverviews();
 	}
 
 	private async Task OnCompanyChanged(CompanyModel value)
@@ -229,7 +229,7 @@ public partial class RepairJobReport : IAsyncDisposable
 		{
 			_isProcessing = false;
 			StateHasChanged();
-			await LoadJobOverviews();
+			await LoadTransactionOverviews();
 		}
 	}
 
@@ -282,7 +282,7 @@ public partial class RepairJobReport : IAsyncDisposable
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
 			var (stream, fileName) = await RepairReportExport.ExportJobReport(
-				_jobOverviews,
+				_transactionOverviews,
 				isExcel ? ReportExportType.Excel : ReportExportType.PDF,
 				DateOnly.FromDateTime(_fromDate),
 				DateOnly.FromDateTime(_toDate),
@@ -336,34 +336,6 @@ public partial class RepairJobReport : IAsyncDisposable
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "NewTransaction": await AuthenticationService.NavigateToRoute(PageRouteNames.Repair, FormFactor, JSRuntime, NavigationManager); break;
-			case "SummaryReport": await AuthenticationService.NavigateToRoute(PageRouteNames.RepairReport, FormFactor, JSRuntime, NavigationManager); break;
-			case "Refresh": await LoadJobOverviews(); break;
-			case "ToggleDeleted": await ToggleDeleted(); break;
-			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportReport(); break;
-			case "ExportExcel": await ExportReport(true); break;
-			case "ViewSelected": await ViewSelectedTransaction(); break;
-			case "ExportSelectedPdf": await ExportSelectedTransaction(); break;
-			case "ExportSelectedExcel": await ExportSelectedTransaction(true); break;
-			case "DeleteRecoverSelected": await DeleteRecoverSelectedTransaction(); break;
-			case "PeriodToday": await HandleDatesChanged(DateRangeType.Today); break;
-			case "PeriodPreviousDay": await HandleDatesChanged(DateRangeType.Yesterday); break;
-			case "PeriodNextDay": await HandleDatesChanged(DateRangeType.NextDay); break;
-			case "PeriodCurrentMonth": await HandleDatesChanged(DateRangeType.CurrentMonth); break;
-			case "PeriodPreviousMonth": await HandleDatesChanged(DateRangeType.PreviousMonth); break;
-			case "PeriodNextMonth": await HandleDatesChanged(DateRangeType.NextMonth); break;
-			case "PeriodCurrentFinancialYear": await HandleDatesChanged(DateRangeType.CurrentFinancialYear); break;
-			case "PeriodPreviousFinancialYear": await HandleDatesChanged(DateRangeType.PreviousFinancialYear); break;
-			case "PeriodNextFinancialYear": await HandleDatesChanged(DateRangeType.NextFinancialYear); break;
-			case "PeriodAllTime": await HandleDatesChanged(DateRangeType.AllTime); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<RepairJobOverviewModel> args)
 	{
 		switch (args.Item.Id)
@@ -405,7 +377,7 @@ public partial class RepairJobReport : IAsyncDisposable
 		try
 		{
 			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
-				await LoadJobOverviews();
+				await LoadTransactionOverviews();
 		}
 		catch (OperationCanceledException)
 		{

@@ -190,28 +190,6 @@ public partial class AuditTrailReport : IAsyncDisposable
 	#endregion
 
 	#region Utilities
-	private async Task OnMenuSelected(Syncfusion.Blazor.Navigations.MenuEventArgs<Syncfusion.Blazor.Navigations.MenuItem> args)
-	{
-		switch (args.Item.Id)
-		{
-			case "OpenChanges": await OpenChanges(); break;
-			case "Refresh": await LoadAuditTrails(); break;
-			case "ToggleDetailsView": await ToggleDetailsView(); break;
-			case "ExportPdf": await ExportReport(); break;
-			case "ExportExcel": await ExportReport(true); break;
-			case "PeriodToday": await HandleDatesChanged(DateRangeType.Today); break;
-			case "PeriodPreviousDay": await HandleDatesChanged(DateRangeType.Yesterday); break;
-			case "PeriodNextDay": await HandleDatesChanged(DateRangeType.NextDay); break;
-			case "PeriodCurrentMonth": await HandleDatesChanged(DateRangeType.CurrentMonth); break;
-			case "PeriodPreviousMonth": await HandleDatesChanged(DateRangeType.PreviousMonth); break;
-			case "PeriodNextMonth": await HandleDatesChanged(DateRangeType.NextMonth); break;
-			case "PeriodCurrentFinancialYear": await HandleDatesChanged(DateRangeType.CurrentFinancialYear); break;
-			case "PeriodPreviousFinancialYear": await HandleDatesChanged(DateRangeType.PreviousFinancialYear); break;
-			case "PeriodNextFinancialYear": await HandleDatesChanged(DateRangeType.NextFinancialYear); break;
-			case "PeriodAllTime": await HandleDatesChanged(DateRangeType.AllTime); break;
-		}
-	}
-
 	private async Task OnGridContextMenuItemClicked(ContextMenuClickEventArgs<AuditTrailModel> args)
 	{
 		if (args.Item.Id == "OpenChanges") await OpenChanges();
