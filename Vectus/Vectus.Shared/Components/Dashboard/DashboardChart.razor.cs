@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
-
 using MudBlazor;
 
 using VectusLibrary.Fleet.Repair.Models;
@@ -11,8 +9,6 @@ namespace Vectus.Shared.Components.Dashboard;
 
 public partial class DashboardChart
 {
-	private int _cacheHours = 12;
-
 	private List<TripRequestOverviewModel> _tripRequests = [];
 	private List<RepairOverviewModel> _repairs = [];
 	private List<RepairJobOverviewModel> _repairJobs = [];
@@ -73,38 +69,8 @@ public partial class DashboardChart
 
 	private async Task LoadData()
 	{
-		if (LoadCached())
-			return;
-
-		await LoadFresh();
-
-		var expiry = TimeSpan.FromHours(_cacheHours);
-		MemoryCache.Set(StorageFileNames.TripRequestsYearOverviewDataFileName, _tripRequests, expiry);
-		MemoryCache.Set(StorageFileNames.RepairsYearOverviewDataFileName, _repairs, expiry);
-		MemoryCache.Set(StorageFileNames.RepairJobsYearOverviewDataFileName, _repairJobs, expiry);
-	}
-
-	private bool LoadCached()
-	{
-		if (!MemoryCache.TryGetValue(StorageFileNames.TripRequestsYearOverviewDataFileName, out List<TripRequestOverviewModel> tripRequests))
-			return false;
-
-		_tripRequests = tripRequests ?? [];
-		_repairs = MemoryCache.Get<List<RepairOverviewModel>>(StorageFileNames.RepairsYearOverviewDataFileName) ?? [];
-		_repairJobs = MemoryCache.Get<List<RepairJobOverviewModel>>(StorageFileNames.RepairJobsYearOverviewDataFileName) ?? [];
-
-		BuildAll();
-		StateHasChanged();
-		return true;
-	}
-
-	private async Task LoadFresh()
-	{
 		try
 		{
-			var cacheSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AnalysisCacheHours);
-			_cacheHours = int.TryParse(cacheSetting?.Value, out var hours) && hours > 0 ? hours : 12;
-
 			// Window: first day of month 11 months ago → end of current month (12 months total).
 			var thisMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 			var windowStart = thisMonthStart.AddMonths(-11);

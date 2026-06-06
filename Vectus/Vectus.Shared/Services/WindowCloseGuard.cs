@@ -31,4 +31,10 @@ public static class WindowCloseGuard
 			BlockClose = false;
 		}
 	}
+
+	public static void Release()
+	{
+		_owner = null;
+		BlockClose = false;
+	}
 }

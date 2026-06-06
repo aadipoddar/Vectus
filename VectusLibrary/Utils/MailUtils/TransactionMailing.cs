@@ -3,6 +3,8 @@
 using MimeKit;
 
 using VectusLibrary.DataAccess;
+using VectusLibrary.Operations.Data;
+using VectusLibrary.Operations.Models;
 
 namespace VectusLibrary.Utils.MailUtils;
 
@@ -59,9 +61,13 @@ internal static class TransactionMailing
 		if (SqlDataAccess._databaseConnection != Secrets.AzureConnectionString)
 			return; // Do not send emails in local/dev environment
 
+		var notificationEmail = (await SettingsData.LoadSettingsByKey(SettingsKeys.NotificationEmail))?.Value;
+		if (string.IsNullOrWhiteSpace(notificationEmail))
+			return; // No recipient configured - notifications disabled
+
 		var message = new MimeMessage();
 		message.From.Add(new MailboxAddress("AadiSoft", Secrets.Email));
-		message.To.Add(new MailboxAddress(Secrets.ToName, Secrets.ToEmail));
+		message.To.Add(new MailboxAddress(Secrets.ToName, notificationEmail));
 		message.Subject = subject;
 
 		var bodyBuilder = new BodyBuilder

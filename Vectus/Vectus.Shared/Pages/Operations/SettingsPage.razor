@@ -413,15 +413,28 @@ else
 												Max="365"
 												Required="false" />
 						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Notification Settings -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+							<polyline points="22,6 12,13 2,6" />
+						</svg>
+						<h2 class="section-title">Notification Settings</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid">
 						<div class="form-field">
-							<CustomNumericField T="int"
-												@bind-Value="_analysisCacheHours"
-												Label="Analysis Cache (Hours)"
-												Placeholder="e.g., 12"
-												Format="N0"
-												Min="1"
-												Max="168"
-												Required="false" />
+							<CustomTextField @bind-Value="_notificationEmail"
+											 Label="Notification Email"
+											 Placeholder="Leave blank to disable email notifications"
+											 Required="false" />
 						</div>
 					</div>
 				</div>

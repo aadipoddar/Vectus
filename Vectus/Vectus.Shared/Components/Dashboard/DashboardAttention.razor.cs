@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
-
 using Syncfusion.Blazor.Grids;
 
 using VectusLibrary.Accounts.Masters.Models;
@@ -15,7 +13,6 @@ namespace Vectus.Shared.Components.Dashboard;
 public partial class DashboardAttention
 {
 	private int _warningDays = 30;
-	private int _cacheHours = 12;
 
 	private List<VehicleDocumentRenewalOverviewModel> _dueDocuments = [];
 	private List<TripRequestOverviewModel> _pendingTripRequests = [];
@@ -59,44 +56,10 @@ public partial class DashboardAttention
 
 	private async Task LoadData()
 	{
-		if (LoadCached())
-			return;
-
-		await LoadFresh();
-
-		var expiry = TimeSpan.FromHours(_cacheHours);
-		MemoryCache.Set(StorageFileNames.DueDocumentsDataFileName, _dueDocuments, expiry);
-		MemoryCache.Set(StorageFileNames.PendingTripRequestsDataFileName, _pendingTripRequests, expiry);
-		MemoryCache.Set(StorageFileNames.InGarageRepairsDataFileName, _inGarageRepairs, expiry);
-		MemoryCache.Set(StorageFileNames.IdleVehiclesDataFileName, _idleVehicles, expiry);
-		MemoryCache.Set(StorageFileNames.CompaniesDataFileName, _companies, expiry);
-		MemoryCache.Set(StorageFileNames.VehicleTypesDataFileName, _vehicleTypes, expiry);
-	}
-
-	private bool LoadCached()
-	{
-		if (!MemoryCache.TryGetValue(StorageFileNames.IdleVehiclesDataFileName, out List<VehicleModel> idleVehicles))
-			return false;
-
-		_idleVehicles = idleVehicles ?? [];
-		_dueDocuments = MemoryCache.Get<List<VehicleDocumentRenewalOverviewModel>>(StorageFileNames.DueDocumentsDataFileName) ?? [];
-		_pendingTripRequests = MemoryCache.Get<List<TripRequestOverviewModel>>(StorageFileNames.PendingTripRequestsDataFileName) ?? [];
-		_inGarageRepairs = MemoryCache.Get<List<RepairOverviewModel>>(StorageFileNames.InGarageRepairsDataFileName) ?? [];
-		_companies = MemoryCache.Get<List<CompanyModel>>(StorageFileNames.CompaniesDataFileName) ?? [];
-		_vehicleTypes = MemoryCache.Get<List<VehicleTypeModel>>(StorageFileNames.VehicleTypesDataFileName) ?? [];
-		StateHasChanged();
-		return true;
-	}
-
-	private async Task LoadFresh()
-	{
 		try
 		{
 			var warningSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.ReportWarningDays);
 			_warningDays = int.TryParse(warningSetting?.Value, out var days) ? days : 30;
-
-			var cacheSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AnalysisCacheHours);
-			_cacheHours = int.TryParse(cacheSetting?.Value, out var hours) && hours > 0 ? hours : 12;
 
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
 			var warningWindowStart = currentDateTime.AddDays(-_warningDays);

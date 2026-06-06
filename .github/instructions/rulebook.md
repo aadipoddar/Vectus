@@ -37,8 +37,9 @@ actual project/namespace/constant names.
   **.NET MAUI Hybrid** host (`<App>`, `Platforms/`).
 - **Business logic + data access** in a no-UI class library (`<App>Library`),
   organized into feature folders.
-- **UI toolkit:** Syncfusion Blazor (grids, inputs, menus, dialogs) + MudBlazor,
-  fronted by the repo's own reusable component wrappers.
+- **UI toolkit:** Syncfusion Blazor (grids, inputs, dialogs) + MudBlazor (top-level
+  menus via `MudMenu`, declarative hotkeys via `MudHotkey`, launchpad tabs via
+  `MudTabs`), fronted by the repo's own reusable component wrappers.
 - **Data access:** Dapper calling **stored procedures only** — no inline SQL, no
   EF Core.
 - **Database:** an SSDT SQL Server project (`<App>DB`, MSBuild-only); tables and
@@ -163,7 +164,7 @@ In this order, omitting any that don't apply:
 #region Actions        // delete / recover / accept / reject
 #region Exporting
 #region Uploading <X>  // only if the page uploads a blob/file
-#region Utilities      // menu handler, context-menu handler, toggles, ResetPage, auto-refresh
+#region Utilities      // grid context-menu handler, toggles, ResetPage, auto-refresh
 ```
  
 Method order within a region matches the canonical sibling. Keep `ToggleDeleted` /
@@ -181,6 +182,12 @@ private bool _showAllColumns = false;  // report pages
 private ToastNotification _toastNotification;
 private SfGrid<TModel> _sfGrid;
 private <FirstInput> _sfFirstFocus;     // first focusable control
+ 
+// One generic confirmation dialog per page (§3.9), not per-action dialogs:
+private ConfirmationDialog _confirmationDialog;
+private string _confirmTitle = string.Empty;
+private string _confirmMessage = string.Empty;
+private Func<Task> _confirmAction;
 ```
  
 ### 3.4 Auth — first thing on first render
@@ -263,18 +270,58 @@ catch { NavigationManager.NavigateTo(PageRouteNames.Dashboard); }
  
 Cart pages catch with `catch { await ResetPage(); }` instead, which clears the local-storage draft before reloading ([§3.4](#34-auth--first-thing-on-first-render)).
  
-### 3.8 Hotkeys
+### 3.8 Hotkeys, menus & confirmations — MudBlazor
+ 
+**Hotkeys are markup, not JS.** Drop `MudBlazor.MudHotkey` elements at the top of the
+`.razor`, one per binding, each `Disabled="@_isProcessing"`, bound to the same method
+the menu item calls:
+ 
+```razor
+<MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Insert OnHotkeyPressed="EditSelectedItem" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.Delete OnHotkeyPressed="DeleteRecoverSelectedItem" Disabled="@_isProcessing" />
+```
+ 
+**Top-of-page menus are `MudBlazor.MudMenu`/`MudMenuItem`** with a direct `OnClick` per
+item — **not** `SfMenu`. No item `Id`s and **no `OnMenuSelected` switch**; the click
+calls the method. Group under `MudMenu Label="File"`/`"Transaction"`/`"Open"`/`"Periods"`,
+separate groups with `MudDivider`, each `MudMenu` is `Dense="true" Disabled="_isProcessing"`.
+The **grid row** context menu is the only place the `Id`+switch pattern remains
+(Syncfusion `ContextMenuItems` + `OnGridContextMenuItemClicked`).
+ 
+**One generic `ConfirmationDialog` per page** handles delete/recover/accept/reject/
+discard — there are no per-action dialog components. Stash a `Func<Task>` and show it:
+ 
+```csharp
+private async Task ShowConfirmation(string title, string message, Func<Task> action)
+{
+	_confirmTitle = title; _confirmMessage = message; _confirmAction = action;
+	StateHasChanged();
+	await _confirmationDialog.ShowAsync();
+}
+private async Task OnConfirmed()
+{
+	await _confirmationDialog.HideAsync();
+	if (_confirmAction is not null) await _confirmAction();
+	_confirmAction = null;
+}
+private async Task OnCancelled() { _confirmAction = null; await _confirmationDialog.HideAsync(); }
+```
  
 Keep bindings consistent and spell the shortcut out in the menu item text
 ("Export PDF (Ctrl + P)", "Show Deleted (Ctrl + Delete)" — exact same wording
 everywhere). Typical set: `Ctrl+N` new, `Ctrl+S` save, `Ctrl+F`
 focus first input, `Ctrl+R`/`F5` refresh, `Ctrl+Q` toggle detail columns,
-`Ctrl+Delete` toggle show-deleted, `Delete` delete/recover row, `Ctrl+E`/`Ctrl+P`
-export Excel/PDF, `Alt+O`/`Alt+E`/`Alt+P` view/export-Excel/export-PDF selected row.
+`Ctrl+Delete` toggle show-deleted, `Insert` edit selected row, `Delete` delete/recover
+row, `Ctrl+E`/`Ctrl+P` export Excel/PDF, `Alt+O`/`Alt+E`/`Alt+P`
+view/export-Excel/export-PDF selected row. (No `Ctrl+B` — there is no back button.)
  
 ### 3.9 Layout skeleton
  
 ```razor
+@* MudHotkey bindings (§3.8) go here, above the markup *@
+ 
 @if (_isLoading || _user is null)
 {
 	<LoadingScreen />
@@ -283,7 +330,13 @@ else
 {
 	<div class="page-shell">
 		<Header Title="…">
-			<LeftContent>  …SfMenu… </LeftContent>
+			<LeftContent>
+				<MudBlazor.MudMenu Label="File" Dense="true" Disabled="_isProcessing">
+					<MudBlazor.MudMenuItem Label="Save (Ctrl + S)" OnClick="SaveTransaction" />
+					<MudBlazor.MudDivider />
+					<MudBlazor.MudMenuItem Label="Export PDF (Ctrl + P)" OnClick="() => ExportMaster()" />
+				</MudBlazor.MudMenu>
+			</LeftContent>
 		</Header>
 		<div class="page-container">
 			<div class="section-card">
@@ -294,7 +347,16 @@ else
 		<Footer />
 	</div>
 }
+ 
+<ConfirmationDialog @ref="_confirmationDialog" Title="@_confirmTitle" Message="@_confirmMessage"
+					OnConfirm="OnConfirmed" OnCancel="OnCancelled" />
+<ToastNotification @ref="_toastNotification" />
+<CloseGuard Block="_isProcessing" />
 ```
+ 
+The `ConfirmationDialog`, `ToastNotification`, and `CloseGuard` sit **outside** the
+`_isLoading` branch so they live for the whole page. `CloseGuard` blocks window/tab
+close and external navigation while `_isProcessing` is true.
  
 Use global CSS classes (`page-shell`, `page-container`, `section-card`,
 `section-header`, `section-title`, `filters-grid`, `form-field`, money classes like
@@ -314,14 +376,16 @@ Reach for the repo's wrappers before raw Syncfusion/MudBlazor/HTML. The standard
 | `FioriTile` | Launchpad navigation tiles (one per feature page) |
 | `BalanceInfoCard` (or similar) | Summary tiles on report pages |
 | `CustomTextField`, `CustomNumericField<T>`, `CustomAutoComplete<T>`, `CustomDatePicker`, `CustomDateRangePicker`, `CustomCheckBox` | Form inputs |
-| `ConfirmationDialog` | All confirmations (delete, recover, reset, discard) — set `Title`/`Message` + `OnConfirm`/`OnCancel` per action |
-| `AcceptConfirmationDialog` / `RejectConfirmationDialog` | Approval workflows |
+| `ConfirmationDialog` | The **single** confirm dialog for all confirmations (delete, recover, accept, reject, discard) — stash a `Func<Task>` and call `ShowConfirmation(title, message, action)` (§3.8) |
 | `DocumentUploadDialog` | Blob/file upload-download-remove |
 | `ToastNotification` | All feedback |
+| `CloseGuard` | Block window close / external nav while `_isProcessing` (`<CloseGuard Block="_isProcessing" />`) |
  
-Grids are `SfGrid` with the shared CssClass; menus are `SfMenu`. Use `@ref` only —
-don't set a literal `ID=` on `SfGrid`. Upload dialogs own their own `SfUploader`
-internally; pass data + callbacks, don't hold a parent uploader reference.
+Grids are `SfGrid` with the shared CssClass and a Syncfusion `ContextMenuItems` menu
+for row actions; top-of-page menus are `MudBlazor.MudMenu`/`MudMenuItem`, and hotkeys
+are `MudBlazor.MudHotkey` (§3.8). Use `@ref` only — don't set a literal `ID=` on
+`SfGrid`. Upload dialogs own their own `SfUploader` internally; pass data + callbacks,
+don't hold a parent uploader reference.
  
 ---
  
@@ -412,16 +476,19 @@ private Func<Task> _confirmAction;   // the pending operation to run on confirm
 - **Saving:** `SaveTransaction()` — guard `_isProcessing`; admin check; map
   `_selectedXxx?.Id ?? 0` onto the model; call
   `XxxData.SaveTransaction(_model, _user.Id, platform)`; toast; `ResetPage()`.
-- **Actions:** `DeleteTransaction(id)`/`RecoverTransaction(id)` (load fresh by id, set
-  audit fields, call `XxxData.Delete/RecoverTransaction`), `EditSelectedItem()`,
-  `DeleteRecoverSelectedItem()` (branch on `Status`, calls
-  `ShowConfirmation(title, message, action)`), and the shared confirm trio
-  `ShowConfirmation` / `OnConfirmed` (hide → invoke `_confirmAction`) / `OnCancelled`.
-- **Exporting:** `ExportExcel()`/`ExportPdf()` → `XxxExport.ExportMaster(_items, type)`
-  → `SaveAndViewService.SaveAndView`.
-- **Utilities:** `OnMenuSelected`/`OnGridContextMenuItemClicked` switches,
+- **Actions:** `EditSelectedItem()`, one unified
+  `DeleteRecoverTransaction(int id, bool isRecover)` (admin check, load fresh by id,
+  set audit fields, call `XxxData.Delete/RecoverTransaction`, toast, `ResetPage()`),
+  `DeleteRecoverSelectedItem()` (read selected row, branch on `Status`, call
+  `ShowConfirmation(title, message, () => DeleteRecoverTransaction(id, !status))`),
+  and the shared confirm trio `ShowConfirmation` / `OnConfirmed` (hide → invoke
+  `_confirmAction`) / `OnCancelled` (§3.8).
+- **Exporting:** one `ExportMaster(bool isExcel = false)` (PDF default) →
+  `XxxExport.ExportMaster(_items, isExcel ? ReportExportType.Excel : ReportExportType.PDF)`
+  → `SaveAndViewService.SaveAndView`. **Not** separate `ExportExcel`/`ExportPdf`.
+- **Utilities:** `OnGridContextMenuItemClicked` switch (the only `Id`+switch left),
   `ToggleDeleted()` (`_showDeleted = !_showDeleted; await LoadData();`),
-  `ResetPage() => PageRefresh.Request();`.
+  `ResetPage() => PageRefresh.Request();`. No `OnMenuSelected`.
 `platform` = `FormFactor.GetFormFactor() + FormFactor.GetPlatform()` (or repo
 equivalent).
  
@@ -435,20 +502,33 @@ entity dropdowns), aggregates, column show/hide, period presets, row actions, an
  
 ### 7.1 Methods
  
+Reports keep **two lists**: `_allXxxOverviews` (the raw date-range load) and
+`_xxxOverviews` (what the grid binds). The expensive DB read happens only when the
+date range changes; entity-dropdown filters re-slice the in-memory list.
+ 
 - **Load Data:** `OnAfterRenderAsync` → `InitializePage()` → `LoadData()` (filter
-  sources + default dates), `LoadOverviews()`, `StartAutoRefresh()`, clear loading,
+  sources + default dates), `LoadXxxOverviews()`, `StartAutoRefresh()`, clear loading,
   focus.
-- `LoadOverviews()` — guard `_isProcessing`; toast Loading; load via
-  `CommonData.LoadTableDataByDate<TOverview>(Names.X_Overview, from, to)`; apply
-  `!_showDeleted` then each `_selectedXxx?.Id > 0` filter in memory; order;
-  `finally` refresh grid + clear processing.
-- **Changed Events:** one `OnXxxChanged` per filter (set field → `await LoadOverviews()`);
-  `OnDateRangeChanged` + `HandleDatesChanged(DateRangeType)` for period presets.
-- **Exporting:** whole-report `ExportExcel`/`ExportPdf` via `XxxReportExport.ExportReport(...)`,
-  per-row export/view (decode transaction no, navigate).
-- **Actions:** admin-gated delete/recover keyed by the overview row id.
-- **Utilities:** menu/context handlers, `ToggleDetailsView()` (flip `_showAllColumns`,
-  refresh grid), `ToggleDeleted()`, and the auto-refresh trio.
+- `LoadXxxOverviews()` — guard `_isProcessing`; toast Loading; load **all** rows for
+  the date range via `CommonData.LoadTableDataByDate<TOverview>(Names.X_Overview, from, to)`
+  into `_allXxxOverviews`; then `await ApplyFilters()`; `finally` clear processing.
+- `ApplyFilters()` — set `_xxxOverviews = [.. _allXxxOverviews.Where(...)]` applying
+  `(_showDeleted || x.Status)` and each `_selectedYyy is null || _selectedYyy.Id == 0
+  || x.YyyId == _selectedYyy.Id`; order; refresh grid; `StateHasChanged()`. No DB hit.
+- **Changed Events:** each entity `OnYyyChanged` sets its field then `await ApplyFilters()`
+  (in-memory). `OnDateRangeChanged` and `HandleDatesChanged(DateRangeType)` (period
+  presets) reset the dates and call `LoadXxxOverviews()` (re-query). A filter that
+  changes another dropdown's candidate set (e.g. company → vehicles) reloads that
+  dropdown before `ApplyFilters()`.
+- **Exporting:** one whole-report `ExportReport(bool isExcel = false)` via
+  `XxxReportExport.ExportReport(_xxxOverviews, …, _showAllColumns, _showDeleted, active filters)`,
+  plus a per-row `ExportSelectedTransaction(bool isExcel = false)` and
+  `ViewSelectedTransaction()` (decode transaction no, navigate via `AuthenticationService.NavigateToRoute`).
+- **Actions:** admin-gated `DeleteRecoverTransaction(id, transactionNo, isRecover)`
+  driven through `ShowConfirmation` + the shared confirm trio (§3.8).
+- **Utilities:** `OnGridContextMenuItemClicked` switch, `ToggleDetailsView()` (flip
+  `_showAllColumns`, refresh grid), `ToggleDeleted()` (flip then `await ApplyFilters()`),
+  and the auto-refresh trio.
 ### 7.2 Auto-refresh + dispose (verbatim)
  
 ```csharp
@@ -463,7 +543,7 @@ private async Task StartAutoRefresh()
  
 private async Task AutoRefreshLoop(CancellationToken cancellationToken)
 {
-	try { while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken)) await LoadOverviews(); }
+	try { while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken)) await LoadXxxOverviews(); }
 	catch (OperationCanceledException) { /* expected on dispose */ }
 }
  
@@ -481,8 +561,12 @@ async ValueTask IAsyncDisposable.DisposeAsync()
 sizes `10/20/50/100/All`, `Toolbar=["Search"]`, shared CssClass. Money columns
 `Format="N2" TextAlign=Right` with the money templates. Aggregates with Footer +
 GroupFooter + GroupCaption templates. Detail-only columns use `Visible="_showAllColumns"`.
-An entity column hides when that entity is the active filter — use the **OR** form:
-`Visible="@(_showAllColumns || _selectedX is null || _selectedX.Id <= 0)"` (never `&&`).
+For an entity column, the active filter hides it (redundant) and the verbosity choice
+sets the connective:
+- **Always-visible column** that should only hide when it *is* the active filter →
+  OR: `Visible="@(_showAllColumns || _selectedX is null || _selectedX.Id <= 0)"`.
+- **Detail-only column** that should appear only in details view *and* not as the
+  active filter → AND: `Visible="@(_showAllColumns && (_selectedX is null || _selectedX.Id <= 0))"`.
  
 ---
  
@@ -514,7 +598,7 @@ persistence and invoice export.
   `SaveTransactionFile()` (persist draft when unsaved & non-empty; delete otherwise),
   `SaveTransaction(bool savePDF=false, bool saveExcel=false)` (persist via
   `XxxData.SaveTransaction(header, lines)`, optional invoice, `ResetPage`).
-- **Utilities:** menu/context handlers, `DeleteLocalFiles()`,
+- **Utilities:** `OnGridContextMenuItemClicked` switch, `DeleteLocalFiles()`,
   `ResetPage()` = `await DeleteLocalFiles(); PageRefresh.Request();`.
 Both save methods guard `_isProcessing || _isLoading`. The `OnAfterRenderAsync`
 `catch` calls `await ResetPage()` here (clears the draft) — this is the defining
@@ -741,8 +825,9 @@ Adding a soft-deletable master "Widget", in order:
 - [ ] **Export** `…/Widget/Exports/WidgetExport.cs` (`ExportMaster`).
 - [ ] **Route** in `PageRouteNames`.
 - [ ] **Page** `<App>.Shared/Pages/<Domain>/WidgetPage.razor` + `.razor.cs` (copy the
-      canonical master page; set role, menu, grid columns, form
-      inputs, the two confirm dialogs + toast).
+      canonical master page; set role, `MudMenu` items + matching `MudHotkey` bindings,
+      grid columns + context menu, form inputs, the single `ConfirmationDialog` +
+      `ToastNotification` + `CloseGuard`).
 - [ ] **Launchpad tile** in the right tab + section.
 - [ ] **Build** library, shared, web host, and SQL project; fix all errors.
 > **Reports** add: `*_Overview` view/proc, `WidgetOverviewModel`, `ExportReport`, an

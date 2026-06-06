@@ -69,7 +69,7 @@ public static class AuthenticationService
 	public static async Task CloseWindowOrTab(IFormFactor FormFactor, IJSRuntime JSRuntime)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("window.close");
+			await JSRuntime.InvokeVoidAsync("stradaCloseGuard.close");
 		else
 			CloseCurrentWindow?.Invoke();
 	}

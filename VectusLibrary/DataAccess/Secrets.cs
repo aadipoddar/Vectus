@@ -21,7 +21,6 @@ public static partial class Secrets
 	public static string Email => "softaadi@gmail.com";
 	public static string EmailPassword = GetSecret(nameof(EmailPassword));
 
-	public static string ToEmail = "aadipoddarmail@gmail.com";
 	public static string ToName => "Vectus";
 
 	public static string OpenRouteServiceApiKey = GetSecret(nameof(OpenRouteServiceApiKey));
