@@ -9,7 +9,7 @@
 <PageTitle>Trip Request - Vectus</PageTitle>
 
 <MudBlazor.MudHotkey Key=JsKey.KeyN KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="ResetPage" Disabled="@_isProcessing" />
-<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _sfFirstFocus.FocusAsync()" Disabled="@_isProcessing" />
+<MudBlazor.MudHotkey Key=JsKey.KeyF KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => _firstFocus.FocusAsync()" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyS KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="SaveTransaction" Disabled="@_isProcessing" />
 <MudBlazor.MudHotkey Key=JsKey.KeyH KeyModifiers=[JsKeyModifier.ControlLeft] OnHotkeyPressed="() => AuthenticationService.NavigateToRoute(PageRouteNames.TripRequestReport, FormFactor, JSRuntime, NavigationManager)" Disabled="@_isProcessing" />
 
@@ -53,114 +53,54 @@ else
 
 						<!-- Company -->
 						<div class="form-field">
-							<CustomAutoComplete T="CompanyModel"
-												@ref="_sfFirstFocus"
-												@bind-Value="_selectedCompany"
-												DataSource="@_companies"
-												Placeholder="Select Company"
-												Label="Company (Ctrl + F)"
-												FieldValue="@nameof(CompanyModel.Name)"
+							<CustomAutoComplete T="CompanyModel" @ref="_firstFocus" @bind-Value="_selectedCompany" DataSource="@_companies" Placeholder="Select Company" Label="Company (Ctrl + F)" FieldValue="@nameof(CompanyModel.Name)"
 												AddNewRoute="@PageRouteNames.CompanyMaster" />
 						</div>
 
 						<div class="form-field">
-							<CustomDatePicker Value="_tripRequest.TransactionDateTime"
-											  ValueChanged="OnTransactionDateChanged"
-											  FinancialYear="@_selectedFinancialYear" />
+							<CustomDatePicker Value="_tripRequest.TransactionDateTime" ValueChanged="OnTransactionDateChanged" FinancialYear="@_selectedFinancialYear" />
 						</div>
 
 						<div class="form-field">
-							<CustomTextField @bind-Value="_tripRequest.TransactionNo"
-											 Label="Transaction No"
-											 Placeholder="Auto-generated on save"
-											 TabIndex="-1"
-											 ReadOnly="true" />
+							<CustomTextField @bind-Value="_tripRequest.TransactionNo" Label="Transaction No" Placeholder="Auto-generated on save" TabIndex="-1" ReadOnly="true" />
 						</div>
 
 						<!-- Route -->
 						<div class="form-field">
-							<CustomAutoComplete T="RouteOverviewModel"
-												Value="_selectedRoute"
-												DataSource="@_routes"
-												Placeholder="Select a Route"
-												Label="Route"
-												ValueChanged="OnRouteChanged"
-												FieldValue="@nameof(RouteOverviewModel.RouteDisplay)"
+							<CustomAutoComplete T="RouteOverviewModel" Value="_selectedRoute" DataSource="@_routes" Placeholder="Select a Route" Label="Route" ValueChanged="OnRouteChanged" FieldValue="@nameof(RouteOverviewModel.RouteDisplay)"
 												AddNewRoute="@PageRouteNames.RouteMaster" />
 						</div>
 
 						<!-- Vehicle -->
 						<div class="form-field">
-							<CustomAutoComplete T="VehicleLocationModel"
-												Value="_selectedVehicle"
-												DataSource="@_vehicles"
-												Placeholder="Select a Vehicle (Ctrl + F)"
-												Label="Vehicle"
-												ValueChanged="OnVehicleChanged"
-												FieldValue="@nameof(VehicleLocationModel.Code)"
-												AddNewRoute="@PageRouteNames.VehicleMaster" />
+							<CustomAutoComplete T="VehicleLocationModel" Value="_selectedVehicle" DataSource="@_vehicles" Placeholder="Select a Vehicle (Ctrl + F)" Label="Vehicle" ValueChanged="OnVehicleChanged"
+												FieldValue="@nameof(VehicleLocationModel.Code)" AddNewRoute="@PageRouteNames.VehicleMaster" />
 						</div>
 
 						<!-- SDR -->
 						<div class="form-field">
-							<CustomTextField Value="@(_selectedVehicle?.SDR)"
-											 Label="SDR"
-											 Placeholder="SDR"
-											 Required="false"
-											 TabIndex="-1"
-											 ReadOnly="true" />
+							<CustomTextField Value="@(_selectedVehicle?.SDR)" Label="SDR" Placeholder="SDR" Required="false" TabIndex="-1" ReadOnly="true" />
 						</div>
 
 						@if (_selectedRoute is not null)
 						{
 							<div class="form-field">
 								<div class="date-year-wrapper">
-									<CustomNumericField T="int"
-														Value="_selectedRoute.EstimatedDistance"
-														Label="Est. Dist"
-														Placeholder="Estimated distance..."
-														Format="N0"
-														ReadOnly="true"
-														Required="false"
-														TabIndex="-1" />
-									<CustomNumericField T="decimal"
-														Value="_selectedRoute.EstimatedCost"
-														Label="Est. Cost"
-														Placeholder="Estimated cost..."
-														ReadOnly="true"
-														Required="false"
-														TabIndex="-1" />
+									<CustomNumericField T="int" Value="_selectedRoute.EstimatedDistance" Label="Est. Dist" Placeholder="Estimated distance..." Format="N0" ReadOnly="true" Required="false" TabIndex="-1" />
+									<CustomNumericField T="decimal" Value="_selectedRoute.EstimatedCost" Label="Est. Cost" Placeholder="Estimated cost..." ReadOnly="true" Required="false" TabIndex="-1" />
 								</div>
 							</div>
 
 							<div class="form-field">
 								<div class="date-year-wrapper">
-									<CustomNumericField T="int"
-														Value="_selectedRoute.EstimatedHours"
-														Label="Est. Hours"
-														Placeholder="Estimated hours..."
-														Format="N0"
-														ReadOnly="true"
-														Required="false"
-														TabIndex="-1" />
-									<CustomNumericField T="int"
-														Value="_selectedRoute.EstimatedFuelConsumption"
-														Label="Est. Fuel"
-														Placeholder="Estimated fuel..."
-														Format="N0"
-														ReadOnly="true"
-														Required="false"
-														TabIndex="-1" />
+									<CustomNumericField T="int" Value="_selectedRoute.EstimatedHours" Label="Est. Hours" Placeholder="Estimated hours..." Format="N0" ReadOnly="true" Required="false" TabIndex="-1" />
+									<CustomNumericField T="int" Value="_selectedRoute.EstimatedFuelConsumption" Label="Est. Fuel" Placeholder="Estimated fuel..." Format="N0" ReadOnly="true" Required="false" TabIndex="-1" />
 								</div>
 							</div>
 						}
 
 						<div class="form-field">
-							<CustomTextField @bind-Value="_tripRequest.Remarks"
-											 Label="Remarks"
-											 Placeholder="Enter remarks (optional)"
-											 Required="false"
-											 Lines="2" />
+							<CustomTextField @bind-Value="_tripRequest.Remarks" Label="Remarks" Placeholder="Enter remarks (optional)" Required="false" Lines="2" />
 						</div>
 					</div>
 				</div>
@@ -182,9 +122,7 @@ else
 						</div>
 					</div>
 					<div class="section-body grid-body">
-						<SfGrid DataSource="@_vehicles" AllowSorting="true" AllowResizing="true"
-								EnableVirtualization="true" Height="600" CssClass="professional-grid"
-								Toolbar="@(new List<string>() { "Search" })">
+						<SfGrid DataSource="@_vehicles" AllowSorting="true" AllowResizing="true" EnableVirtualization="true" Height="600" CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
 							<GridEvents TValue="VehicleLocationModel" OnRecordDoubleClick="OnVehicleRowDoubleClick" />
 							<GridColumns>
 								<GridColumn Field="@nameof(VehicleLocationModel.Code)" HeaderText="Vehicle" Width="150" />
@@ -217,13 +155,8 @@ else
 					<div class="section-body">
 						@if (_selectedRoute is not null)
 						{
-							<RouteMap OriginLatitude="_selectedRoute.FromLocationLatitude"
-									  OriginLongitude="_selectedRoute.FromLocationLongitude"
-									  DestinationLatitude="_selectedRoute.ToLocationLatitude"
-									  DestinationLongitude="_selectedRoute.ToLocationLongitude"
-									  Vehicles="_vehicles"
-									  SelectedVehicleCode="@(_selectedVehicle?.Code)"
-									  OnVehicleSelected="OnMapVehicleSelected"
+							<RouteMap OriginLatitude="_selectedRoute.FromLocationLatitude" OriginLongitude="_selectedRoute.FromLocationLongitude" DestinationLatitude="_selectedRoute.ToLocationLatitude"
+									  DestinationLongitude="_selectedRoute.ToLocationLongitude" Vehicles="_vehicles" SelectedVehicleCode="@(_selectedVehicle?.Code)" OnVehicleSelected="OnMapVehicleSelected"
 									  PlaceholderText="This route has no map coordinates set on its locations." />
 						}
 						else

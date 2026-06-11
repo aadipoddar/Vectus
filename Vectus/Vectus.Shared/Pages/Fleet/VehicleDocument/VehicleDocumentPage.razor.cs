@@ -39,7 +39,7 @@ public partial class VehicleDocumentPage
 	];
 
 	private SfGrid<VehicleDocumentModel> _sfGrid;
-	private CustomTextField _sfFirstFocus;
+	private CustomTextField _firstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
 
@@ -82,8 +82,8 @@ public partial class VehicleDocumentPage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 	#endregion
 
@@ -164,7 +164,7 @@ public partial class VehicleDocumentPage
 		_selectedVehicleDocumentType = _vehicleDocumentTypes.FirstOrDefault(vdt => vdt.Id == _vehicleDocument.VehicleDocumentTypeId);
 		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _vehicleDocument.VehicleId);
 		StateHasChanged();
-		await _sfFirstFocus.FocusAsync();
+		await _firstFocus.FocusAsync();
 	}
 
 	private async Task DeleteRecoverTransaction(int id, bool isRecover)

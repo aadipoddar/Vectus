@@ -142,7 +142,7 @@ public static class RouteData
 				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
 				TableName = FleetNames.Route,
 				RecordNo = route.Code,
-				RecordValue = diff,
+				RecordValue = isUpdate ? diff : null,
 				CreatedBy = userId,
 				CreatedFromPlatform = platform
 			}, transaction);

@@ -41,7 +41,7 @@ public partial class SalaryStructurePage
 
 	private SfGrid<SalaryStructureModel> _sfGrid;
 	private SfGrid<SalaryStructureLineCartModel> _sfCartGrid;
-	private CustomAutoComplete<EmployeeModel> _sfFirstFocus;
+	private CustomAutoComplete<EmployeeModel> _firstFocus;
 	private CustomAutoComplete<SalaryComponentModel> _sfComponentAutoComplete;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
@@ -83,8 +83,8 @@ public partial class SalaryStructurePage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 	#endregion
 
@@ -279,8 +279,8 @@ public partial class SalaryStructurePage
 			await _sfCartGrid.Refresh();
 
 		StateHasChanged();
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 
 	private async Task DeleteRecoverTransaction(int id, bool isRecover)

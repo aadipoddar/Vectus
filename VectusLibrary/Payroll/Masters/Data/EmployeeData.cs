@@ -148,7 +148,7 @@ public static class EmployeeData
 				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
 				TableName = PayrollNames.Employee,
 				RecordNo = employee.Name,
-				RecordValue = diff,
+				RecordValue = isUpdate ? diff : null,
 				CreatedBy = userId,
 				CreatedFromPlatform = platform
 			}, transaction);

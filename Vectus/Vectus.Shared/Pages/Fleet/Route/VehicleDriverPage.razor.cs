@@ -33,7 +33,7 @@ public partial class VehicleDriverPage
 	];
 
 	private SfGrid<VehicleDriverModel> _sfGrid;
-	private CustomAutoComplete<VehicleModel> _sfFirstFocus;
+	private CustomAutoComplete<VehicleModel> _firstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
 
@@ -70,8 +70,8 @@ public partial class VehicleDriverPage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 	#endregion
 
@@ -129,7 +129,7 @@ public partial class VehicleDriverPage
 		_selectedDriver = _drivers.FirstOrDefault(d => d.Id == _vehicleDriver.DriverId);
 		_endDateTime = _vehicleDriver.EndDateTime ?? default;
 		StateHasChanged();
-		await _sfFirstFocus.FocusAsync();
+		await _firstFocus.FocusAsync();
 	}
 
 	private async Task DeleteTransaction(int id)

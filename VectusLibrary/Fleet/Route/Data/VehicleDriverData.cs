@@ -105,7 +105,7 @@ public static class VehicleDriverData
 				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
 				TableName = FleetNames.VehicleDriver,
 				RecordNo = vehicleDriver.StartDateTime.ToString() + " - " + vehicleDriver.EndDateTime.ToString(),
-				RecordValue = diff,
+				RecordValue = isUpdate ? diff : null,
 				CreatedBy = userId,
 				CreatedFromPlatform = platform
 			}, transaction);

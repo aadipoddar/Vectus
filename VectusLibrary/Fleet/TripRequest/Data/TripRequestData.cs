@@ -106,7 +106,7 @@ public static class TripRequestData
 				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
 				TableName = FleetNames.TripRequest,
 				RecordNo = tripRequest.TransactionNo,
-				RecordValue = diff,
+				RecordValue = isUpdate ? diff : null,
 				CreatedBy = isUpdate ? tripRequest.LastModifiedBy.Value : tripRequest.CreatedBy,
 				CreatedFromPlatform = isUpdate ? tripRequest.LastModifiedFromPlatform : tripRequest.CreatedFromPlatform
 			}, transaction);

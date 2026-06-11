@@ -9,13 +9,11 @@ using VectusLibrary.Accounts.Masters.Data;
 using VectusLibrary.Accounts.Masters.Models;
 using VectusLibrary.Fleet.Garage.Models;
 using VectusLibrary.Fleet.Repair.Data;
-using VectusLibrary.Fleet.Repair.Exports;
 using VectusLibrary.Fleet.Repair.Models;
 using VectusLibrary.Fleet.Vehicle.Data;
 using VectusLibrary.Fleet.Vehicle.Models;
 using VectusLibrary.Operations.Data;
 using VectusLibrary.Operations.Models;
-using VectusLibrary.Utils.ExportUtils;
 
 namespace Vectus.Shared.Pages.Fleet.Repair;
 
@@ -46,7 +44,7 @@ public partial class RepairPage
 		new() { Text = "Delete (Del)", Id = "DeleteCart", IconCss = "e-icons e-trash", Target = ".e-content" }
 	];
 
-	private CustomAutoComplete<CompanyModel> _sfFirstFocus;
+	private CustomAutoComplete<CompanyModel> _firstFocus;
 	private CustomTextField _sfJobFocus;
 	private SfGrid<RepairJobCartModel> _sfCartGrid;
 
@@ -78,8 +76,8 @@ public partial class RepairPage
 
 		await SaveTransactionFile();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()
@@ -513,18 +511,10 @@ public partial class RepairPage
 
 			var jobs = RepairData.ConvertCartToJobs(_cart, _repair.Id);
 			_repair.Id = await RepairData.SaveTransaction(_repair, jobs);
+			_repair = await CommonData.LoadTableDataById<RepairModel>(FleetNames.Repair, _repair.Id);
 
-			if (savePDF)
-			{
-				var (pdfStream, pdfFileName) = await RepairInvoiceExport.ExportInvoice(_repair.Id, InvoiceExportType.PDF);
-				await SaveAndViewService.SaveAndView(pdfFileName, pdfStream);
-			}
-
-			if (saveExcel)
-			{
-				var (excelStream, excelFileName) = await RepairInvoiceExport.ExportInvoice(_repair.Id, InvoiceExportType.Excel);
-				await SaveAndViewService.SaveAndView(excelFileName, excelStream);
-			}
+			if (savePDF) await ExportSelectedTransaction(false, true);
+			if (saveExcel) await ExportSelectedTransaction(true, true);
 
 			await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully.", ToastType.Success);
 
@@ -544,15 +534,9 @@ public partial class RepairPage
 	#endregion
 
 	#region Exporting
-	private async Task ExportPdfInvoice()
+	private async Task ExportSelectedTransaction(bool isExcel = false, bool force = false)
 	{
-		if (!Id.HasValue || Id.Value <= 0)
-		{
-			await _toastNotification.ShowAsync("Nothing to Export", "There is nothing to export.", ToastType.Error);
-			return;
-		}
-
-		if (_isProcessing)
+		if (_repair.Id <= 0 || (_isProcessing && !force))
 			return;
 
 		try
@@ -560,39 +544,9 @@ public partial class RepairPage
 			_isProcessing = true;
 			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
 
-			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(Id.Value, InvoiceExportType.PDF);
-			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error While Exporting", ex.Message, ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-		}
-	}
-
-	private async Task ExportExcelInvoice()
-	{
-		if (!Id.HasValue || Id.Value <= 0)
-		{
-			await _toastNotification.ShowAsync("Nothing to Export", "There is nothing to export.", ToastType.Error);
-			return;
-		}
-
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			await _toastNotification.ShowAsync("Processing", "Generating the Export...", ToastType.Info);
-
-			var (stream, fileName) = await RepairInvoiceExport.ExportInvoice(Id.Value, InvoiceExportType.Excel);
-			await SaveAndViewService.SaveAndView(fileName, stream);
+			var decodeTransactionNo = await DecodeCode.DecodeTransactionNo(_repair.TransactionNo, !isExcel, isExcel, CodeType.Repair);
+			await SaveAndViewService.SaveAndView(isExcel ? decodeTransactionNo.ExcelStream.fileName : decodeTransactionNo.PDFStream.fileName,
+				isExcel ? decodeTransactionNo.ExcelStream.stream : decodeTransactionNo.PDFStream.stream);
 
 			await _toastNotification.ShowAsync("Exported", "The export has been downloaded successfully.", ToastType.Success);
 		}

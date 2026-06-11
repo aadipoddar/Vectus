@@ -31,7 +31,7 @@ public partial class EmployeeLocationPage
 	];
 
 	private SfGrid<EmployeeLocationModel> _sfGrid;
-	private CustomTextField _sfFirstFocus;
+	private CustomTextField _firstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
 
@@ -70,8 +70,8 @@ public partial class EmployeeLocationPage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 	#endregion
 
@@ -124,7 +124,7 @@ public partial class EmployeeLocationPage
 
 		_selectedStateUT = _stateUTs.FirstOrDefault(s => s.Id == _location.StateUTId);
 		StateHasChanged();
-		await _sfFirstFocus.FocusAsync();
+		await _firstFocus.FocusAsync();
 
 	}
 	private async Task DeleteRecoverTransaction(int id, bool isRecover)

@@ -134,7 +134,7 @@ public static class SalaryStructureData
 				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
 				TableName = PayrollNames.SalaryStructure,
 				RecordNo = await BuildRecordNo(structure, transaction),
-				RecordValue = diff,
+				RecordValue = isUpdate ? diff : null,
 				CreatedBy = userId,
 				CreatedFromPlatform = platform
 			}, transaction);

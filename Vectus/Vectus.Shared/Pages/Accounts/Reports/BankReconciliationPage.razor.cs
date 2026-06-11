@@ -51,7 +51,7 @@ public partial class BankReconciliationPage : IAsyncDisposable
 	];
 
 	private SfGrid<FinancialAccountingLedgerOverviewModel> _sfGrid;
-	private CustomDateRangePicker _sfFirstFocus;
+	private CustomDateRangePicker _firstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
 
@@ -82,8 +82,8 @@ public partial class BankReconciliationPage : IAsyncDisposable
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()
@@ -132,6 +132,7 @@ public partial class BankReconciliationPage : IAsyncDisposable
 		{
 			_isProcessing = false;
 			StateHasChanged();
+			await _toastNotification.HideAllInfoAsync();
 		}
 	}
 
@@ -440,10 +441,7 @@ public partial class BankReconciliationPage : IAsyncDisposable
 					await LoadTransactionOverviews();
 			}
 		}
-		catch (OperationCanceledException)
-		{
-			// Timer was cancelled, expected on dispose
-		}
+		catch (OperationCanceledException) { }
 	}
 
 	async ValueTask IAsyncDisposable.DisposeAsync()

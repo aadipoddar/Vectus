@@ -92,7 +92,7 @@ public static class VehicleDocumentData
 				Action = isUpdate ? AuditTrailActionTypes.Update.ToString() : AuditTrailActionTypes.Insert.ToString(),
 				TableName = FleetNames.VehicleDocument,
 				RecordNo = vehicleDocument.TransactionNo,
-				RecordValue = diff,
+				RecordValue = isUpdate ? diff : null,
 				CreatedBy = isUpdate ? vehicleDocument.LastModifiedBy.Value : vehicleDocument.CreatedBy,
 				CreatedFromPlatform = isUpdate ? vehicleDocument.LastModifiedFromPlatform : vehicleDocument.CreatedFromPlatform
 			}, transaction);

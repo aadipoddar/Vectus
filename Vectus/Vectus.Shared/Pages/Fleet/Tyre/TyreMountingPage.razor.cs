@@ -33,7 +33,7 @@ public partial class TyreMountingPage
 	];
 
 	private SfGrid<TyreMountingModel> _sfGrid;
-	private CustomTextField _sfFirstFocus;
+	private CustomTextField _firstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
 
@@ -70,8 +70,8 @@ public partial class TyreMountingPage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 	#endregion
 
@@ -132,7 +132,7 @@ public partial class TyreMountingPage
 		_selectedTyreCompany = _tyreCompanies.FirstOrDefault(tc => tc.Id == _tyreMounting.TyreCompanyId);
 		_selectedVehicle = _vehicles.FirstOrDefault(v => v.Id == _tyreMounting.VehicleId);
 		StateHasChanged();
-		await _sfFirstFocus.FocusAsync();
+		await _firstFocus.FocusAsync();
 	}
 
 	private async Task DeleteTransaction(int id)

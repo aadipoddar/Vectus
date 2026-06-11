@@ -39,7 +39,7 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 	];
 
 	private SfGrid<VehicleDocumentRenewalOverviewModel> _sfGrid;
-	private CustomAutoComplete<VehicleModel> _sfFirstFocus;
+	private CustomAutoComplete<VehicleModel> _firstFocus;
 	private ToastNotification _toastNotification;
 
 	#region Load Data
@@ -65,8 +65,8 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()
@@ -104,6 +104,7 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 		{
 			_isProcessing = false;
 			StateHasChanged();
+			await _toastNotification.HideAllInfoAsync();
 		}
 	}
 
@@ -243,10 +244,7 @@ public partial class VehicleDocumentRenewalReport : IAsyncDisposable
 			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
 				await LoadTransactionOverviews();
 		}
-		catch (OperationCanceledException)
-		{
-			// Timer was cancelled, expected on dispose
-		}
+		catch (OperationCanceledException) { }
 	}
 
 	async ValueTask IAsyncDisposable.DisposeAsync()

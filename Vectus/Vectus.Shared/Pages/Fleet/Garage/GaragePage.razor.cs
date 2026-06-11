@@ -34,7 +34,7 @@ public partial class GaragePage
 	];
 
 	private SfGrid<GarageModel> _sfGrid;
-	private CustomTextField _sfFirstFocus;
+	private CustomTextField _firstFocus;
 	private ToastNotification _toastNotification;
 	private ConfirmationDialog _confirmationDialog;
 
@@ -71,8 +71,8 @@ public partial class GaragePage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 	#endregion
 
@@ -125,7 +125,7 @@ public partial class GaragePage
 
 		_selectedLocation = _locations.FirstOrDefault(rl => rl.Id == _garage.LocationId);
 		StateHasChanged();
-		await _sfFirstFocus.FocusAsync();
+		await _firstFocus.FocusAsync();
 	}
 
 	private async Task DeleteRecoverTransaction(int id, bool isRecover)

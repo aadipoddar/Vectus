@@ -1,6 +1,6 @@
 <div class="animated-loader-overlay">
 	<div class="animated-loader-container">
-		<img src="_content/Vectus.Shared/images/loading.gif" alt="Loading" class="animated-loader-gif" />
+		<img src="_content/Vectus.Shared/images/loading.svg" alt="Loading" class="animated-loader-image" />
 		<p class="animated-loader-text">Checking the Tyre Pressure on the Servers.</p>
 	</div>
 </div>
@@ -12,48 +12,37 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background: #fff;
+		background: var(--app-bg);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		z-index: 9999;
-		animation: fadeIn 0.3s ease;
 	}
 
 	.animated-loader-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		gap: 24px;
 	}
 
-	.animated-loader-gif {
-		width: 300px;
-		height: 300px;
-		object-fit: contain;
+	.animated-loader-image {
+		width: 400px;
+		height: 400px;
 	}
 
 	.animated-loader-text {
-		margin-top: 8px;
-		color: #000;
+		margin: 0;
+		color: var(--gray-900);
 		font-size: 18px;
 		font-weight: 600;
 		letter-spacing: 0.2px;
 		text-align: center;
 	}
 
-	@@keyframes fadeIn {
-		from {
-			opacity: 0;
-		}
-
-		to {
-			opacity: 1;
-		}
-	}
-
 	/* Responsive */
 	@@media (max-width: 576px) {
-		.animated-loader-gif {
+		.animated-loader-image {
 			width: 200px;
 			height: 200px;
 		}

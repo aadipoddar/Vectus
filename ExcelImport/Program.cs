@@ -250,23 +250,31 @@ static async Task InsertVehicleDriver(ExcelWorksheet worksheet1)
 			continue;
 		}
 
-		code = code.Trim();
+		code = code.Trim().RemoveSpace().Replace("-", "");
 		name = name.Trim();
 
 		var vehicles = await CommonData.LoadTableData<VehicleModel>(FleetNames.Vehicle);
 		var drivers = await CommonData.LoadTableData<DriverModel>(FleetNames.Driver);
 
-		var vehicle = vehicles.FirstOrDefault(v => string.Equals(v.ShortCode, code[^4..], StringComparison.OrdinalIgnoreCase));
+		var vehicle = vehicles.FirstOrDefault(v => string.Equals(v.Code.RemoveSpace().Replace("-", ""), code, StringComparison.OrdinalIgnoreCase));
 		var driver = drivers.FirstOrDefault(d => string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase));
 
 		Console.WriteLine("Inserting New Vehicle: " + code);
-		await VehicleDriverData.SaveTransaction(new()
+
+		try
 		{
-			Id = 0,
-			DriverId = driver.Id,
-			StartDateTime = DateTime.Now,
-			VehicleId = vehicle.Id
-		}, 1, "Import Script");
+			await VehicleDriverData.SaveTransaction(new()
+			{
+				Id = 0,
+				DriverId = driver.Id,
+				StartDateTime = DateTime.Now,
+				VehicleId = vehicle.Id
+			}, 1, "Import Script");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Error occurred while inserting vehicle driver for Vehicle: " + code + " and Driver: " + name + ". Error: " + ex.Message);
+		}
 		row++;
 	}
 }

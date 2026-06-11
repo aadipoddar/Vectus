@@ -174,8 +174,8 @@ public static class RepairData
 		repair = await ValidateTransaction(repair, update, sqlDataAccessTransaction);
 		ValidateTransactionJobs(repair, jobs);
 
-		var previousRepair = update && !recover ? await CommonData.LoadTableDataById<RepairOverviewModel>(FleetNames.RepairOverview, repair.Id, sqlDataAccessTransaction) : null;
-		var previousJobs = update && !recover ? await CommonData.LoadTableDataByMasterId<RepairJobOverviewModel>(FleetNames.RepairJobOverview, repair.Id, sqlDataAccessTransaction) : null;
+		var previousRepair = update && !recover ? await CommonData.LoadTableDataById<RepairOverviewModel>(FleetNames.RepairOverview, repair.Id, sqlDataAccessTransaction) : new();
+		var previousJobs = update && !recover ? await CommonData.LoadTableDataByMasterId<RepairJobOverviewModel>(FleetNames.RepairJobOverview, repair.Id, sqlDataAccessTransaction) : [];
 
 		repair.Id = await InsertRepair(repair, sqlDataAccessTransaction);
 		await SaveTransactionJobDetails(repair, jobs, update, sqlDataAccessTransaction);

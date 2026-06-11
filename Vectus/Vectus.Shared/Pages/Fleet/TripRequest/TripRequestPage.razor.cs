@@ -34,7 +34,7 @@ public partial class TripRequestPage
 	private List<RouteOverviewModel> _routes = [];
 	private List<VehicleLocationModel> _vehicles = [];
 
-	private CustomAutoComplete<CompanyModel> _sfFirstFocus;
+	private CustomAutoComplete<CompanyModel> _firstFocus;
 	private ToastNotification _toastNotification;
 
 	#region Load Data
@@ -60,8 +60,8 @@ public partial class TripRequestPage
 		_isLoading = false;
 		StateHasChanged();
 
-		if (_sfFirstFocus is not null)
-			await _sfFirstFocus.FocusAsync();
+		if (_firstFocus is not null)
+			await _firstFocus.FocusAsync();
 	}
 
 	private async Task LoadData()

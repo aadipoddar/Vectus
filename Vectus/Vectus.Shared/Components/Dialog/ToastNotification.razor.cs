@@ -4,38 +4,25 @@ using Syncfusion.Blazor.Notifications;
 
 namespace Vectus.Shared.Components.Dialog;
 
-/// <summary>
-/// Defines the types of toast notifications available
-/// </summary>
 public enum ToastType
 {
-	/// <summary>Success toast (green) - for successful operations</summary>
 	Success,
-	/// <summary>Error toast (red) - for errors and failures</summary>
 	Error,
-	/// <summary>Warning toast (amber) - for warnings</summary>
 	Warning,
-	/// <summary>Info toast (blue) - for informational messages</summary>
 	Info
 }
 
 public partial class ToastNotification : ComponentBase
 {
 	private SfToast _sfToast = null!;
+	private SfToast _sfInfoToast = null!;
 
-	/// <summary>
-	/// Event callback that fires after a toast is shown, allowing parent to update UI
-	/// </summary>
 	[Parameter] public EventCallback OnToastShown { get; set; }
 
-	/// <summary>
-	/// Shows a toast notification with the specified type
-	/// </summary>
-	/// <param name="title">The title of the toast</param>
-	/// <param name="message">The content message of the toast</param>
-	/// <param name="type">The type of toast (Success, Error, Warning, Info)</param>
-	public async Task ShowAsync(string title, string message, ToastType type)
+	public async Task ShowAsync(string title, string message, ToastType type, int? timeout = null)
 	{
+		await HideAllInfoAsync();
+
 		var cssClass = type switch
 		{
 			ToastType.Success => "e-toast-success",
@@ -45,46 +32,30 @@ public partial class ToastNotification : ComponentBase
 			_ => "e-toast-success"
 		};
 
-		await _sfToast.ShowAsync(new ToastModel
-		{
-			Title = title,
-			Content = message,
-			CssClass = cssClass
-		});
+		if (type == ToastType.Info)
+			await _sfInfoToast.ShowAsync(new()
+			{
+				Title = title,
+				Content = message,
+				CssClass = cssClass,
+				Timeout = timeout ?? 0
+			});
 
-		await InvokeAsync(StateHasChanged);
+		else
+			await _sfToast.ShowAsync(new()
+			{
+				Title = title,
+				Content = message,
+				CssClass = cssClass,
+				Timeout = timeout ?? 5000
+			});
+
+		StateHasChanged();
 
 		if (OnToastShown.HasDelegate)
 			await OnToastShown.InvokeAsync();
 	}
 
-	/// <summary>
-	/// Shows a success toast notification (green)
-	/// </summary>
-	public async Task ShowSuccessAsync(string title, string message) =>
-		await ShowAsync(title, message, ToastType.Success);
-
-	/// <summary>
-	/// Shows an error toast notification (red)
-	/// </summary>
-	public async Task ShowErrorAsync(string title, string message) =>
-		await ShowAsync(title, message, ToastType.Error);
-
-	/// <summary>
-	/// Shows a warning toast notification (amber)
-	/// </summary>
-	public async Task ShowWarningAsync(string title, string message) =>
-		await ShowAsync(title, message, ToastType.Warning);
-
-	/// <summary>
-	/// Shows an info toast notification (blue)
-	/// </summary>
-	public async Task ShowInfoAsync(string title, string message) =>
-		await ShowAsync(title, message, ToastType.Info);
-
-	/// <summary>
-	/// Hides all currently displayed toasts
-	/// </summary>
-	public async Task HideAllAsync() =>
-		await _sfToast.HideAsync("All");
+	public async Task HideAllAsync() => await _sfToast.HideAsync("All");
+	public async Task HideAllInfoAsync() => await _sfInfoToast?.HideAsync("All");
 }
